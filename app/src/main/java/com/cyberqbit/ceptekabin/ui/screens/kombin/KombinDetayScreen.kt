@@ -1,5 +1,6 @@
 package com.cyberqbit.ceptekabin.ui.screens.kombin
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
 fun KombinDetayScreen(
     kombinId: Long,
     onNavigateBack: () -> Unit,
+    onNavigateToKiyaket: (Long) -> Unit = {},
     viewModel: KombinViewModel = hiltViewModel()
 ) {
     var kombin by remember { mutableStateOf<Kombin?>(null) }
@@ -67,7 +69,10 @@ fun KombinDetayScreen(
                 },
                 actions = {
                     kombin?.let { k ->
-                        IconButton(onClick = { viewModel.toggleFavori(k) }) {
+                        IconButton(onClick = { 
+                            kombin = k.copy(favori = !k.favori)
+                            viewModel.toggleFavori(k) 
+                        }) {
                             Icon(
                                 if (k.favori) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 "Favori",
@@ -109,30 +114,23 @@ fun KombinDetayScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(k.ad, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                                IconButton(onClick = { viewModel.toggleFavori(k) }) {
-                                    Icon(
-                                        if (k.favori) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                        "Favori",
-                                        tint = if (k.favori) Error else LocalContentColor.current
-                                    )
-                                }
                             }
 
                             Spacer(Modifier.height(16.dp))
 
                             // Kıyafet slotları
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                KombinSlotCard("Üst", k.ustGiyim, Modifier.weight(1f))
-                                KombinSlotCard("Alt", k.altGiyim, Modifier.weight(1f))
+                                KombinSlotCard("Üst", k.ustGiyim, Modifier.weight(1f)) { k.ustGiyim?.let { onNavigateToKiyaket(it.id) } }
+                                KombinSlotCard("Alt", k.altGiyim, Modifier.weight(1f)) { k.altGiyim?.let { onNavigateToKiyaket(it.id) } }
                             }
                             Spacer(Modifier.height(10.dp))
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                KombinSlotCard("Dış", k.disGiyim, Modifier.weight(1f))
-                                KombinSlotCard("Ayakkabı", k.ayakkabi, Modifier.weight(1f))
+                                KombinSlotCard("Dış", k.disGiyim, Modifier.weight(1f)) { k.disGiyim?.let { onNavigateToKiyaket(it.id) } }
+                                KombinSlotCard("Ayakkabı", k.ayakkabi, Modifier.weight(1f)) { k.ayakkabi?.let { onNavigateToKiyaket(it.id) } }
                             }
                             k.aksesuar?.let { aks ->
                                 Spacer(Modifier.height(10.dp))
-                                KombinSlotCard("Aksesuar", aks, Modifier.fillMaxWidth())
+                                KombinSlotCard("Aksesuar", aks, Modifier.fillMaxWidth()) { onNavigateToKiyaket(aks.id) }
                             }
 
                             Spacer(Modifier.height(16.dp))
@@ -178,20 +176,22 @@ fun KombinDetayScreen(
                                 val promosyonMesaji = """
                                     Hey! CepteKabin uygulamasında sana özel harika bir kombin hazırladım. 🤩👗👔
                                     
-                                    Eğer uygulaman varsa ekteki .kmb dosyasına tıklayarak bu kombini anında kendi dolabına ekleyebilirsin!
+                                    Eğer uygulaman varsa ekteki dosyaya tıklayarak bu kombini anında kendi dolabına ekleyebilirsin!
                                     
                                     Henüz CepteKabin'in yok mu? Hemen ücretsiz indir:
                                     👉 https://bit.ly/CepteKabinApp
                                 """.trimIndent()
 
                                 val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                                    type = "application/octet-stream"
+                                    type = "*/*"
                                     putExtra(android.content.Intent.EXTRA_STREAM, shareUri)
                                     putExtra(android.content.Intent.EXTRA_TEXT, promosyonMesaji)
                                     putExtra(android.content.Intent.EXTRA_SUBJECT, "Sana Harika Bir Kombin Gönderdim!")
                                     addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                                 }
-                                context.startActivity(android.content.Intent.createChooser(shareIntent, "Kombini Paylaş"))
+                                val chooser = android.content.Intent.createChooser(shareIntent, "Kombini Paylaş (Yakındakiler ve Uygulamalar)")
+                                context.startActivity(chooser)
                             }
                         }
                     }, modifier = Modifier.fillMaxWidth()) {
@@ -206,10 +206,20 @@ fun KombinDetayScreen(
 }
 
 @Composable
-private fun KombinSlotCard(label: String, kiyaket: Kiyaket?, modifier: Modifier = Modifier) {
-    GlassSurface(modifier = modifier) {
+private fun KombinSlotCard(label: String, kiyaket: Kiyaket?, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
+    val mod = if (onClick != null) modifier.clickable { onClick() } else modifier
+    GlassSurface(modifier = mod) {
         Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.Checkroom, null, Modifier.size(28.dp), tint = if (kiyaket != null) PrimaryLight else Grey400)
+            if (kiyaket != null && !kiyaket.imageUrl.isNullOrBlank()) {
+                coil.compose.AsyncImage(
+                    model = kiyaket.imageUrl,
+                    contentDescription = kiyaket.marka,
+                    modifier = Modifier.size(64.dp),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+            } else {
+                Icon(Icons.Default.Checkroom, null, Modifier.size(64.dp), tint = if (kiyaket != null) PrimaryLight else Grey400)
+            }
             Spacer(Modifier.height(6.dp))
             Text(label, style = MaterialTheme.typography.labelSmall, color = Grey500)
             if (kiyaket != null) {

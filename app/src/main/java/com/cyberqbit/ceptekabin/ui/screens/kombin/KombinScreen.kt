@@ -145,11 +145,20 @@ fun KombinCard(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.Default.Checkroom,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                            if (!kiyaket.imageUrl.isNullOrBlank()) {
+                                coil.compose.AsyncImage(
+                                    model = kiyaket.imageUrl,
+                                    contentDescription = kiyaket.marka,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.Checkroom,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
                         }
                     }
                 }

@@ -44,6 +44,7 @@ fun HomeScreen(
     onNavigateToKombin: () -> Unit,
     onNavigateToTarama: () -> Unit,
     onNavigateToHavaDurumu: () -> Unit,
+    onNavigateToKiyaket: (Long) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val havaDurumu by viewModel.havaDurumu.collectAsState()
@@ -178,7 +179,7 @@ fun HomeScreen(
             Spacer(Modifier.height(12.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(sonEklenenler.take(5)) { kiyaket ->
-                    KiyaketMiniCard(kiyaket = kiyaket, isDark = isDark)
+                    KiyaketMiniCard(kiyaket = kiyaket, isDark = isDark, onClick = { onNavigateToKiyaket(kiyaket.id) })
                 }
             }
             Spacer(Modifier.height(24.dp))
@@ -289,10 +290,19 @@ fun QuickActionCard(icon: ImageVector, title: String, subtitle: String, onClick:
 }
 
 @Composable
-fun KiyaketMiniCard(kiyaket: Kiyaket, isDark: Boolean) {
-    GlassSurface(modifier = Modifier.size(100.dp)) {
+fun KiyaketMiniCard(kiyaket: Kiyaket, isDark: Boolean, onClick: () -> Unit) {
+    GlassSurface(modifier = Modifier.size(100.dp).clickable(onClick = onClick)) {
         Column(Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(Icons.Default.Checkroom, null, Modifier.size(32.dp), tint = PrimaryLight)
+            if (!kiyaket.imageUrl.isNullOrBlank()) {
+                coil.compose.AsyncImage(
+                    model = kiyaket.imageUrl,
+                    contentDescription = kiyaket.marka,
+                    modifier = Modifier.size(48.dp),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                )
+            } else {
+                Icon(Icons.Default.Checkroom, null, Modifier.size(32.dp), tint = PrimaryLight)
+            }
             Spacer(Modifier.height(4.dp))
             Text(kiyaket.marka, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium, color = if (isDark) Grey100 else Grey800, maxLines = 1)
             Text(kiyaket.tur.displayName, style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600, maxLines = 1)

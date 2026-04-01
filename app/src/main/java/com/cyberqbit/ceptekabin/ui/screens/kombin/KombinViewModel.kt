@@ -43,6 +43,11 @@ class KombinViewModel @Inject constructor(
     }
 
     fun toggleFavori(kombin: Kombin) {
+        val guncelKombinler = _kombinler.value.map {
+            if (it.id == kombin.id) it.copy(favori = !it.favori) else it
+        }
+        _kombinler.value = guncelKombinler
+        
         viewModelScope.launch {
             kombinRepository.toggleFavori(kombin.id, !kombin.favori)
         }

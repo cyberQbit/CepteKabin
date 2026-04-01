@@ -93,7 +93,8 @@ fun NavGraph(
                     onNavigateToDolap      = { navController.navigate(Screen.Dolap.route) },
                     onNavigateToKombin     = { navController.navigate(Screen.Kombin.route) },
                     onNavigateToTarama     = { navController.navigate(Screen.Tarama.route) },
-                    onNavigateToHavaDurumu = { navController.navigate(Screen.HavaDurumu.route) }
+                    onNavigateToHavaDurumu = { navController.navigate(Screen.HavaDurumu.route) },
+                    onNavigateToKiyaket    = { id -> navController.navigate(Screen.KiyaketDetay.createRoute(id)) }
                 )
             }
 
@@ -168,7 +169,8 @@ fun NavGraph(
                 val id = backStackEntry.arguments?.getLong("id") ?: 0L
                 KombinDetayScreen(
                     kombinId = id,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToKiyaket = { kiyaketId -> navController.navigate(Screen.KiyaketDetay.createRoute(kiyaketId)) }
                 )
             }
 
