@@ -1,6 +1,10 @@
 package com.cyberqbit.ceptekabin.ui.screens.tarama
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,9 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.cyberqbit.ceptekabin.domain.model.Kiyaket
 import com.cyberqbit.ceptekabin.domain.model.KiyaketTur
 import com.cyberqbit.ceptekabin.domain.model.Mevsim
@@ -42,19 +48,87 @@ fun KiyaketEkleScreen(
 
     var urunKoduInput by remember { mutableStateOf("") }
     var marka by remember { mutableStateOf("") }
+    var customMarkaField by remember { mutableStateOf("") }
+    var markaExpanded by remember { mutableStateOf(false) }
+    
     var model by remember { mutableStateOf("") }
+    var modelExpanded by remember { mutableStateOf(false) }
+    
     var tur by remember { mutableStateOf<KiyaketTur?>(null) }
     var beden by remember { mutableStateOf("") }
+    var bedenExpanded by remember { mutableStateOf(false) }
+    
     var renk by remember { mutableStateOf("") }
+    var customRenkField by remember { mutableStateOf("") }
+    var renkExpanded by remember { mutableStateOf(false) }
+    
     var mevsim by remember { mutableStateOf(Mevsim.DORT_MEVSIM) }
+    var mevsimExpanded by remember { mutableStateOf(false) }
+    
     var sezon by remember { mutableStateOf("") }
     var not by remember { mutableStateOf("") }
-    var showBedenSecimi by remember { mutableStateOf(false) }
     var saveSuccess by remember { mutableStateOf(false) }
-
-    val bedenSecenekleri = listOf("XS", "S", "M", "L", "XL", "XXL", "XXXL")
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+
+    // Validation error state
+    var validationError by remember { mutableStateOf<String?>(null) }
+
+    // Marka listesi - International + Top Turkish Brands
+    val markaList = listOf(
+        // International
+        "Nike", "Adidas", "Puma", "Reebok", "New Balance",
+        "Asics", "Converse", "Vans", "Tommy Hilfiger", "Calvin Klein",
+        "Ralph Lauren", "Lacoste", "Polo", "Dior", "Gucci",
+        // Top Turkish Brands
+        "Defacto", "Koton", "LC Waikiki", "Terranova", "Boyner",
+        "Vakko", "Westbury", "İpekyol", "D'S Damat", "Kiğılı",
+        "Mavi Jeans", "Derimod", "Crescent", "Karaca", "Pastel",
+        "Diğer"
+    )
+
+    // Renk listesi - 20+ renkler
+    val renkList = listOf(
+        "Siyah-BLK", "Beyaz-WHI", "Kırmızı-RED", "Mavi-BLU", "Yeşil-GRN",
+        "Sarı-YEL", "Turuncu-ORN", "Mor-PUR", "Pembe-PNK", "Kahverengi-BRN",
+        "Gri-GRY", "Lacivert-NVY", "Turkuaz-TRQ", "Zeytin-OLV", "Koyu Yeşil-DRG",
+        "Ekru-CRM", "Beige-BGE", "Bej-BGE", "Maroon-MAR", "Tüm Renkler-MLT",
+        "Diğer"
+    )
+
+    // Beden listesi - eksiksiz
+    val bedenList = listOf(
+        "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "Standart"
+    )
+
+    // Model/Kategori listesi
+    val kategoriList = listOf(
+        "Üst Giyim", "Alt Giyim", "Dış Giyim", "Ayakkabı", "Aksesuar"
+    )
+
+    // Image Picker Launchers
+        val context = androidx.compose.ui.platform.LocalContext.current
+    var tempCameraUri by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<android.net.Uri?>(null) }
+
+    fun createImageUri(): android.net.Uri {
+        val file = java.io.File(context.cacheDir, "camera_image_${System.currentTimeMillis()}.jpg")
+        return androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+    }
+
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        uri?.let { selectedImageUri = it }
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            tempCameraUri?.let { selectedImageUri = it }
+        }
+    }
 
     LaunchedEffect(barkod) {
         if (barkod.isNotBlank()) {
@@ -75,6 +149,20 @@ fun KiyaketEkleScreen(
         if (saveSuccess) {
             onKiyaketSaved()
         }
+    }
+
+    // Validation Error Dialog
+    if (validationError != null) {
+        AlertDialog(
+            onDismissRequest = { validationError = null },
+            title = { Text("Eksik Bilgi") },
+            text = { Text(validationError ?: "") },
+            confirmButton = {
+                TextButton(onClick = { validationError = null }) {
+                    Text("Tamam")
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -253,6 +341,105 @@ fun KiyaketEkleScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
+            // Resim Yükleme
+            GlassCard(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Kıyafet Resmi",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isDark) Grey100 else Grey900
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                if (selectedImageUri != null) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Grey700),
+                        contentAlignment = Alignment.TopEnd
+                    ) {
+                        AsyncImage(
+                            model = selectedImageUri,
+                            contentDescription = "Seçilen Resim",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                        IconButton(
+                            onClick = { selectedImageUri = null },
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(Black.copy(alpha = 0.6f))
+                        ) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Resmi Kaldır",
+                                tint = White
+                            )
+                        }
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(150.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                if (isDark) Grey800.copy(alpha = 0.5f) else Grey300.copy(alpha = 0.3f)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Image,
+                            contentDescription = null,
+                            tint = if (isDark) Grey500 else Grey600,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    GlassButton(
+                        onClick = {
+                            val uri = createImageUri()
+                            tempCameraUri = uri
+                            cameraLauncher.launch(uri)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                    ) {
+                        Icon(Icons.Default.PhotoCamera, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Fotoğraf", fontSize = MaterialTheme.typography.labelSmall.fontSize)
+                    }
+
+                    GlassButton(
+                        onClick = {
+                            pickImageLauncher.launch(
+                                androidx.activity.result.PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp)
+                    ) {
+                        Icon(Icons.Default.PhotoLibrary, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Galeriden", fontSize = MaterialTheme.typography.labelSmall.fontSize)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Otomatik doldurulan bilgiler
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -264,33 +451,97 @@ fun KiyaketEkleScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                OutlinedTextField(
-                    value = marka,
-                    onValueChange = { marka = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Marka *") },
-                    leadingIcon = { Icon(Icons.Default.Business, contentDescription = null) },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PrimaryLight,
-                        unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                // Marka Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = markaExpanded,
+                    onExpandedChange = { markaExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = marka,
+                        onValueChange = { },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                        label = { Text("Marka *") },
+                        leadingIcon = { Icon(Icons.Default.Business, contentDescription = null) },
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = markaExpanded) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryLight,
+                            unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                        )
                     )
-                )
+                    ExposedDropdownMenu(
+                        expanded = markaExpanded,
+                        onDismissRequest = { markaExpanded = false }
+                    ) {
+                        markaList.forEach { markaOption ->
+                            DropdownMenuItem(
+                                text = { Text(markaOption) },
+                                onClick = {
+                                    marka = markaOption
+                                    customMarkaField = ""
+                                    markaExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Custom Marka Field
+                if (marka == "Diğer") {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = customMarkaField,
+                        onValueChange = { customMarkaField = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Marka Adı") },
+                        placeholder = { Text("Markayı yazın") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryLight,
+                            unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                        )
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(
-                    value = model,
-                    onValueChange = { model = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Model") },
-                    leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PrimaryLight,
-                        unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                // Model/Kategori Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = modelExpanded,
+                    onExpandedChange = { modelExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = model,
+                        onValueChange = { },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                        label = { Text("Model / Kategori *") },
+                        leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryLight,
+                            unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                        )
                     )
-                )
+                    ExposedDropdownMenu(
+                        expanded = modelExpanded,
+                        onDismissRequest = { modelExpanded = false }
+                    ) {
+                        kategoriList.forEach { kategoriOption ->
+                            DropdownMenuItem(
+                                text = { Text(kategoriOption) },
+                                onClick = {
+                                    model = kategoriOption
+                                    modelExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -333,42 +584,37 @@ fun KiyaketEkleScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Beden seçimi
-                OutlinedTextField(
-                    value = beden,
-                    onValueChange = { beden = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Beden *") },
-                    leadingIcon = { Icon(Icons.Default.Straighten, contentDescription = null) },
-                    trailingIcon = {
-                        IconButton(onClick = { showBedenSecimi = !showBedenSecimi }) {
-                            Icon(
-                                if (showBedenSecimi) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                contentDescription = null
-                            )
-                        }
-                    },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PrimaryLight,
-                        unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                // Beden Dropdown - Readonly
+                ExposedDropdownMenuBox(
+                    expanded = bedenExpanded,
+                    onExpandedChange = { bedenExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = beden,
+                        onValueChange = { },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                        label = { Text("Beden *") },
+                        leadingIcon = { Icon(Icons.Default.Straighten, contentDescription = null) },
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = bedenExpanded) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryLight,
+                            unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                        )
                     )
-                )
-
-                if (showBedenSecimi) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ExposedDropdownMenu(
+                        expanded = bedenExpanded,
+                        onDismissRequest = { bedenExpanded = false }
                     ) {
-                        bedenSecenekleri.forEach { bedenOption ->
-                            FilterChip(
-                                selected = beden == bedenOption,
+                        bedenList.forEach { bedenOption ->
+                            DropdownMenuItem(
+                                text = { Text(bedenOption) },
                                 onClick = {
                                     beden = bedenOption
-                                    showBedenSecimi = false
-                                },
-                                label = { Text(bedenOption) }
+                                    bedenExpanded = false
+                                }
                             )
                         }
                     }
@@ -376,23 +622,63 @@ fun KiyaketEkleScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                OutlinedTextField(
-                    value = renk,
-                    onValueChange = { renk = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Renk") },
-                    leadingIcon = { Icon(Icons.Default.Palette, contentDescription = null) },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PrimaryLight,
-                        unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                // Renk Dropdown
+                ExposedDropdownMenuBox(
+                    expanded = renkExpanded,
+                    onExpandedChange = { renkExpanded = it }
+                ) {
+                    OutlinedTextField(
+                        value = renk,
+                        onValueChange = { },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                        label = { Text("Renk") },
+                        leadingIcon = { Icon(Icons.Default.Palette, contentDescription = null) },
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = renkExpanded) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryLight,
+                            unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                        )
                     )
-                )
+                    ExposedDropdownMenu(
+                        expanded = renkExpanded,
+                        onDismissRequest = { renkExpanded = false }
+                    ) {
+                        renkList.forEach { renkOption ->
+                            DropdownMenuItem(
+                                text = { Text(renkOption) },
+                                onClick = {
+                                    renk = renkOption
+                                    customRenkField = ""
+                                    renkExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Custom Renk Field
+                if (renk == "Diğer") {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = customRenkField,
+                        onValueChange = { customRenkField = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Renk Adı") },
+                        placeholder = { Text("Rengi yazın") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryLight,
+                            unfocusedBorderColor = if (isDark) Grey700 else Grey400
+                        )
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Mevsim seçimi
-                var mevsimExpanded by remember { mutableStateOf(false) }
                 ExposedDropdownMenuBox(
                     expanded = mevsimExpanded,
                     onExpandedChange = { mevsimExpanded = it }
@@ -465,18 +751,22 @@ fun KiyaketEkleScreen(
             // Kaydet butonu
             GlassButton(
                 onClick = {
-                    if (marka.isNotBlank() && tur != null && beden.isNotBlank()) {
+                    val finalMarka = if (marka == "Diğer") customMarkaField else marka
+                    val finalRenk = if (renk == "Diğer") customRenkField else renk
+                    
+                    if (finalMarka.isNotBlank() && tur != null && beden.isNotBlank() && model.isNotBlank()) {
                         viewModel.saveKiyaket(
                             kiyaket = Kiyaket(
                                 barkod = barkod.takeIf { it.isNotBlank() },
-                                marka = marka,
+                                marka = finalMarka,
                                 model = model.takeIf { it.isNotBlank() },
                                 tur = tur!!,
                                 beden = beden,
-                                renk = renk.takeIf { it.isNotBlank() },
+                                renk = finalRenk.takeIf { it.isNotBlank() },
                                 mevsim = mevsim,
                                 sezon = sezon.takeIf { it.isNotBlank() },
-                                not = not.takeIf { it.isNotBlank() }
+                                not = not.takeIf { it.isNotBlank() },
+                                imageUrl = selectedImageUri?.toString()
                             ),
                             onSuccess = { saveSuccess = true },
                             onError = { /* Hata göster */ }
@@ -484,7 +774,7 @@ fun KiyaketEkleScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = marka.isNotBlank() && tur != null && beden.isNotBlank() && !isLoading
+                enabled = (marka != "" || marka == "Diğer") && tur != null && beden.isNotBlank() && model.isNotBlank() && !isLoading
             ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))

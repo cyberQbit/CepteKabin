@@ -15,156 +15,102 @@ import javax.inject.Inject
 class HavaDurumuApiService @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
-    companion object {
-        const val BASE_URL = "https://mooweather-api.onrender.com/api/weather/"
-    }
-
     suspend fun getWeatherByCity(city: String, lang: String = "tr"): Result<HavaDurumu> = withContext(Dispatchers.IO) {
         try {
-            val request = Request.Builder()
-                .url("${BASE_URL}${city}?lang=$lang")
+            val geocodeReq = Request.Builder()
+                .url("https://geocoding-api.open-meteo.com/v1/search?name=$city&language=tr&count=1")
                 .get()
                 .build()
-
-            val response = okHttpClient.newCall(request).execute()
-            if (!response.isSuccessful) {
-                return@withContext Result.failure(Exception("API Error: ${response.code}"))
-            }
-
-            val body = response.body?.string() ?: return@withContext Result.failure(Exception("Empty response"))
-            val json = JSONObject(body)
-
-            val havaDurumu = parseWeatherResponse(json)
-            Result.success(havaDurumu)
-        } catch (e: Exception) {
+            
+            val geoResp = okHttpClient.newCall(geocodeReq).execute()
+            if (!geoResp.isSuccessful) return@withContext Result.failure(Exception("Geocoding Error"))
+            
+            val geoBody = geoResp.body?.string() ?: return@withContext Result.failure(Exception("Empty Response"))
+            val geoJson = JSONObject(geoBody)
+            val results = geoJson.optJSONArray("results") ?: return@withContext Result.failure(Exception("Şehir bulunamadı"))
+            
+            val first = results.getJSONObject(0)
+            val lat = first.getDouble("latitude")
+            val lon = first.getDouble("longitude")
+            val name = first.getString("name")
+            
+            getWeatherFromOpenMeteo(lat, lon, name)
+        } catch(e: Exception) {
             Result.failure(e)
         }
     }
 
     suspend fun getWeatherByLocation(lat: Double, lon: Double, lang: String = "tr"): Result<HavaDurumu> = withContext(Dispatchers.IO) {
         try {
-            val request = Request.Builder()
-                .url("${BASE_URL}location?lat=$lat&lon=$lon&lang=$lang")
-                .get()
-                .build()
-
-            val response = okHttpClient.newCall(request).execute()
-            if (!response.isSuccessful) {
-                return@withContext Result.failure(Exception("API Error: ${response.code}"))
-            }
-
-            val body = response.body?.string() ?: return@withContext Result.failure(Exception("Empty response"))
-            val json = JSONObject(body)
-
-            val havaDurumu = parseWeatherResponse(json)
-            Result.success(havaDurumu)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+            val result = getWeatherFromOpenMeteo(lat, lon, "Konumunuz")
+            result
+        } catch(e:Exception){ Result.failure(e) }
     }
-
-    private fun parseWeatherResponse(json: JSONObject): HavaDurumu {
-        val name = json.optString("Name", "")
-        val temp = json.optDouble("Temp", 0.0)
-        val tempMax = json.optDouble("TempMax", 0.0)
-        val tempMin = json.optDouble("TempMin", 0.0)
-        val feelsLike = json.optDouble("FeelsLike", 0.0)
-        val humidity = json.optInt("Humidity", 0)
-        val pressure = json.optInt("Pressure", 0)
-        val description = json.optString("Description", "")
-        val windSpeed = json.optDouble("WindSpeed", 0.0)
-        val visibility = json.optInt("Visibility", 0)
-        val clouds = json.optInt("Clouds", 0)
-        val sunrise = json.optLong("Sunrise", 0)
-        val sunset = json.optLong("Sunset", 0)
-
-        val durum = parseWeatherStatus(description, clouds)
-        val icon = parseWeatherIcon(durum)
-
-        val forecastList = parseForecast(json)
-
-        return HavaDurumu(
-            sehir = name,
-            sehirId = name,
-            sicaklik = temp,
-            hissedilenSicaklik = feelsLike,
-            durum = durum,
-            aciklama = description,
-            nemOrani = humidity,
-            ruzgarHizi = windSpeed,
-            gunBatimi = sunset,
-            gunDogumu = sunrise,
-            guncelTarih = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()),
-            forecastList = forecastList
-        )
-    }
-
-    private fun parseWeatherStatus(description: String, clouds: Int): HavaDurumuDurum {
-        val lowerDesc = description.lowercase()
-        return when {
-            lowerDesc.contains("güneş") || lowerDesc.contains("sunny") || lowerDesc.contains("clear") -> HavaDurumuDurum.GUNESLI
-            lowerDesc.contains("bulut") || lowerDesc.contains("cloud") -> {
-                if (clouds < 30) HavaDurumuDurum.AZ_BULUTLU
-                else if (clouds < 70) HavaDurumuDurum.PARCALI_BULUTLU
-                else HavaDurumuDurum.COK_BULUTLU
-            }
-            lowerDesc.contains("yağmur") || lowerDesc.contains("rain") -> HavaDurumuDurum.YAGMURLU
-            lowerDesc.contains("kar") || lowerDesc.contains("snow") -> HavaDurumuDurum.KARLI
-            lowerDesc.contains("fırtına") || lowerDesc.contains("storm") -> HavaDurumuDurum.FIRTINALI
-            lowerDesc.contains("sis") || lowerDesc.contains("fog") -> HavaDurumuDurum.Sisli
-            else -> HavaDurumuDurum.BILINMIYOR
-        }
-    }
-
-    private fun parseWeatherIcon(durum: HavaDurumuDurum): String {
-        return when (durum) {
-            HavaDurumuDurum.GUNESLI -> "☀️"
-            HavaDurumuDurum.AZ_BULUTLU -> "🌤️"
-            HavaDurumuDurum.PARCALI_BULUTLU -> "⛅"
-            HavaDurumuDurum.COK_BULUTLU -> "☁️"
-            HavaDurumuDurum.YAGMURLU -> "🌧️"
-            HavaDurumuDurum.YAGIS_HAKLI -> "🌦️"
-            HavaDurumuDurum.KARLI -> "🌨️"
-            HavaDurumuDurum.FIRTINALI -> "⛈️"
-            HavaDurumuDurum.Sisli -> "🌫️"
-            HavaDurumuDurum.RUZGARLI -> "💨"
-            else -> "❓"
-        }
-    }
-
-    private fun parseForecast(json: JSONObject): List<ForecastItem> {
-        val forecast = json.optJSONArray("forecast") ?: return emptyList()
-        val items = mutableListOf<ForecastItem>()
-
-        for (i in 0 until minOf(forecast.length(), 5)) {
-            try {
-                val item = forecast.getJSONObject(i)
-                val dateStr = item.optString("date", "")
-                val dayName = item.optString("day", "")
-                val minTemp = item.optDouble("temp_min", 0.0)
-                val maxTemp = item.optDouble("temp_max", 0.0)
-                val desc = item.optString("description", "")
-                val humidity = item.optInt("humidity", 0)
-                val wind = item.optDouble("wind", 0.0)
-                val rain = item.optInt("rain", 0)
-
-                items.add(
-                    ForecastItem(
-                        tarih = dateStr,
-                        gun = dayName,
-                        sicaklikMin = minTemp,
-                        sicaklikMax = maxTemp,
-                        durum = parseWeatherStatus(desc, 50),
-                        nemOrani = humidity,
-                        ruzgarHizi = wind,
-                        yağışOlasılığı = rain
-                    )
+    
+    private fun getWeatherFromOpenMeteo(lat: Double, lon: Double, cityName: String): Result<HavaDurumu> {
+        val url = "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto"
+        val req = Request.Builder().url(url).get().build()
+        val resp = okHttpClient.newCall(req).execute()
+        if (!resp.isSuccessful) return Result.failure(Exception("API Error"))
+        
+        val body = resp.body?.string() ?: return Result.failure(Exception("Empty Response"))
+        val json = JSONObject(body)
+        val current = json.getJSONObject("current")
+        val daily = json.getJSONObject("daily")
+        
+        val temp = current.getDouble("temperature_2m")
+        val hum = current.getInt("relative_humidity_2m")
+        val appTemp = current.getDouble("apparent_temperature")
+        val wind = current.getDouble("wind_speed_10m")
+        val code = current.getInt("weather_code")
+        
+        val durum = wmoToDurum(code)
+        
+        val dates = daily.getJSONArray("time")
+        val maxTemps = daily.getJSONArray("temperature_2m_max")
+        val minTemps = daily.getJSONArray("temperature_2m_min")
+        val codes = daily.getJSONArray("weather_code")
+        
+        val forecasts = mutableListOf<ForecastItem>()
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val dayFormat = SimpleDateFormat("EEEE", Locale("tr"))
+        
+        for (i in 0 until Math.min(5, dates.length())) {
+            val dateStr = dates.getString(i)
+            val d = sdf.parse(dateStr)
+            val gun = if (d != null) dayFormat.format(d) else ""
+            forecasts.add(
+                ForecastItem(
+                    tarih = dateStr,
+                    gun = gun,
+                    sicaklikMin = minTemps.getDouble(i),
+                    sicaklikMax = maxTemps.getDouble(i),
+                    durum = wmoToDurum(codes.getInt(i)),
+                    nemOrani = 0,
+                    ruzgarHizi = 0.0,
+                    yağışOlasılığı = 0
                 )
-            } catch (e: Exception) {
-                continue
-            }
+            )
         }
+        
+        val havaDurumu = HavaDurumu(
+            sehir = cityName,
+            sehirId = cityName,
+            sicaklik = temp,
+            hissedilenSicaklik = appTemp,
+            durum = durum,
+            aciklama = durum.displayName,
+            nemOrani = hum,
+            ruzgarHizi = wind,
+            gunBatimi = 0L,
+            gunDogumu = 0L,
+            guncelTarih = sdf.format(Date()),
+            forecastList = forecasts
+        )
+        return Result.success(havaDurumu)
+    }
 
-        return items
+    private fun wmoToDurum(code: Int): HavaDurumuDurum {
+        return HavaDurumuDurum.fromIconAndCode("", code)
     }
 }

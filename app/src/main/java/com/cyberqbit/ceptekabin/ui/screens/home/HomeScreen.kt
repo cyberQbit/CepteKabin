@@ -88,6 +88,7 @@ fun HomeScreen(
                     else listOf(Grey100, White)
                 )
             )
+            .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
@@ -245,7 +246,7 @@ fun WeatherCard(
                             }
                         }
                     }
-                    Text(havaDurumu.durum.icon, fontSize = 48.sp)
+                    Text(havaDurumu.durum.toEmoji(), fontSize = 48.sp)
                 }
                 if (havaDurumu.forecastList.isNotEmpty()) {
                     Spacer(Modifier.height(16.dp))
@@ -255,7 +256,7 @@ fun WeatherCard(
                         havaDurumu.forecastList.take(5).forEach { forecast ->
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(forecast.gun.take(3), style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey400 else Grey600)
-                                Text(forecast.durum.icon, fontSize = 20.sp)
+                                Text(forecast.durum.toEmoji(), fontSize = 20.sp)
                                 Text("${forecast.sicaklikMax.toInt()}°", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey800)
                             }
                         }

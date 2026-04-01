@@ -1,12 +1,19 @@
 package com.cyberqbit.ceptekabin.ui.screens.tarama
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.os.Build
+import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cyberqbit.ceptekabin.data.remote.api.UrunKoduSearchService
+import com.cyberqbit.ceptekabin.data.remote.firebase.StorageService
 import com.cyberqbit.ceptekabin.domain.model.BarkodSonuc
 import com.cyberqbit.ceptekabin.domain.model.Kiyaket
 import com.cyberqbit.ceptekabin.domain.repository.BarkodRepository
 import com.cyberqbit.ceptekabin.domain.repository.KiyaketRepository
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +25,10 @@ import javax.inject.Inject
 class KiyaketEkleViewModel @Inject constructor(
     private val barkodRepository: BarkodRepository,
     private val kiyaketRepository: KiyaketRepository,
-    private val urunKoduSearchService: UrunKoduSearchService
+    private val urunKoduSearchService: UrunKoduSearchService,
+    private val storageService: StorageService,
+    @dagger.hilt.android.qualifiers.ApplicationContext
+    private val context: Context
 ) : ViewModel() {
 
     private val _barkodSonuc = MutableStateFlow<BarkodSonuc?>(null)
@@ -85,13 +95,69 @@ class KiyaketEkleViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                kiyaketRepository.insertKiyaket(kiyaket)
+                var finalKiyaket = kiyaket
+
+                // Process image if it's a local URI
+                if (!kiyaket.imageUrl.isNullOrBlank() && 
+                    (kiyaket.imageUrl!!.startsWith("content://") || kiyaket.imageUrl!!.startsWith("file://"))) {
+                    
+                    try {
+                        // Decode Bitmap from URI
+                        val bitmap = decodeBitmapFromUri(kiyaket.imageUrl!!)
+                        
+                        if (bitmap != null) {
+                            // Get current user ID or use anonymous
+                            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "anonymous"
+                            
+                            // Upload image to Firebase Storage
+                            val uploadResult = storageService.uploadKiyafetImage(bitmap, userId)
+                            
+                            val pair = uploadResult.getOrNull()
+                            if (pair != null) {
+                                val downloadUrl = pair.first
+                                val storagePath = pair.second
+                                finalKiyaket = kiyaket.copy(
+                                    imageUrl = downloadUrl,
+                                    firebaseStoragePath = storagePath
+                                )
+                            } else {
+                                throw Exception("Image upload failed")
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        onError("Görüntü işleme hatası: ${e.message}")
+                        _isLoading.value = false
+                        return@launch
+                    }
+                }
+
+                // Save to repository
+                kiyaketRepository.insertKiyaket(finalKiyaket)
                 _isLoading.value = false
                 onSuccess()
             } catch (e: Exception) {
                 _isLoading.value = false
                 onError(e.message ?: "Kayıt hatası")
             }
+        }
+    }
+
+    private fun decodeBitmapFromUri(uri: String): Bitmap? {
+        return try {
+            val contentUri = android.net.Uri.parse(uri)
+            
+            val bitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                val source = ImageDecoder.createSource(context.contentResolver, contentUri)
+                ImageDecoder.decodeBitmap(source)
+            } else {
+                @Suppress("DEPRECATION")
+                MediaStore.Images.Media.getBitmap(context.contentResolver, contentUri)
+            }
+            bitmap
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
@@ -102,4 +168,3 @@ class KiyaketEkleViewModel @Inject constructor(
         _urunKoduHata.value = null
     }
 }
-

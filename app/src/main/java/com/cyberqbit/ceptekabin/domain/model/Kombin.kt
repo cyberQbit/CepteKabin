@@ -34,6 +34,22 @@ enum class HavaDurumuDurum(val icon: String, val displayName: String) {
     COK_BULUTLU("overcast", "Çok Bulutlu"), SOGUK("cold", "Soğuk"), Sicak("hot", "Sıcak"),
     NEMLI("humid", "Nemli"), BILINMIYOR("unknown", "Bilinmiyor");
 
+    fun toEmoji(): String {
+        return when(this) {
+            GUNESLI, AZ_BULUTLU -> "☀️"
+            PARCALI_BULUTLU -> "⛅"
+            BULUTLU, COK_BULUTLU -> "☁️"
+            YAGMURLU, YAGIS_HAKLI -> "🌧️"
+            KARLI -> "❄️"
+            FIRTINALI -> "⛈️"
+            RUZGARLI -> "🌬️"
+            Sisli -> "🌫️"
+            SOGUK -> "🧊"
+            Sicak -> "🔥"
+            else -> "🌡️"
+        }
+    }
+
     companion object {
         fun fromIconAndCode(icon: String, code: Int): HavaDurumuDurum = when (code) {
             0 -> GUNESLI; 1, 2 -> AZ_BULUTLU; 3 -> COK_BULUTLU; 45, 48 -> Sisli

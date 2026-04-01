@@ -57,7 +57,10 @@ fun NavGraph(
                             onClick = {
                                 if (currentRoute != item.route) {
                                     navController.navigate(item.route) {
-                                        popUpTo(Screen.Home.route) { saveState = true }
+                                        // Pop back to the first destination for proper back stack management
+                                        popUpTo(Screen.Home.route) {
+                                            saveState = item.route == Screen.Home.route
+                                        }
                                         launchSingleTop = true
                                         restoreState = true
                                     }
@@ -72,7 +75,7 @@ fun NavGraph(
         NavHost(
             navController = navController,
             startDestination = if (isLoggedIn) Screen.Home.route else Screen.Auth.route,
-            modifier = Modifier.padding(paddingValues)
+            modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
         ) {
 
             composable(Screen.Auth.route) {
@@ -139,7 +142,8 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() },
                     onKiyaketSaved = {
                         navController.navigate(Screen.Dolap.route) {
-                            popUpTo(Screen.Dolap.route) { inclusive = true }
+                            popUpTo(Screen.KiyaketEkle.route) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
                 )
