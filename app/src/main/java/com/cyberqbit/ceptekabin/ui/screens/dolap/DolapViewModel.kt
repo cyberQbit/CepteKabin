@@ -23,6 +23,25 @@ class DolapViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    // Favori modunda olup olmadığımızı takip eden değişken
+    private val _sadeceFavoriler = MutableStateFlow(false)
+    val sadeceFavoriler: StateFlow<Boolean> = _sadeceFavoriler.asStateFlow()
+
+    fun toggleFavoriler() {
+        _sadeceFavoriler.value = !_sadeceFavoriler.value
+        if (_sadeceFavoriler.value) {
+            // Sadece favorileri getir (Repository'den)
+            viewModelScope.launch {
+                kiyaketRepository.getFavoriKiyaketler().collect { list ->
+                    _kiyaketler.value = filtrele(list, _seciliKategori.value)
+                }
+            }
+        } else {
+            // Favori modundan çıkınca kıyafetleri tekrar getir
+            kategoriSec(_seciliKategori.value)
+        }
+    }
+
     init {
         loadKiyaketler()
     }

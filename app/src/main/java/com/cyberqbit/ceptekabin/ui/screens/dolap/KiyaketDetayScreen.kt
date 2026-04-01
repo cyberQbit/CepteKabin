@@ -124,12 +124,21 @@ fun KiyaketDetayScreen(
                                 .height(180.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.Default.Checkroom,
-                                null,
-                                modifier = Modifier.size(80.dp),
-                                tint = PrimaryLight
-                            )
+                            if (!k.imageUrl.isNullOrBlank()) {
+                                coil.compose.AsyncImage(
+                                    model = k.imageUrl,
+                                    contentDescription = k.marka,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.Checkroom,
+                                    null,
+                                    modifier = Modifier.size(80.dp),
+                                    tint = PrimaryLight
+                                )
+                            }
                         }
                         Spacer(Modifier.height(12.dp))
                         Text(

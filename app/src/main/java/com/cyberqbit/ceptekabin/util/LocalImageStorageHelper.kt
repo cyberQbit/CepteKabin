@@ -9,30 +9,34 @@ import android.provider.MediaStore
 
 object LocalImageStorageHelper {
     
-    /**
-     * Bitmap'i Android'in kalıcı "Pictures/CepteKabin" klasörüne kaydeder.
-     * Uygulama silinse bile bu klasör ve içindeki resimler silinmez.
-     * Kaydedilen resmin cihazdaki adresini (URI) String olarak döndürür.
-     */
     fun saveBitmapToGallery(context: Context, bitmap: Bitmap, filename: String): String? {
         val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "$filename.jpg")
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
-            // Android 10 (Q) ve üzeri için özel klasör yolu belirtiyoruz
+            // UZANTI HİLESİ: .ckb yaparak Galerinin bunu resim olarak görmesini engelliyoruz
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "$filename.ckb")
+            // MIME HİLESİ: Resim değil, rastgele bir dosya gibi tanıtıyoruz
+            put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream")
+            
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/CepteKabin")
+                // Pictures yerine Belgeler klasöründe saklıyoruz (Galeri burayı taramaz)
+                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS + "/CepteKabin")
                 put(MediaStore.MediaColumns.IS_PENDING, 1)
             }
         }
 
         val resolver = context.contentResolver
-        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        // MediaStore.Images yerine MediaStore.Files kullanıyoruz!
+        val uri = resolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
 
         return uri?.let { imageUri ->
             try {
                 resolver.openOutputStream(imageUri)?.use { outputStream ->
-                    // Resmi %90 kalite ile JPEG olarak sıkıştırıp kaydediyoruz
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream)
+                    // SIKIŞTIRMA: JPEG yerine WEBP kullanıp, kaliteyi 70'e çekerek devasa yer tasarrufu sağlıyoruz
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        bitmap.compress(Bitmap.CompressFormat.WEBP_LOSSY, 70, outputStream)
+                    } else {
+                        @Suppress("DEPRECATION")
+                        bitmap.compress(Bitmap.CompressFormat.WEBP, 70, outputStream)
+                    }
                 }
                 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -41,10 +45,10 @@ object LocalImageStorageHelper {
                     resolver.update(imageUri, contentValues, null, null)
                 }
                 
-                imageUri.toString() // Başarılıysa adresi döndür
+                imageUri.toString()
             } catch (e: Exception) {
                 e.printStackTrace()
-                resolver.delete(imageUri, null, null) // Hata olursa bozuk dosyayı sil
+                resolver.delete(imageUri, null, null)
                 null
             }
         }

@@ -35,6 +35,14 @@ fun DolapScreen(
             TopAppBar(
                 title = { Text("Dolabım") },
                 actions = {
+                    val sadeceFavoriler by viewModel.sadeceFavoriler.collectAsState()
+                    IconButton(onClick = { viewModel.toggleFavoriler() }) {
+                        Icon(
+                            imageVector = if (sadeceFavoriler) Icons.Filled.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = "Favoriler",
+                            tint = if (sadeceFavoriler) androidx.compose.ui.graphics.Color.Red else androidx.compose.ui.graphics.Color.Gray
+                        )
+                    }
                     IconButton(onClick = onNavigateToTarama) {
                         Icon(Icons.Default.QrCodeScanner, contentDescription = "Barkod Tara")
                     }
@@ -147,12 +155,21 @@ fun KiyaketCard(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        Icons.Default.Checkroom,
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    if (!kiyaket.imageUrl.isNullOrBlank()) {
+                        coil.compose.AsyncImage(
+                            model = kiyaket.imageUrl,
+                            contentDescription = kiyaket.marka,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            Icons.Default.Checkroom,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
 
