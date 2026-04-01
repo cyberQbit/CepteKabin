@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo placeholder - Kullanıcı logo.png yüklediğinde bu dosya otomatik kullanılacak -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    
+    <!-- Askı çizgisi -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M100,30 L100,50 M80,50 L120,50 M60,50 C60,50 70,150 100,150 C130,150 140,50 140,50"
+        android:strokeWidth="8"
+        android:strokeColor="#006D77"
+        android:strokeLineCap="round"/>
+    
+    <!-- Dolap ikonu -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M40,60 L160,60 L160,170 L40,170 Z"
+        android:strokeWidth="6"
+        android:strokeColor="#006D77"/>
+    
+    <!-- Raf çizgileri -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M40,100 L160,100"
+        android:strokeWidth="3"
+        android:strokeColor="#E8A598"/>
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M40,135 L160,135"
+        android:strokeWidth="3"
+        android:strokeColor="#E8A598"/>
+        
+</vector>

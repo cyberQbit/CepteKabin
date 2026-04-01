@@ -1,0 +1,383 @@
+package com.cyberqbit.ceptekabin.ui.screens.havadurumu
+
+import android.Manifest
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.cyberqbit.ceptekabin.domain.model.ForecastItem
+import com.cyberqbit.ceptekabin.domain.model.HavaDurumu
+import com.cyberqbit.ceptekabin.domain.model.HavaDurumuDurum
+import com.cyberqbit.ceptekabin.ui.components.GlassCard
+import com.cyberqbit.ceptekabin.ui.components.GlassSurface
+import com.cyberqbit.ceptekabin.ui.screens.home.HomeViewModel
+import com.cyberqbit.ceptekabin.ui.theme.*
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun HavaDurumuScreen(
+    onNavigateBack: () -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+    val havaDurumu by viewModel.havaDurumu.collectAsState()
+    val sehirAdi by viewModel.sehirAdi.collectAsState()
+    val isLoading by viewModel.havaDurumuYukleniyor.collectAsState()
+
+    val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
+
+    LaunchedEffect(locationPermission.status.isGranted) {
+        if (locationPermission.status.isGranted) {
+            viewModel.loadHavaDurumuWithLocation()
+        } else {
+            viewModel.loadHavaDurumuByCity("Istanbul")
+        }
+    }
+
+    val isDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val backgroundGradient = if (isDark) {
+        listOf(Grey900, SurfaceDark)
+    } else {
+        listOf(Grey100, White)
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(backgroundGradient))
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        // Başlık
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    Icons.Default.ArrowBack,
+                    contentDescription = "Geri",
+                    tint = if (isDark) Grey100 else Grey800
+                )
+            }
+            Text(
+                text = "Hava Durumu",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (isDark) Grey100 else Grey900
+            )
+            IconButton(onClick = { viewModel.loadHavaDurumuWithLocation() }) {
+                Icon(
+                    Icons.Default.MyLocation,
+                    contentDescription = "Konumumu Kullan",
+                    tint = PrimaryLight
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxWidth().height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = PrimaryLight)
+            }
+        } else {
+            havaDurumu?.let { hava ->
+                // Ana Hava Durumu Kartı
+                MainWeatherCard(havaDurumu = hava, sehirAdi = sehirAdi, isDark = isDark)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Hava Durumu Detayları
+                WeatherDetailsCard(havaDurumu = hava, isDark = isDark)
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 5 Günlük Tahmin
+                if (hava.forecastList.isNotEmpty()) {
+                    Text(
+                        text = "5 Günlük Tahmin",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (isDark) Grey100 else Grey900
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    hava.forecastList.forEach { forecast ->
+                        ForecastDayRow(forecast = forecast, isDark = isDark)
+                        Spacer(modifier = Modifier.height(6.dp))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Kıyafet Önerisi
+                OutfitSuggestionCard(havaDurumu = hava, isDark = isDark)
+            } ?: run {
+                Box(
+                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.CloudOff,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                            tint = Grey500
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Hava durumu yüklenemedi",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Grey600
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        TextButton(onClick = { viewModel.loadHavaDurumuWithLocation() }) {
+                            Text("Tekrar Dene", color = PrimaryLight)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MainWeatherCard(havaDurumu: HavaDurumu, sehirAdi: String?, isDark: Boolean) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = sehirAdi ?: havaDurumu.sehir,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = if (isDark) Grey100 else Grey900
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = havaDurumu.durum.icon,
+                fontSize = 56.sp
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "${havaDurumu.sicaklik.toInt()}°C",
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isDark) Grey100 else Grey900
+            )
+
+            Text(
+                text = havaDurumu.durum.displayName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (isDark) Grey300 else Grey700
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "En yüksek: ${havaDurumu.sicaklik.toInt()}° / En düşük: ${(havaDurumu.sicaklik - 5).toInt()}°",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isDark) Grey500 else Grey600
+            )
+        }
+    }
+}
+
+@Composable
+fun WeatherDetailsCard(havaDurumu: HavaDurumu, isDark: Boolean) {
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Detaylar",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isDark) Grey100 else Grey900
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            WeatherDetailItem(
+                icon = Icons.Default.Thermostat,
+                label = "Hissedilen",
+                value = "${havaDurumu.hissedilenSicaklik.toInt()}°",
+                isDark = isDark
+            )
+            WeatherDetailItem(
+                icon = Icons.Default.WaterDrop,
+                label = "Nem",
+                value = "${havaDurumu.nemOrani}%",
+                isDark = isDark
+            )
+            WeatherDetailItem(
+                icon = Icons.Default.Air,
+                label = "Rüzgar",
+                value = "${havaDurumu.ruzgarHizi.toInt()} km/s",
+                isDark = isDark
+            )
+        }
+    }
+}
+
+@Composable
+fun WeatherDetailItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, isDark: Boolean) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = PrimaryLight,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isDark) Grey500 else Grey600,
+            fontSize = 10.sp
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodySmall,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isDark) Grey100 else Grey900
+        )
+    }
+}
+
+@Composable
+fun ForecastDayRow(forecast: ForecastItem, isDark: Boolean) {
+    GlassSurface(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = forecast.gun,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = FontWeight.Medium,
+                color = if (isDark) Grey100 else Grey800,
+                modifier = Modifier.width(80.dp)
+            )
+
+            Text(text = forecast.durum.icon, fontSize = 20.sp)
+
+            Row {
+                Text(
+                    text = "${forecast.sicaklikMin.toInt()}°",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isDark) Grey500 else Grey600
+                )
+                Text(
+                    text = " / ",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isDark) Grey600 else Grey500
+                )
+                Text(
+                    text = "${forecast.sicaklikMax.toInt()}°",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isDark) Grey100 else Grey800
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun OutfitSuggestionCard(havaDurumu: HavaDurumu, isDark: Boolean) {
+    val sicaklik = havaDurumu.sicaklik
+    val (ustGiyim, altGiyim, disGiyim, ayakkabi) = when {
+        sicaklik >= 30 -> listOf("Tişört", "Şort", null, "Sandalet")
+        sicaklik >= 20 -> listOf("Tişört", "Pantolon", null, "Spor Ayakkabı")
+        sicaklik >= 10 -> listOf("Sweatshirt", "Pantolon", "Ceket", "Ayakkabı")
+        sicaklik >= 0  -> listOf("Kazak", "Pantolon", "Mont", "Bot")
+        else           -> listOf("Kalın Kazak", "Kalın Pantolon", "Kaban", "Bot")
+    }
+
+    GlassCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.Checkroom,
+                contentDescription = null,
+                tint = AccentGold,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Text(
+                    text = "Kıyafet Önerisi",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = if (isDark) Grey100 else Grey900
+                )
+                Text(
+                    text = "Bu hava için önerilen kıyafetler:",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isDark) Grey500 else Grey600
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            listOfNotNull(ustGiyim, altGiyim, disGiyim, ayakkabi).forEach { item ->
+                OutfitChip(label = item, isDark = isDark)
+            }
+        }
+    }
+}
+
+@Composable
+fun OutfitChip(label: String, isDark: Boolean) {
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = if (isDark) GlassDark else GlassLight
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = if (isDark) Grey200 else Grey700,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+        )
+    }
+}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Logo foreground - Kullanıcı logo.png yüklediğinde ic_launcher_foreground_with_logo.xml kullanılabilir -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Askı -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M54,24 L54,36 M42,36 L66,36"
+        android:strokeWidth="3"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"/>
+    
+    <!-- Dolap kapağı -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M30,42 L78,42 L78,86 L30,86 Z"
+        android:strokeWidth="3"
+        android:strokeColor="#FFFFFF"/>
+    
+    <!-- Raf çizgileri - Terracotta -->
+    <path
+        android:pathData="M34,54 L74,54 M34,64 L74,64 M34,74 L74,74"
+        android:strokeWidth="2"
+        android:strokeColor="#E8A598"/>
+        
+</vector>
