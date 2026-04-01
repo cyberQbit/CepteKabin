@@ -12,6 +12,8 @@ import com.cyberqbit.ceptekabin.domain.repository.BarkodRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import okhttp3.Request
+import org.json.JSONObject
 import javax.inject.Inject
 
 class BarkodRepositoryImpl @Inject constructor(
@@ -20,124 +22,105 @@ class BarkodRepositoryImpl @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) : BarkodRepository {
 
-    private val upcItemDbApi = UPCItemDbApi(okHttpClient)
+    private val upcItemDbApi      = UPCItemDbApi(okHttpClient)
     private val openBeautyFactsApi = OpenBeautyFactsApi(okHttpClient)
-    private val trendyolSearchApi = TrendyolSearchApi(okHttpClient)
+    private val trendyolSearchApi  = TrendyolSearchApi(okHttpClient)
 
     override suspend fun barkodAra(barkod: String): Result<BarkodSonuc> = withContext(Dispatchers.IO) {
-        // ══════════════════════════════════════════════════════
-        // AŞAMA 1: Local Cache (Anında)
-        // ══════════════════════════════════════════════════════
+
+        // ── 1. Local cache (instant) ──────────────────────────────────────────
         getBarkodOnbellek(barkod)?.let {
             return@withContext Result.success(it.copy(kaynak = "yerel_bellegim"))
         }
 
-        // ══════════════════════════════════════════════════════
-        // AŞAMA 2A: UPCitemdb API (Uluslararası ürünler)
-        // ══════════════════════════════════════════════════════
-        try {
-            val upcResult = upcItemDbApi.searchBarkod(barkod)
-            if (upcResult != null) {
-                val sonuc = upcResult.copy(kaynak = "upcitemdb")
-                saveBarkodOnbellek(sonuc)
-                return@withContext Result.success(sonuc)
-            }
-        } catch (e: Exception) {
-            // Hata oldu, devam et
+        // ── 2. Open Food Facts (unlimited, good EAN-13 coverage) ─────────────
+        tryApi("openfoodfacts") { openFoodFactsAra(barkod) }?.let {
+            cache(it); return@withContext Result.success(it)
         }
 
-        // ══════════════════════════════════════════════════════
-        // AŞAMA 2B: Open Beauty Facts API (Kozmetik/Parfüm)
-        // ══════════════════════════════════════════════════════
-        try {
-            val beautyResult = openBeautyFactsApi.searchBarkod(barkod)
-            if (beautyResult != null) {
-                val sonuc = beautyResult.copy(kaynak = "openbeautyfacts")
-                saveBarkodOnbellek(sonuc)
-                return@withContext Result.success(sonuc)
-            }
-        } catch (e: Exception) {
-            // Hata oldu, devam et
+        // ── 3. Open Beauty Facts (cosmetics/accessories) ─────────────────────
+        tryApi("openbeautyfacts") { openBeautyFactsApi.searchBarkod(barkod) }?.let {
+            cache(it); return@withContext Result.success(it)
         }
 
-        // ══════════════════════════════════════════════════════
-        // AŞAMA 2C: Sezonlu Ürün Veritabanı
-        // ══════════════════════════════════════════════════════
-        try {
-            val sezonluUrun = sezonluUrunDao.getByBarkod(barkod)
-            if (sezonluUrun != null) {
-                val sonuc = BarkodSonuc(
-                    barkod = barkod,
-                    marka = sezonluUrun.marka,
-                    model = sezonluUrun.model,
-                    tur = sezonluUrun.tur,
-                    beden = null,
-                    renk = null,
-                    imageUrl = null,
-                    sezon = sezonluUrun.sezon,
-                    urunDurumu = UrunDurum.fromString(sezonluUrun.durum),
-                    kaynak = "sezonlu_urun"
-                )
-                return@withContext Result.success(sonuc)
-            }
-        } catch (e: Exception) {
-            // Hata oldu, devam et
+        // ── 4. UPC Item DB (international brands, 100 req/day free) ──────────
+        tryApi("upcitemdb") { upcItemDbApi.searchBarkod(barkod) }?.let {
+            cache(it); return@withContext Result.success(it)
         }
 
-        // ══════════════════════════════════════════════════════
-        // AŞAMA 3: Trendyol Arama (En önemli - Türk ürünleri)
-        // ══════════════════════════════════════════════════════
-        try {
-            val trendyolResult = trendyolSearchApi.searchBarkod(barkod)
-            if (trendyolResult != null) {
-                val sonuc = trendyolResult.copy(kaynak = "trendyol")
-                saveBarkodOnbellek(sonuc)
-                return@withContext Result.success(sonuc)
-            }
-        } catch (e: Exception) {
-            // Hata oldu, devam et
+        // ── 5. Sezonlu ürün local DB ──────────────────────────────────────────
+        sezonluUrunDao.getByBarkod(barkod)?.let { u ->
+            val sonuc = BarkodSonuc(barkod, u.marka, u.model, u.tur, null, null, null,
+                sezon = u.sezon, urunDurumu = UrunDurum.fromString(u.durum), kaynak = "sezonlu_urun")
+            return@withContext Result.success(sonuc)
         }
 
-        // ══════════════════════════════════════════════════════
-        // AŞAMA 4: Google Shopping Search
-        // ══════════════════════════════════════════════════════
-        try {
-            val googleResult = searchWithGoogle(barkod)
-            if (googleResult != null) {
-                val sonuc = googleResult.copy(kaynak = "google_shopping")
-                saveBarkodOnbellek(sonuc)
-                return@withContext Result.success(sonuc)
-            }
-        } catch (e: Exception) {
-            // Hata oldu, devam et
+        // ── 6. Trendyol search (Turkish market — most important) ──────────────
+        tryApi("trendyol") { trendyolSearchApi.searchBarkod(barkod) }?.let {
+            cache(it); return@withContext Result.success(it)
         }
 
-        // ══════════════════════════════════════════════════════
-        // AŞAMA 5: Manuel giriş gerekiyor
-        // ══════════════════════════════════════════════════════
+        // ── 7. Barcode lookup via go-upc.com (another free fallback) ─────────
+        tryApi("go_upc") { goUpcAra(barkod) }?.let {
+            cache(it); return@withContext Result.success(it)
+        }
+
+        // ── 8. Manual entry required ──────────────────────────────────────────
         Result.failure(BarkodBulunamadiException(barkod))
     }
 
-    private suspend fun searchWithGoogle(barkod: String): BarkodSonuc? {
-        // Google Custom Search API entegrasyonu
-        // NOT: Ücretsiz 100 istek/gün limiti var
-        // API key olmadan sadece web scraping yapılabilir
-        // Şimdilik basit bir fallback olarak null döndür
-        return null
+    // ── Open Food Facts ───────────────────────────────────────────────────────
+    private fun openFoodFactsAra(barkod: String): BarkodSonuc? {
+        return try {
+            val req = Request.Builder()
+                .url("https://world.openfoodfacts.org/api/v2/product/$barkod.json")
+                .header("User-Agent", "CepteKabin/1.0 (android)")
+                .build()
+            val resp = okHttpClient.newCall(req).execute()
+            if (!resp.isSuccessful) return null
+            val body = resp.body?.string() ?: return null
+            val json = JSONObject(body)
+            if (json.optInt("status", 0) != 1) return null
+            val product = json.optJSONObject("product") ?: return null
+            val brand = product.optString("brands", "").split(",").firstOrNull()?.trim()
+            val name = product.optString("product_name", "").ifBlank { null }
+            val image = product.optString("image_front_url", "").ifBlank { null }
+            if (brand.isNullOrBlank() && name.isNullOrBlank()) return null
+            BarkodSonuc(barkod, brand, name, null, null, null, image, kaynak = "openfoodfacts")
+        } catch (e: Exception) { null }
+    }
+
+    // ── Go-UPC.com free API ───────────────────────────────────────────────────
+    private fun goUpcAra(barkod: String): BarkodSonuc? {
+        return try {
+            val req = Request.Builder()
+                .url("https://go-upc.com/api/v1/code/$barkod")
+                .header("User-Agent", "CepteKabin/1.0")
+                .build()
+            val resp = okHttpClient.newCall(req).execute()
+            if (!resp.isSuccessful) return null
+            val body = resp.body?.string() ?: return null
+            val json = JSONObject(body)
+            val product = json.optJSONObject("product") ?: return null
+            val name = product.optString("name", "").ifBlank { null }
+            val brand = product.optString("brand", "").ifBlank { null }
+            val image = product.optString("imageUrl", "").ifBlank { null }
+            if (name.isNullOrBlank() && brand.isNullOrBlank()) return null
+            BarkodSonuc(barkod, brand, name, null, null, null, image, kaynak = "go_upc")
+        } catch (e: Exception) { null }
+    }
+
+    private suspend fun <T> tryApi(tag: String, block: suspend () -> T?): T? {
+        return try { block() } catch (e: Exception) { null }
+    }
+
+    private suspend fun cache(sonuc: BarkodSonuc) {
+        try { saveBarkodOnbellek(sonuc) } catch (_: Exception) {}
     }
 
     override suspend fun getBarkodOnbellek(barkod: String): BarkodSonuc? {
-        return barkodOnbellekDao.getByBarkod(barkod)?.let { entity ->
-            BarkodSonuc(
-                barkod = entity.barkod,
-                marka = entity.marka,
-                model = entity.model,
-                tur = entity.tur,
-                beden = entity.beden,
-                renk = entity.renk,
-                imageUrl = entity.imageUrl,
-                kaynak = "yerel_bellegim"
-            )
+        return barkodOnbellekDao.getByBarkod(barkod)?.let { e ->
+            BarkodSonuc(e.barkod, e.marka, e.model, e.tur, e.beden, e.renk, e.imageUrl, kaynak = "yerel_bellegim")
         }
     }
 

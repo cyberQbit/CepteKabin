@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  LOGO PLACEHOLDER                                            ║
+  ║                                                              ║
+  ║  Replace this file with your real app_logo.png:             ║
+  ║  1. Rename your logo file to:  app_logo.png                 ║
+  ║  2. Copy it to:                                              ║
+  ║       app/src/main/res/drawable/app_logo.png                ║
+  ║  3. Delete this XML file after adding the PNG               ║
+  ╚══════════════════════════════════════════════════════════════╝
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+
+    <!-- Background circle -->
+    <path
+        android:fillColor="#006D77"
+        android:pathData="M100,100 m-95,0 a95,95 0 1,0 190,0 a95,95 0 1,0 -190,0" />
+
+    <!-- Hanger hook -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M100,40 C100,40 100,52 100,55 C92,55 80,62 75,70"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <!-- Hanger bar -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M75,70 L125,70"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <!-- Hanger right side -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M125,70 C130,78 108,55 100,55"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+
+    <!-- Garment body -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M60,70 C55,85 52,115 55,145 L145,145 C148,115 145,85 140,70"
+        android:strokeColor="#E8A598"
+        android:strokeWidth="6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Wardrobe door lines -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M100,90 L100,145"
+        android:strokeColor="#E8A598"
+        android:strokeWidth="3"
+        android:strokeLineCap="round" />
+
+</vector>

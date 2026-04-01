@@ -15,25 +15,23 @@ import androidx.navigation.navArgument
 import com.cyberqbit.ceptekabin.ui.screens.auth.AuthViewModel
 import com.cyberqbit.ceptekabin.ui.screens.auth.GoogleSignInScreen
 import com.cyberqbit.ceptekabin.ui.screens.dolap.DolapScreen
+import com.cyberqbit.ceptekabin.ui.screens.dolap.KiyaketDetayScreen   // NEW
 import com.cyberqbit.ceptekabin.ui.screens.havadurumu.HavaDurumuScreen
 import com.cyberqbit.ceptekabin.ui.screens.home.HomeScreen
 import com.cyberqbit.ceptekabin.ui.screens.kombin.KombinDetayScreen
+import com.cyberqbit.ceptekabin.ui.screens.kombin.KombinOlusturScreen  // NEW
 import com.cyberqbit.ceptekabin.ui.screens.kombin.KombinScreen
 import com.cyberqbit.ceptekabin.ui.screens.kombin.KombinViewModel
 import com.cyberqbit.ceptekabin.ui.screens.tarama.KiyaketEkleScreen
 import com.cyberqbit.ceptekabin.ui.screens.tarama.TaramaScreen
 
-data class BottomNavItem(
-    val route: String,
-    val icon: ImageVector,
-    val label: String
-)
+data class BottomNavItem(val route: String, val icon: ImageVector, val label: String)
 
 val bottomNavItems = listOf(
-    BottomNavItem(Screen.Home.route, Icons.Default.Home, "Ana Sayfa"),
-    BottomNavItem(Screen.Dolap.route, Icons.Default.Checkroom, "Dolap"),
-    BottomNavItem(Screen.Kombin.route, Icons.Default.Style, "Kombin"),
-    BottomNavItem(Screen.HavaDurumu.route, Icons.Default.WbSunny, "Hava")
+    BottomNavItem(Screen.Home.route,        Icons.Default.Home,       "Ana Sayfa"),
+    BottomNavItem(Screen.Dolap.route,       Icons.Default.Checkroom,  "Dolap"),
+    BottomNavItem(Screen.Kombin.route,      Icons.Default.Style,      "Kombin"),
+    BottomNavItem(Screen.HavaDurumu.route,  Icons.Default.WbSunny,    "Hava")
 )
 
 @Composable
@@ -53,7 +51,7 @@ fun NavGraph(
                 NavigationBar {
                     bottomNavItems.forEach { item ->
                         NavigationBarItem(
-                            icon = { Icon(item.icon, contentDescription = item.label) },
+                            icon = { Icon(item.icon, item.label) },
                             label = { Text(item.label) },
                             selected = currentRoute == item.route,
                             onClick = {
@@ -76,7 +74,7 @@ fun NavGraph(
             startDestination = if (isLoggedIn) Screen.Home.route else Screen.Auth.route,
             modifier = Modifier.padding(paddingValues)
         ) {
-            // Auth Screen
+
             composable(Screen.Auth.route) {
                 GoogleSignInScreen(
                     onSignInSuccess = {
@@ -87,17 +85,15 @@ fun NavGraph(
                 )
             }
 
-            // Home Screen
             composable(Screen.Home.route) {
                 HomeScreen(
-                    onNavigateToDolap = { navController.navigate(Screen.Dolap.route) },
-                    onNavigateToKombin = { navController.navigate(Screen.Kombin.route) },
-                    onNavigateToTarama = { navController.navigate(Screen.Tarama.route) },
+                    onNavigateToDolap      = { navController.navigate(Screen.Dolap.route) },
+                    onNavigateToKombin     = { navController.navigate(Screen.Kombin.route) },
+                    onNavigateToTarama     = { navController.navigate(Screen.Tarama.route) },
                     onNavigateToHavaDurumu = { navController.navigate(Screen.HavaDurumu.route) }
                 )
             }
 
-            // Dolap Screen
             composable(Screen.Dolap.route) {
                 DolapScreen(
                     onNavigateToTarama = { navController.navigate(Screen.Tarama.route) },
@@ -107,7 +103,6 @@ fun NavGraph(
                 )
             }
 
-            // Kombin Screen
             composable(Screen.Kombin.route) {
                 val kombinViewModel: KombinViewModel = hiltViewModel()
                 KombinScreen(
@@ -121,14 +116,10 @@ fun NavGraph(
                 )
             }
 
-            // Hava Durumu Screen
             composable(Screen.HavaDurumu.route) {
-                HavaDurumuScreen(
-                    onNavigateBack = { navController.popBackStack() }
-                )
+                HavaDurumuScreen(onNavigateBack = { navController.popBackStack() })
             }
 
-            // Tarama Screen
             composable(Screen.Tarama.route) {
                 TaramaScreen(
                     onBarkodFound = { barkod ->
@@ -138,7 +129,6 @@ fun NavGraph(
                 )
             }
 
-            // Kiyaket Ekle Screen
             composable(
                 route = Screen.KiyaketEkle.route,
                 arguments = listOf(navArgument("barkod") { type = NavType.StringType })
@@ -155,17 +145,18 @@ fun NavGraph(
                 )
             }
 
-            // Kiyaket Detay Screen
+            // FIX: properly implemented KiyaketDetay
             composable(
                 route = Screen.KiyaketDetay.route,
                 arguments = listOf(navArgument("id") { type = NavType.LongType })
             ) { backStackEntry ->
                 val id = backStackEntry.arguments?.getLong("id") ?: 0L
-                // KiyaketDetayScreen(id = id)
-                // TODO: Implement detay ekranı
+                KiyaketDetayScreen(
+                    kiyaketId = id,
+                    onNavigateBack = { navController.popBackStack() }
+                )
             }
 
-            // Kombin Detay Screen
             composable(
                 route = Screen.KombinDetay.route,
                 arguments = listOf(navArgument("id") { type = NavType.LongType })
@@ -177,16 +168,16 @@ fun NavGraph(
                 )
             }
 
-            // Kombin Olustur Screen
+            // FIX: properly implemented KombinOlustur
             composable(Screen.KombinOlustur.route) {
-                // KombinOlusturScreen()
-                // TODO: Implement kombin oluştur ekranı
-            }
-
-            // Ayarlar Screen
-            composable(Screen.Ayarlar.route) {
-                // AyarlarScreen()
-                // TODO: Implement ayarlar ekranı
+                KombinOlusturScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onKombinSaved = {
+                        navController.navigate(Screen.Kombin.route) {
+                            popUpTo(Screen.Kombin.route) { inclusive = true }
+                        }
+                    }
+                )
             }
         }
     }

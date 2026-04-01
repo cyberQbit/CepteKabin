@@ -25,83 +25,55 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    @Provides
-    @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .build()
-    }
+    @Provides @Singleton
+    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
 
-    @Provides
-    @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): CepteKabinDatabase {
-        return CepteKabinDatabase.getDatabase(context)
-    }
+    @Provides @Singleton
+    fun provideDatabase(@ApplicationContext context: Context): CepteKabinDatabase =
+        CepteKabinDatabase.getDatabase(context)
 
-    @Provides
-    @Singleton
-    fun provideKiyaketDao(database: CepteKabinDatabase): KiyaketDao {
-        return database.kiyaketDao()
-    }
+    @Provides @Singleton
+    fun provideKiyaketDao(db: CepteKabinDatabase): KiyaketDao = db.kiyaketDao()
 
-    @Provides
-    @Singleton
-    fun provideKombinDao(database: CepteKabinDatabase): KombinDao {
-        return database.kombinDao()
-    }
+    @Provides @Singleton
+    fun provideKombinDao(db: CepteKabinDatabase): KombinDao = db.kombinDao()
 
-    @Provides
-    @Singleton
-    fun provideKategoriDao(database: CepteKabinDatabase): KategoriDao {
-        return database.kategoriDao()
-    }
+    @Provides @Singleton
+    fun provideKategoriDao(db: CepteKabinDatabase): KategoriDao = db.kategoriDao()
 
-    @Provides
-    @Singleton
-    fun provideBarkodOnbellekDao(database: CepteKabinDatabase): BarkodOnbellekDao {
-        return database.barkodOnbellekDao()
-    }
+    @Provides @Singleton
+    fun provideBarkodOnbellekDao(db: CepteKabinDatabase): BarkodOnbellekDao = db.barkodOnbellekDao()
 
-    @Provides
-    @Singleton
-    fun provideSezonluUrunDao(database: CepteKabinDatabase): SezonluUrunDao {
-        return database.sezonluUrunDao()
-    }
+    @Provides @Singleton
+    fun provideSezonluUrunDao(db: CepteKabinDatabase): SezonluUrunDao = db.sezonluUrunDao()
 
-    @Provides
-    @Singleton
-    fun provideKiyaketRepository(kiyaketDao: KiyaketDao): KiyaketRepository {
-        return KiyaketRepositoryImpl(kiyaketDao)
-    }
+    @Provides @Singleton
+    fun provideKiyaketRepository(kiyaketDao: KiyaketDao): KiyaketRepository =
+        KiyaketRepositoryImpl(kiyaketDao)
 
-    @Provides
-    @Singleton
-    fun provideKombinRepository(kombinDao: KombinDao): KombinRepository {
-        return KombinRepositoryImpl(kombinDao)
-    }
+    // FIX: pass KiyaketDao so KombinRepositoryImpl can resolve Kiyaket relations
+    @Provides @Singleton
+    fun provideKombinRepository(
+        kombinDao: KombinDao,
+        kiyaketDao: KiyaketDao
+    ): KombinRepository = KombinRepositoryImpl(kombinDao, kiyaketDao)
 
-    @Provides
-    @Singleton
+    @Provides @Singleton
     fun provideBarkodRepository(
         barkodOnbellekDao: BarkodOnbellekDao,
         sezonluUrunDao: SezonluUrunDao,
         okHttpClient: OkHttpClient
-    ): BarkodRepository {
-        return BarkodRepositoryImpl(barkodOnbellekDao, sezonluUrunDao, okHttpClient)
-    }
+    ): BarkodRepository = BarkodRepositoryImpl(barkodOnbellekDao, sezonluUrunDao, okHttpClient)
 
-    @Provides
-    @Singleton
-    fun provideHavaDurumuApiService(okHttpClient: OkHttpClient): HavaDurumuApiService {
-        return HavaDurumuApiService(okHttpClient)
-    }
+    @Provides @Singleton
+    fun provideHavaDurumuApiService(okHttpClient: OkHttpClient): HavaDurumuApiService =
+        HavaDurumuApiService(okHttpClient)
 
-    @Provides
-    @Singleton
-    fun provideHavaDurumuRepository(apiService: HavaDurumuApiService): HavaDurumuRepository {
-        return HavaDurumuRepositoryImpl(apiService)
-    }
+    @Provides @Singleton
+    fun provideHavaDurumuRepository(apiService: HavaDurumuApiService): HavaDurumuRepository =
+        HavaDurumuRepositoryImpl(apiService)
 }

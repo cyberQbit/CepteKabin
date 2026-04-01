@@ -30,15 +30,16 @@ class KombinViewModel @Inject constructor(
     private fun loadKombinler() {
         viewModelScope.launch {
             if (_favorilerOnly.value) {
-                kombinRepository.getFavoriKombinler().collect { liste ->
-                    _kombinler.value = liste
-                }
+                kombinRepository.getFavoriKombinler().collect { _kombinler.value = it }
             } else {
-                kombinRepository.getAllKombinler().collect { liste ->
-                    _kombinler.value = liste
-                }
+                kombinRepository.getAllKombinler().collect { _kombinler.value = it }
             }
         }
+    }
+
+    // FIX: Added missing method used by KombinDetayScreen
+    suspend fun getKombinById(id: Long): Kombin? {
+        return kombinRepository.getKombinById(id)
     }
 
     fun toggleFavori(kombin: Kombin) {
@@ -50,6 +51,13 @@ class KombinViewModel @Inject constructor(
     fun deleteKombin(kombin: Kombin) {
         viewModelScope.launch {
             kombinRepository.deleteKombin(kombin)
+        }
+    }
+
+    // FIX: Added missing method used by KombinDetayScreen
+    fun incrementPuan(id: Long) {
+        viewModelScope.launch {
+            kombinRepository.incrementPuan(id)
         }
     }
 

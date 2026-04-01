@@ -11,6 +11,7 @@ import com.cyberqbit.ceptekabin.domain.repository.HavaDurumuRepository
 import com.cyberqbit.ceptekabin.domain.repository.KiyaketRepository
 import com.cyberqbit.ceptekabin.domain.repository.KombinRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,53 +41,70 @@ class HomeViewModel @Inject constructor(
     private val _havaDurumuYukleniyor = MutableStateFlow(false)
     val havaDurumuYukleniyor: StateFlow<Boolean> = _havaDurumuYukleniyor.asStateFlow()
 
+    private val _sehirAdi = MutableStateFlow<String?>(null)
+    val sehirAdi: StateFlow<String?> = _sehirAdi.asStateFlow()
+
     private val _konumIzniGerekli = MutableStateFlow(false)
     val konumIzniGerekli: StateFlow<Boolean> = _konumIzniGerekli.asStateFlow()
 
-    private val _sehirAdi = MutableStateFlow<String?>(null)
-    val sehirAdi: StateFlow<String?> = _sehirAdi.asStateFlow()
+    // Track if we already started a weather load to avoid duplicate calls
+    private var weatherLoadJob: Job? = null
+    private var weatherLoaded = false
 
     init {
         loadSonEklenenler()
         loadFavoriKombinler()
     }
 
+    // FIX: guard against duplicate loads; use a single coroutine job
     fun loadHavaDurumuWithLocation() {
-        viewModelScope.launch {
+        if (weatherLoaded && _havaDurumu.value != null) return
+        weatherLoadJob?.cancel()
+        weatherLoadJob = viewModelScope.launch {
             _havaDurumuYukleniyor.value = true
-
-            when (val result = locationService.getCurrentLocation()) {
-                is LocationService.LocationResult.Success -> {
-                    _sehirAdi.value = result.cityName
-                    loadHavaDurumuByCity(result.cityName)
+            try {
+                when (val result = locationService.getCurrentLocation()) {
+                    is LocationService.LocationResult.Success -> {
+                        val city = normalizeTurkishCityName(result.cityName)
+                        _sehirAdi.value = result.cityName
+                        fetchWeather(city)
+                    }
+                    is LocationService.LocationResult.Error -> {
+                        // Konum alınamazsa İstanbul ile devam et
+                        fetchWeather("Istanbul")
+                    }
                 }
-                is LocationService.LocationResult.Error -> {
-                    // Konum alınamazsa varsayılan şehir
-                    loadHavaDurumuByCity("Istanbul")
-                }
+            } catch (e: Exception) {
+                fetchWeather("Istanbul")
+            } finally {
+                _havaDurumuYukleniyor.value = false
             }
-
-            _havaDurumuYukleniyor.value = false
         }
     }
 
     fun loadHavaDurumuByCity(sehir: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            val normalizedSehir = normalizeTurkishCityName(sehir)
+        weatherLoadJob?.cancel()
+        weatherLoadJob = viewModelScope.launch {
+            _havaDurumuYukleniyor.value = true
+            val normalized = normalizeTurkishCityName(sehir)
             _sehirAdi.value = sehir
-
-            havaDurumuRepository.getWeatherByCity(normalizedSehir)
-                .onSuccess { _havaDurumu.value = it }
-                .onFailure {
-                    // Yedek olarak Istanbul dene
-                    if (normalizedSehir != "Istanbul") {
-                        loadHavaDurumuByCity("Istanbul")
-                    }
-                }
-
-            _isLoading.value = false
+            fetchWeather(normalized)
+            _havaDurumuYukleniyor.value = false
         }
+    }
+
+    private suspend fun fetchWeather(city: String) {
+        havaDurumuRepository.getWeatherByCity(city)
+            .onSuccess {
+                _havaDurumu.value = it
+                weatherLoaded = true
+            }
+            .onFailure {
+                if (city != "Istanbul") {
+                    havaDurumuRepository.getWeatherByCity("Istanbul")
+                        .onSuccess { _havaDurumu.value = it }
+                }
+            }
     }
 
     private fun normalizeTurkishCityName(sehir: String): String {

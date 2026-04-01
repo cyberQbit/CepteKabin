@@ -2,6 +2,7 @@ package com.cyberqbit.ceptekabin.ui.screens.kombin
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,9 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cyberqbit.ceptekabin.domain.model.Kiyaket
 import com.cyberqbit.ceptekabin.domain.model.Kombin
 import com.cyberqbit.ceptekabin.ui.components.GlassCard
 import com.cyberqbit.ceptekabin.ui.components.GlassSurface
+import com.cyberqbit.ceptekabin.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,9 +25,33 @@ fun KombinDetayScreen(
     viewModel: KombinViewModel = hiltViewModel()
 ) {
     var kombin by remember { mutableStateOf<Kombin?>(null) }
+    var yukleniyor by remember { mutableStateOf(true) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
+    // FIX: actually load the kombin data
     LaunchedEffect(kombinId) {
-        // Load kombin details
+        yukleniyor = true
+        kombin = viewModel.getKombinById(kombinId)
+        yukleniyor = false
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Kombini Sil") },
+            text = { Text("Bu kombini silmek istediğinden emin misin?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    kombin?.let {
+                        viewModel.deleteKombin(it)
+                        onNavigateBack()
+                    }
+                }) { Text("Sil", color = Error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) { Text("İptal") }
+            }
+        )
     }
 
     Scaffold(
@@ -33,201 +60,123 @@ fun KombinDetayScreen(
                 title = { Text(kombin?.ad ?: "Kombin Detay") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Geri")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri")
                     }
                 },
                 actions = {
-                    kombin?.let {
-                        IconButton(onClick = { viewModel.toggleFavori(it) }) {
+                    kombin?.let { k ->
+                        IconButton(onClick = { viewModel.toggleFavori(k) }) {
                             Icon(
-                                if (it.favori) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = "Favori",
-                                tint = if (it.favori) MaterialTheme.colorScheme.error else LocalContentColor.current
+                                if (k.favori) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                "Favori",
+                                tint = if (k.favori) Error else LocalContentColor.current
                             )
+                        }
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(Icons.Default.Delete, "Sil", tint = Error)
                         }
                     }
                 }
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            kombin?.let { k ->
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Column {
-                        Text(
-                            text = k.ad,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            // Üst giyim
-                            GlassSurface(modifier = Modifier.weight(1f)) {
-                                Column(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
+    ) { padding ->
+        when {
+            yukleniyor -> {
+                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = PrimaryLight)
+                }
+            }
+            kombin == null -> {
+                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    Text("Kombin bulunamadı.")
+                }
+            }
+            else -> {
+                val k = kombin!!
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(16.dp)
+                ) {
+                    GlassCard(modifier = Modifier.fillMaxWidth()) {
+                        Column {
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(k.ad, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                                IconButton(onClick = { viewModel.toggleFavori(k) }) {
                                     Icon(
-                                        Icons.Default.Checkroom,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(32.dp),
-                                        tint = MaterialTheme.colorScheme.primary
+                                        if (k.favori) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                        "Favori",
+                                        tint = if (k.favori) Error else LocalContentColor.current
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "Üst",
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                    k.ustGiyim?.let {
-                                        Text(
-                                            text = it.marka,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                        )
-                                    }
                                 }
                             }
 
-                            // Alt giyim
-                            GlassSurface(modifier = Modifier.weight(1f)) {
-                                Column(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Icon(
-                                        Icons.Default.Checkroom,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(32.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "Alt",
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                    k.altGiyim?.let {
-                                        Text(
-                                            text = it.marka,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                        )
-                                    }
-                                }
+                            Spacer(Modifier.height(16.dp))
+
+                            // Kıyafet slotları
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                KombinSlotCard("Üst", k.ustGiyim, Modifier.weight(1f))
+                                KombinSlotCard("Alt", k.altGiyim, Modifier.weight(1f))
                             }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            // Dış giyim
-                            GlassSurface(modifier = Modifier.weight(1f)) {
-                                Column(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Icon(
-                                        Icons.Default.Checkroom,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(32.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "Dış",
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                    k.disGiyim?.let {
-                                        Text(
-                                            text = it.marka,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                        )
-                                    }
-                                }
+                            Spacer(Modifier.height(10.dp))
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                KombinSlotCard("Dış", k.disGiyim, Modifier.weight(1f))
+                                KombinSlotCard("Ayakkabı", k.ayakkabi, Modifier.weight(1f))
+                            }
+                            k.aksesuar?.let { aks ->
+                                Spacer(Modifier.height(10.dp))
+                                KombinSlotCard("Aksesuar", aks, Modifier.fillMaxWidth())
                             }
 
-                            // Ayakkabı
-                            GlassSurface(modifier = Modifier.weight(1f)) {
-                                Column(
-                                    modifier = Modifier.padding(12.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    Icon(
-                                        Icons.Default.Checkroom,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(32.dp),
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text(
-                                        text = "Ayakkabı",
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                    k.ayakkabi?.let {
-                                        Text(
-                                            text = it.marka,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                            Spacer(Modifier.height(16.dp))
+                            HorizontalDivider()
+                            Spacer(Modifier.height(12.dp))
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        HorizontalDivider()
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    Icons.Default.Star,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "${k.puan} puan",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-
-                            IconButton(onClick = { viewModel.deleteKombin(k) }) {
-                                Icon(
-                                    Icons.Default.Delete,
-                                    contentDescription = "Sil",
-                                    tint = MaterialTheme.colorScheme.error
-                                )
+                                Icon(Icons.Default.Star, null, Modifier.size(18.dp), tint = AccentGold)
+                                Spacer(Modifier.width(4.dp))
+                                Text("${k.puan} puan", style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            viewModel.incrementPuan(k.id)
+                            kombin = k.copy(puan = k.puan + 1)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight)
+                    ) {
+                        Icon(Icons.Default.ThumbUp, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text("Bu Kombini Giydim (+1 puan)")
+                    }
                 }
-            } ?: run {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun KombinSlotCard(label: String, kiyaket: Kiyaket?, modifier: Modifier = Modifier) {
+    GlassSurface(modifier = modifier) {
+        Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(Icons.Default.Checkroom, null, Modifier.size(28.dp), tint = if (kiyaket != null) PrimaryLight else Grey400)
+            Spacer(Modifier.height(6.dp))
+            Text(label, style = MaterialTheme.typography.labelSmall, color = Grey500)
+            if (kiyaket != null) {
+                Text(kiyaket.marka, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                Text(kiyaket.tur.displayName, style = MaterialTheme.typography.labelSmall, color = Grey500)
+            } else {
+                Text("—", style = MaterialTheme.typography.bodySmall, color = Grey400)
             }
         }
     }
