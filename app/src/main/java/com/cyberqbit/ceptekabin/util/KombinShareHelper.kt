@@ -100,4 +100,33 @@ object KombinShareHelper {
             null
         }
     }
+
+    suspend fun getPromoImageUri(context: Context): Uri? = withContext(Dispatchers.IO) {
+        try {
+            val file = File(context.cacheDir, "CepteKabin_Tanitim.png")
+            if (!file.exists()) {
+                val drawable = androidx.core.content.ContextCompat.getDrawable(context, com.cyberqbit.ceptekabin.R.drawable.app_logo)
+                if (drawable != null) {
+                    val bitmap = if (drawable is android.graphics.drawable.BitmapDrawable) {
+                        drawable.bitmap
+                    } else {
+                        val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: 512
+                        val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: 512
+                        val bmp = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+                        val canvas = android.graphics.Canvas(bmp)
+                        drawable.setBounds(0, 0, canvas.width, canvas.height)
+                        drawable.draw(canvas)
+                        bmp
+                    }
+                    FileOutputStream(file).use { out ->
+                        bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, out)
+                    }
+                }
+            }
+            FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 }

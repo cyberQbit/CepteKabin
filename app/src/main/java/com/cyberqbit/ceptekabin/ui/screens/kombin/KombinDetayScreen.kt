@@ -169,28 +169,39 @@ fun KombinDetayScreen(
                         coroutineScope.launch {
                             // Kombin kıyafetlerini listeye çevir
                             val kombinKiyafetleri = listOfNotNull(k.ustGiyim, k.altGiyim, k.disGiyim, k.ayakkabi, k.aksesuar)
-                            
+
                             val shareUri = com.cyberqbit.ceptekabin.util.KombinShareHelper.createKmbFile(context, k, kombinKiyafetleri)
-                            
-                            if (shareUri != null) {
+                            val logoUri = com.cyberqbit.ceptekabin.util.KombinShareHelper.getPromoImageUri(context)
+
+                            if (shareUri != null && logoUri != null) {
                                 val promosyonMesaji = """
                                     Hey! CepteKabin uygulamasında sana özel harika bir kombin hazırladım. 🤩👗👔
                                     
-                                    Eğer uygulaman varsa ekteki dosyaya tıklayarak bu kombini anında kendi dolabına ekleyebilirsin!
+                                    ✨ Eğer uygulaman zaten yüklüyse, hemen aşağıdaki .kmb dosyasına tıklayarak kombini anında dolabına ekleyebilirsin!
                                     
-                                    Henüz CepteKabin'in yok mu? Hemen ücretsiz indir:
-                                    👉 https://bit.ly/CepteKabinApp
+                                    ⚠️ Henüz CepteKabin'in yok mu? Çok basit:
+                                    1️⃣ Önce şu linkten uygulamayı ücretsiz indir ve kur:
+                                    🔗 https://bit.ly/CepteKabinApp
+                                    
+                                    2️⃣ Kurulum bittikten sonra bu sohbete geri dön ve bu sohbetteki belgeye (.kmb dosyasına) tıkla!
+                                    
+                                    Sihir o an gerçekleşecek ve kombin dolabında belirecek! 🪄
                                 """.trimIndent()
 
-                                val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                val uris = java.util.ArrayList<android.net.Uri>().apply {
+                                    add(logoUri)
+                                    add(shareUri)
+                                }
+
+                                val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND_MULTIPLE).apply {
                                     type = "*/*"
-                                    putExtra(android.content.Intent.EXTRA_STREAM, shareUri)
+                                    putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, uris)
                                     putExtra(android.content.Intent.EXTRA_TEXT, promosyonMesaji)
                                     putExtra(android.content.Intent.EXTRA_SUBJECT, "Sana Harika Bir Kombin Gönderdim!")
                                     addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                                 }
-                                val chooser = android.content.Intent.createChooser(shareIntent, "Kombini Paylaş (Yakındakiler ve Uygulamalar)")
+                                val chooser = android.content.Intent.createChooser(shareIntent, "Kombini Paylaş")
                                 context.startActivity(chooser)
                             }
                         }
