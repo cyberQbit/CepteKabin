@@ -46,7 +46,7 @@ class AuthViewModel @Inject constructor(
 
             when (val result = googleAuthService.signInWithGoogle(data)) {
                 is GoogleAuthService.SignInResult.Success -> {
-                    // Save user to Firestore
+                    // Save user to Firestore asynchronously without blocking login flow
                     val userData = mapOf(
                         "uid" to result.uid,
                         "email" to result.email,
@@ -54,7 +54,9 @@ class AuthViewModel @Inject constructor(
                         "photoUrl" to (result.photoUrl ?: ""),
                         "createdAt" to System.currentTimeMillis()
                     )
-                    firestoreService.saveUser(result.uid, userData)
+                    viewModelScope.launch {
+                        firestoreService.saveUser(result.uid, userData)
+                    }
                     _isLoggedIn.value = true
                     _signInState.value = SignInState.Success(result.uid)
                 }
