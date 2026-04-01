@@ -83,4 +83,22 @@ class KombinOlusturViewModel @Inject constructor(
             }
         }
     }
+
+    fun loadKombinForEdit(kombinId: Long) {
+        if (kombinId == 0L) return
+        viewModelScope.launch {
+            val kombin = kombinRepository.getKombinById(kombinId)
+            kombin?.let { k ->
+                _uiState.update { state ->
+                    state.copy(
+                        seciliUst = k.ustGiyim,
+                        seciliAlt = k.altGiyim,
+                        seciliDis = k.disGiyim,
+                        seciliAyak = k.ayakkabi,
+                        seciliAksesuar = k.aksesuar
+                    )
+                }
+            }
+        }
+    }
 }

@@ -29,6 +29,7 @@ import com.cyberqbit.ceptekabin.ui.theme.*
 fun KiyaketDetayScreen(
     kiyaketId: Long,
     onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit = {},
     viewModel: KiyaketDetayViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -71,6 +72,9 @@ fun KiyaketDetayScreen(
                 },
                 actions = {
                     uiState.kiyaket?.let { k ->
+                        IconButton(onClick = { onNavigateToEdit(k.id) }) {
+                            Icon(Icons.Default.Edit, "Düzenle")
+                        }
                         IconButton(onClick = { viewModel.toggleFavori(k) }) {
                             Icon(
                                 if (k.favori) Icons.Default.Favorite else Icons.Default.FavoriteBorder,

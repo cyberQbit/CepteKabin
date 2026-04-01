@@ -73,7 +73,7 @@ class KombinRepositoryImpl @Inject constructor(
 
 ### 7. HomeViewModel — Hava Durumu Race Condition
 **Dosya:** `HomeViewModel.kt`  
-**Sorun:** `LaunchedEffect(locationPermission.status.isGranted)` ile `LaunchedEffect(Unit)` yarışıyordu; izin GrantED olmadan önce `loadHavaDurumuByCity("Istanbul")` çağrılıyordu, sonra izin verilince tekrar yüklemeye çalışıyordu.  
+**Sorun:** `LaunchedEffect(locationPermission.status.isGranted)` ile `LaunchedEffect(Unit)` yarışıyordu; izin GrantED olmadan önce `loadHavaDurumuByCity("Ankara")` çağrılıyordu, sonra izin verilince tekrar yüklemeye çalışıyordu.  
 **Düzeltme:**
 - `weatherLoaded` flag'i eklendi — zaten yüklüyse tekrar çağrılmıyor
 - `Job` takibi eklendi — önceki job iptal ediliyor

@@ -179,12 +179,17 @@ fun NavGraph(
             }
 
             composable(
-                route     = Screen.KiyaketEkle.route,
-                arguments = listOf(navArgument("barkod") { type = NavType.StringType })
+                route = Screen.KiyaketEkle.route,
+                arguments = listOf(
+                    navArgument("barkod") { type = NavType.StringType; defaultValue = "" },
+                    navArgument("kiyaketId") { type = NavType.LongType; defaultValue = 0L }
+                )
             ) { backStack ->
                 val barkod = backStack.arguments?.getString("barkod") ?: ""
+                val kiyaketId = backStack.arguments?.getLong("kiyaketId") ?: 0L
                 KiyaketEkleScreen(
                     barkod         = barkod,
+                    kiyaketId      = kiyaketId,
                     onNavigateBack = { navController.popBackStack() },
                     onKiyaketSaved = {
                         navController.navigate(Screen.Dolap.route) {
@@ -202,7 +207,10 @@ fun NavGraph(
                 val id = backStack.arguments?.getLong("id") ?: 0L
                 KiyaketDetayScreen(
                     kiyaketId      = id,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToEdit = { kId ->
+                        navController.navigate(Screen.KiyaketEkle.createRoute("", kId))
+                    }
                 )
             }
 
@@ -214,14 +222,22 @@ fun NavGraph(
                 KombinDetayScreen(
                     kombinId          = id,
                     onNavigateBack    = { navController.popBackStack() },
+                    onNavigateToEdit  = { kId ->
+                        navController.navigate(Screen.KombinOlustur.createRoute(kId))
+                    },
                     onNavigateToKiyaket = { kId ->
                         navController.navigate(Screen.KiyaketDetay.createRoute(kId))
                     }
                 )
             }
 
-            composable(Screen.KombinOlustur.route) {
+            composable(
+                route = Screen.KombinOlustur.route,
+                arguments = listOf(navArgument("kombinId") { type = NavType.LongType; defaultValue = 0L })
+            ) { backStack ->
+                val kombinId = backStack.arguments?.getLong("kombinId") ?: 0L
                 KombinOlusturScreen(
+                    kombinId       = kombinId,
                     onNavigateBack = { navController.popBackStack() },
                     onKombinSaved  = {
                         navController.navigate(Screen.Kombin.route) {
@@ -255,3 +271,4 @@ fun NavGraph(
         }
     }
 }
+

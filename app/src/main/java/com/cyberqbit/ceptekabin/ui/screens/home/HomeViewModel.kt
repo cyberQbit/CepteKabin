@@ -77,11 +77,11 @@ class HomeViewModel @Inject constructor(
                     }
                     is LocationService.LocationResult.Error -> {
                         // Konum alınamazsa İstanbul ile devam et
-                        fetchWeather("Istanbul")
+                        fetchWeather("Ankara")
                     }
                 }
             } catch (e: Exception) {
-                fetchWeather("Istanbul")
+                fetchWeather("Ankara")
             } finally {
                 _havaDurumuYukleniyor.value = false
             }
@@ -108,8 +108,8 @@ class HomeViewModel @Inject constructor(
                 weatherLoaded = true
             }
             .onFailure {
-                if (city != "Istanbul") {
-                    havaDurumuRepository.getWeatherByCity("Istanbul")
+                if (city != "Ankara") {
+                    havaDurumuRepository.getWeatherByCity("Ankara")
                         .onSuccess { 
                             _havaDurumu.value = it
                             val sdf = SimpleDateFormat("HH.mm - dd/MM/yyyy", Locale("tr", "TR"))

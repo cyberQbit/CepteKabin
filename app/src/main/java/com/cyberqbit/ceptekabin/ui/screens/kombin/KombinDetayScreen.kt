@@ -32,6 +32,7 @@ import kotlinx.coroutines.launch
 fun KombinDetayScreen(
     kombinId: Long,
     onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit = {},
     onNavigateToKiyaket: (Long) -> Unit = {},
     viewModel: KombinViewModel = hiltViewModel()
 ) {
@@ -82,6 +83,9 @@ fun KombinDetayScreen(
                 },
                 actions = {
                     kombin?.let { k ->
+                        IconButton(onClick = { onNavigateToEdit(k.id) }) {
+                            Icon(Icons.Default.Edit, "Düzenle")
+                        }
                         IconButton(onClick = {
                             kombin = k.copy(favori = !k.favori)
                             viewModel.toggleFavori(k)

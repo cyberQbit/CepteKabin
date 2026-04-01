@@ -32,6 +32,7 @@ import com.cyberqbit.ceptekabin.ui.theme.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KombinOlusturScreen(
+    kombinId: Long = 0L,
     onNavigateBack: () -> Unit,
     onKombinSaved: () -> Unit,
     viewModel: KombinOlusturViewModel = hiltViewModel()
@@ -40,6 +41,14 @@ fun KombinOlusturScreen(
     val isDark = isSystemInDarkTheme()
 
     var kombinAdi by remember { mutableStateOf("") }
+    var existingKombin by remember { mutableStateOf<Kombin?>(null) }
+
+    // Düzenleme modunu başlat
+    LaunchedEffect(kombinId) {
+        if (kombinId != 0L) {
+            viewModel.loadKombinForEdit(kombinId)
+        }
+    }
     var showKiyaketSecim by remember { mutableStateOf<KiyaketSlot?>(null) }
 
     LaunchedEffect(uiState.savedSuccess) {
@@ -188,6 +197,7 @@ fun KombinOlusturScreen(
                 onClick = {
                     viewModel.kaydet(
                         Kombin(
+                            id = if(kombinId != 0L) kombinId else 0L,
                             ad = kombinAdi.ifBlank { "Yeni Kombin" },
                             ustGiyim = uiState.seciliUst,
                             altGiyim = uiState.seciliAlt,
@@ -395,3 +405,4 @@ private fun KiyaketSecimBottomSheet(
 }
 
 enum class KiyaketSlot { UST, ALT, DIS, AYAK, AKSESUAR }
+

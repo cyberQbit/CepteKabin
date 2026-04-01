@@ -10,8 +10,8 @@ sealed class Screen(val route: String) {
     object Tarama        : Screen("tarama")
     object Ayarlar       : Screen("ayarlar")
 
-    object KiyaketEkle : Screen("kiyaket_ekle/{barkod}") {
-        fun createRoute(barkod: String) = "kiyaket_ekle/$barkod"
+    object KiyaketEkle : Screen("kiyaket_ekle?barkod={barkod}&kiyaketId={kiyaketId}") {
+        fun createRoute(barkod: String = "", kiyaketId: Long = 0L) = "kiyaket_ekle?barkod=$barkod&kiyaketId=$kiyaketId"
     }
     object KiyaketDetay : Screen("kiyaket_detay/{id}") {
         fun createRoute(id: Long) = "kiyaket_detay/$id"
@@ -19,7 +19,9 @@ sealed class Screen(val route: String) {
     object KombinDetay : Screen("kombin_detay/{id}") {
         fun createRoute(id: Long) = "kombin_detay/$id"
     }
-    object KombinOlustur : Screen("kombin_olustur")
+    object KombinOlustur : Screen("kombin_olustur?kombinId={kombinId}") {
+        fun createRoute(kombinId: Long = 0L) = "kombin_olustur?kombinId=$kombinId"
+    }
 
     object Kategori : Screen("kategori/{id}") {
         fun createRoute(id: Long) = "kategori/$id"
@@ -33,3 +35,4 @@ sealed class Screen(val route: String) {
         fun createRoute(encodedUri: String) = "kombin_import/$encodedUri"
     }
 }
+

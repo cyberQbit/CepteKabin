@@ -47,7 +47,7 @@ fun HavaDurumuScreen(
         if (locationPermission.status.isGranted) {
             viewModel.loadHavaDurumuWithLocation()
         } else {
-            viewModel.loadHavaDurumuByCity("Istanbul")
+            viewModel.loadHavaDurumuByCity("Ankara")
         }
     }
 

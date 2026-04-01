@@ -74,7 +74,7 @@ fun HomeScreen(
             viewModel.loadHavaDurumuWithLocation()
         } else {
             // Load with default city if permission not granted
-            viewModel.loadHavaDurumuByCity("Istanbul")
+            viewModel.loadHavaDurumuByCity("Ankara")
         }
     }
 
@@ -155,7 +155,7 @@ fun HomeScreen(
                 if (locationPermission.status.isGranted) {
                     viewModel.loadHavaDurumuWithLocation()
                 } else {
-                    viewModel.loadHavaDurumuByCity("Istanbul")
+                    viewModel.loadHavaDurumuByCity("Ankara")
                 }
             }
         )

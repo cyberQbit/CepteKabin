@@ -187,4 +187,8 @@ class KiyaketEkleViewModel @Inject constructor(
         _kaynak.value = ""
         _urunKoduHata.value = null
     }
+
+    suspend fun getKiyaket(id: Long): Kiyaket? {
+        return kiyaketRepository.getKiyaketById(id)
+    }
 }

@@ -35,6 +35,7 @@ import com.cyberqbit.ceptekabin.ui.theme.*
 @Composable
 fun KiyaketEkleScreen(
     barkod: String,
+    kiyaketId: Long = 0L,
     onNavigateBack: () -> Unit,
     onKiyaketSaved: () -> Unit,
     viewModel: KiyaketEkleViewModel = hiltViewModel()
