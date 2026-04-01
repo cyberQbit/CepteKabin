@@ -109,15 +109,11 @@ fun HomeScreen(
                         .background(PrimaryDark),
                     contentAlignment = Alignment.Center
                 ) {
-                    try {
-                        Image(
-                            painter = painterResource(id = R.drawable.app_logo),
-                            contentDescription = "CepteKabin Logo",
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } catch (e: Exception) {
-                        Icon(Icons.Default.Checkroom, null, tint = White, modifier = Modifier.size(28.dp))
-                    }
+                    Image(
+                        painter = painterResource(id = R.drawable.app_logo),
+                        contentDescription = "CepteKabin Logo",
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
                 Spacer(Modifier.width(12.dp))
                 Column {
