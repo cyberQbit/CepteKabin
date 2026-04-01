@@ -35,3 +35,13 @@
 # 3. Gson için gerekli config (reflection kullanıyor)
 -keepattributes Signature
 -keepattributes *Annotation*
+
+# --- GSON KORUMA KURALLARI ---
+-keep class sun.misc.Unsafe { *; }
+-keep class com.google.gson.** { *; }
+
+# --- CEPTEKABİN VERİ MODELLERİ KORUMA ---
+-keep enum com.cyberqbit.ceptekabin.domain.model.** { *; }
+
+# --- PAYLAŞIM VERİ SINIFI KORUMA ---
+# (KombinExportData zaten korunuyor, ama enum'lar için ek kural)
