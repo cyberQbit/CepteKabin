@@ -1,6 +1,6 @@
 <div align="center">
   
-  <img src="app/src/main/res/drawable-nodpi/app_logo.png" alt="CepteKabin Logo" width="150"/>
+  <img src="app/src/main/res/drawable-nodpi/app_logo.webp" alt="CepteKabin Logo" width="150"/>
 
   # 📱 CepteKabin v1.0
   

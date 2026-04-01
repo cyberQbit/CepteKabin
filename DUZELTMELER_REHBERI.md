@@ -115,7 +115,7 @@ class KombinRepositoryImpl @Inject constructor(
 
 ### Adımlar:
 1. `app/src/main/res/drawable/` klasörüne git
-2. Kendi logonu şu isimle koy: **`app_logo.png`**
+2. Kendi logonu şu isimle koy: **`app_logo.webp`**
 3. Uygulama otomatik olarak kullanır
 
 ### Geçici Placeholder:
@@ -159,7 +159,7 @@ app/src/main/java/com/cyberqbit/ceptekabin/
 │
 └── res/drawable/
     ├── app_logo.xml                       ← GEÇİCİ PLACEHOLDER
-    └── app_logo.png                       ← SEN EKLE (logo.png → app_logo.png)
+    └── app_logo.webp                      ← SEN EKLE (logo.png → app_logo.webp)
 ```
 
 ---

@@ -3,10 +3,10 @@
   ╔══════════════════════════════════════════════════════════════╗
   ║  LOGO PLACEHOLDER                                            ║
   ║                                                              ║
-  ║  Replace this file with your real app_logo.png:             ║
-  ║  1. Rename your logo file to:  app_logo.png                 ║
+  ║  Replace this file with your real app_logo.webp:            ║
+  ║  1. Rename your logo file to:  app_logo.webp                ║
   ║  2. Copy it to:                                              ║
-  ║       app/src/main/res/drawable/app_logo.png                ║
+  ║       app/src/main/res/drawable/app_logo.webp               ║
   ║  3. Delete this XML file after adding the PNG               ║
   ╚══════════════════════════════════════════════════════════════╝
 -->
