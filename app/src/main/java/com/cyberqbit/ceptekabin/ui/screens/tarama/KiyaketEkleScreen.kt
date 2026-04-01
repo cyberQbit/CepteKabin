@@ -754,6 +754,7 @@ fun KiyaketEkleScreen(
                     val finalMarka = if (marka == "Diğer") customMarkaField else marka
                     val finalRenk = if (renk == "Diğer") customRenkField else renk
                     
+                    // Şartlar sağlanıyorsa kaydet
                     if (finalMarka.isNotBlank() && tur != null && beden.isNotBlank() && model.isNotBlank()) {
                         viewModel.saveKiyaket(
                             kiyaket = Kiyaket(
@@ -769,12 +770,20 @@ fun KiyaketEkleScreen(
                                 imageUrl = selectedImageUri?.toString()
                             ),
                             onSuccess = { saveSuccess = true },
-                            onError = { /* Hata göster */ }
+                            onError = { hataMesaji -> 
+                                // HATA GÖSTERİMİ DÜZELTİLDİ:
+                                // Sayfanın üst kısmında tanımladığın validationError değişkenine hatayı atıyoruz,
+                                // böylece ekranda AlertDialog (Uyarı penceresi) çıkacak.
+                                validationError = hataMesaji 
+                            }
                         )
+                    } else {
+                        // KULLANICI EKSİK GİRİŞ YAPTIYSA UYAR:
+                        validationError = "Lütfen Marka, Tür, Model ve Beden alanlarını eksiksiz doldurun."
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = (marka != "" || marka == "Diğer") && tur != null && beden.isNotBlank() && model.isNotBlank() && !isLoading
+                enabled = !isLoading // Sadece yükleniyorsa butonu pasif yap
             ) {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
