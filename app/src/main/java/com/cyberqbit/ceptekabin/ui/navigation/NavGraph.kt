@@ -177,8 +177,9 @@ fun NavGraph(
                 KombinOlusturScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onKombinSaved = {
-                        navController.navigate(Screen.Kombin.route) {
-                            popUpTo(Screen.Kombin.route) { inclusive = true }
+                        navController.navigate(Screen.Dolap.route) {
+                            popUpTo(Screen.KombinOlustur.route) { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
                 )
