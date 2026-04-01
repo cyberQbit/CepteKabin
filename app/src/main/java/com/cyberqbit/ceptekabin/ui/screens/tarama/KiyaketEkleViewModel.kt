@@ -97,48 +97,51 @@ class KiyaketEkleViewModel @Inject constructor(
             try {
                 var finalKiyaket = kiyaket
 
-                // Process image if it's a local URI
+                // Eğer kullanıcı bir resim seçtiyse (ve bu resim yerel bir yolsa)
                 if (!kiyaket.imageUrl.isNullOrBlank() && 
                     (kiyaket.imageUrl!!.startsWith("content://") || kiyaket.imageUrl!!.startsWith("file://"))) {
                     
                     try {
-                        // Decode Bitmap from URI
+                        // URI'den Bitmap'e dönüştür
                         val bitmap = decodeBitmapFromUri(kiyaket.imageUrl!!)
                         
                         if (bitmap != null) {
-                            // Get current user ID or use anonymous
-                            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: "anonymous"
+                            // Benzersiz bir dosya adı oluştur
+                            val fileName = "kiyafet_${System.currentTimeMillis()}"
                             
-                            // Upload image to Firebase Storage
-                            val uploadResult = storageService.uploadKiyafetImage(bitmap, userId)
+                            // YENİ SİSTEM: Firebase yerine cihazın kalıcı hafızasına kaydet
+                            val savedUriString = com.cyberqbit.ceptekabin.util.LocalImageStorageHelper.saveBitmapToGallery(
+                                context = context,
+                                bitmap = bitmap,
+                                filename = fileName
+                            )
                             
-                            val pair = uploadResult.getOrNull()
-                            if (pair != null) {
-                                val downloadUrl = pair.first
-                                val storagePath = pair.second
+                            if (savedUriString != null) {
+                                // Kayıt başarılı, yeni kalıcı adresi nesneye ekle
                                 finalKiyaket = kiyaket.copy(
-                                    imageUrl = downloadUrl,
-                                    firebaseStoragePath = storagePath
+                                    imageUrl = savedUriString,
+                                    firebaseStoragePath = null // Artık bulut kullanmıyoruz
                                 )
                             } else {
-                                throw Exception("Image upload failed")
+                                throw Exception("Fotoğraf cihaza kaydedilemedi.")
                             }
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()
-                        onError("Görüntü işleme hatası: ${e.message}")
+                        onError("Görüntü işleme hatası: ${e.localizedMessage}")
                         _isLoading.value = false
                         return@launch
                     }
                 }
 
-                // Save to repository
+                // Hem veritabanına (Room) hem de eğer varsa bulut senkronizasyonuna (Firestore) gönder
                 kiyaketRepository.insertKiyaket(finalKiyaket)
+                
                 _isLoading.value = false
                 onSuccess()
             } catch (e: Exception) {
                 _isLoading.value = false
-                onError(e.message ?: "Kayıt hatası")
+                onError(e.message ?: "Kayıt hatası oluştu.")
             }
         }
     }
