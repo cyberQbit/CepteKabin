@@ -276,4 +276,29 @@ CepteKabin ile:
     /** @deprecated Yeni kod parseKmbFileForImport() kullanmalı */
     suspend fun importKmbFile(context: Context, uri: Uri): KombinExportData? =
         parseKmbFileForImport(context, uri)
+
+    // ─── 7. ORGANİK BÜYÜME: GENEL UYGULAMA PAYLAŞIMI ───────────────────────
+
+    /**
+     * Sadece davet metnini ve uygulama linkini paylaşır (Kombin bağımsız).
+     * Ana sayfadaki rastgele paylaşım teşviki için kullanılır.
+     */
+    fun createAppInviteIntent(): Intent {
+        val text = """
+🎽 CepteKabin ile sen de dijital gardırobunu oluştur!
+
+✅ Kıyafetlerini telefonunda tut
+✅ Hava durumuna göre kombin önerisi al
+✅ Barkod okutarak saniyede kıyafet ekle
+
+📲 Ücretsiz indir: $APP_STORE_LINK
+        """.trimIndent()
+
+        return Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, text)
+            putExtra(Intent.EXTRA_SUBJECT, "CepteKabin'e Katıl 🎽")
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+    }
 }

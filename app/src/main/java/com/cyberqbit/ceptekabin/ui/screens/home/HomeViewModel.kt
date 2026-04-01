@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cyberqbit.ceptekabin.data.service.LocationService
@@ -13,7 +14,9 @@ import com.cyberqbit.ceptekabin.domain.model.Kombin
 import com.cyberqbit.ceptekabin.domain.repository.HavaDurumuRepository
 import com.cyberqbit.ceptekabin.domain.repository.KiyaketRepository
 import com.cyberqbit.ceptekabin.domain.repository.KombinRepository
+import com.cyberqbit.ceptekabin.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +29,8 @@ class HomeViewModel @Inject constructor(
     private val havaDurumuRepository: HavaDurumuRepository,
     private val kiyaketRepository: KiyaketRepository,
     private val kombinRepository: KombinRepository,
-    private val locationService: LocationService
+    private val locationService: LocationService,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _havaDurumu = MutableStateFlow<HavaDurumu?>(null)
@@ -175,5 +179,33 @@ class HomeViewModel @Inject constructor(
                 _onerilenKombinler.value = oneriler
             }
         }
+    }
+
+    // ─── ORGANIK BÜYÜME: PAYLAŞIM TEŞVİK SİSTEMİ ───────────────────────────────
+
+    private val _showShareDialog = MutableStateFlow(false)
+    val showShareDialog: StateFlow<Boolean> = _showShareDialog.asStateFlow()
+
+    fun checkAndShowSharePrompt() {
+        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        val wasShownLastTime = prefs.getBoolean("share_shown_last_time", false)
+
+        if (wasShownLastTime) {
+            // Arka arkaya gelmemesi için bu sefer gösterme ve durumu sıfırla
+            prefs.edit().putBoolean("share_shown_last_time", false).apply()
+        } else {
+            // Gösterilmediyse zarı at (%30 ihtimalle gösterelim)
+            val randomChance = (1..100).random()
+            if (randomChance <= 30) {
+                _showShareDialog.value = true
+                prefs.edit().putBoolean("share_shown_last_time", true).apply()
+            } else {
+                prefs.edit().putBoolean("share_shown_last_time", false).apply()
+            }
+        }
+    }
+
+    fun dismissShareDialog() {
+        _showShareDialog.value = false
     }
 }

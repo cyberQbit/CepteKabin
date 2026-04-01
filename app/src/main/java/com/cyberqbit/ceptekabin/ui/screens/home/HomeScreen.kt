@@ -1,6 +1,7 @@
 package com.cyberqbit.ceptekabin.ui.screens.home
 
 import android.Manifest
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +35,7 @@ import com.cyberqbit.ceptekabin.ui.components.GlassButton
 import com.cyberqbit.ceptekabin.ui.components.GlassCard
 import com.cyberqbit.ceptekabin.ui.components.GlassSurface
 import com.cyberqbit.ceptekabin.ui.theme.*
+import com.cyberqbit.ceptekabin.util.KombinShareHelper
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -53,13 +56,16 @@ fun HomeScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val havaDurumuYukleniyor by viewModel.havaDurumuYukleniyor.collectAsState()
     val sonGuncelleme by viewModel.sonGuncelleme.collectAsState()
+    val showShareDialog by viewModel.showShareDialog.collectAsState()
 
+    val context = LocalContext.current
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     // FIX: request permission first, then load weather based on result
     var permissionRequested by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        viewModel.checkAndShowSharePrompt()
         if (!permissionRequested) {
             permissionRequested = true
             if (!locationPermission.status.isGranted) {
