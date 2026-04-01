@@ -1,5 +1,8 @@
 package com.cyberqbit.ceptekabin.domain.model
 
+import androidx.annotation.Keep
+
+@Keep // Proguard'ın bu sınıfın ismini değiştirmesini engeller (Gson serileştirmesi için)
 data class Kombin(
     val id: Long = 0,
     val ad: String,
@@ -14,6 +17,7 @@ data class Kombin(
     val favori: Boolean = false
 )
 
+@Keep // Proguard'ın bu sınıfın ismini değiştirmesini engeller (Gson serileştirmesi için)
 data class HavaDurumu(
     val sehir: String, val sehirId: String, val sicaklik: Double, val hissedilenSicaklik: Double,
     val durum: HavaDurumuDurum, val aciklama: String, val nemOrani: Int, val ruzgarHizi: Double,
@@ -21,11 +25,13 @@ data class HavaDurumu(
     val guncelTarih: String, val forecastList: List<ForecastItem> = emptyList()
 )
 
+@Keep // Proguard'ın bu sınıfın ismini değiştirmesini engeller (Gson serileştirmesi için)
 data class ForecastItem(
     val tarih: String, val gun: String, val sicaklikMin: Double, val sicaklikMax: Double,
     val durum: HavaDurumuDurum, val nemOrani: Int, val ruzgarHizi: Double, val yağışOlasılığı: Int
 )
 
+@Keep // Proguard'ın bu enum'un ismini değiştirmesini engeller (Gson serileştirmesi için)
 enum class HavaDurumuDurum(val icon: String, val displayName: String) {
     GUNESLI("sunny", "Güneşli"), BULUTLU("cloudy", "Bulutlu"), YAGMURLU("rainy", "Yağmurlu"),
     KARLI("snowy", "Karlı"), FIRTINALI("stormy", "Fırtınalı"), RUZGARLI("windy", "Rüzgarlı"),

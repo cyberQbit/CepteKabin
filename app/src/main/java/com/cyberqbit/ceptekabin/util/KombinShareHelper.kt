@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.annotation.Keep
 import androidx.core.content.FileProvider
 import com.cyberqbit.ceptekabin.domain.model.Kiyaket
 import com.cyberqbit.ceptekabin.domain.model.Kombin
@@ -17,6 +18,7 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
+@Keep // Proguard'ın bu sınıfın ismini değiştirmesini engeller (Gson serileştirmesi için)
 data class KombinExportData(val kombin: Kombin, val kiyaketler: List<Kiyaket>)
 
 object KombinShareHelper {

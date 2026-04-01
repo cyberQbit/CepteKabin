@@ -1,5 +1,8 @@
 package com.cyberqbit.ceptekabin.domain.model
 
+import androidx.annotation.Keep
+
+@Keep // Proguard'ın bu enum'un ismini değiştirmesini engeller (Gson serileştirmesi için)
 enum class UrunDurum(val displayName: String, val description: String) {
     SATISTA("Satışta", "Ürün hala mağazalarda satışta"),
     STOKTA_YOK("Stokta Yok", "Ürün şu an stokta yok ama tekrar gelebilir"),
@@ -16,6 +19,7 @@ object UrunOncelik {
     fun kullanilabilirMi(durum: UrunDurum, kullaniciOnayli: Boolean) = durum in ON_TAVSIYE_EDILEN || (kullaniciOnayli && durum in ONAY_ILE_KULLANILABILIR)
 }
 
+@Keep // Proguard'ın bu enum'un ismini değiştirmesini engeller (Gson serileştirmesi için)
 enum class Sezon(val displayName: String, val year: Int?) {
     BILINMIYOR("Bilinmiyor", null), ILKBAHAR_2024("2024 İlkbahar", 2024), YAZ_2024("2024 Yaz", 2024),
     SONBAHAR_2024("2024 Sonbahar", 2024), KIS_2024_2025("2024-2025 Kış", 2024),

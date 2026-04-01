@@ -19,3 +19,19 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# ───────────────────────────────────────────────────────────────────────────
+# CepteKabin: Release Modunda Gson Serileştirmesi İçin Gerekli Kurallar
+# ───────────────────────────────────────────────────────────────────────────
+# Sorun: Release modunda Proguard/R8 veri sınıflarının isimlerini değiştirir ve
+# Gson JSON'da eşleşecek field adını bulamaz. Bu kurallar bunu engeller.
+
+# 1. Tüm domain model sınıflarını şifreleme
+-keep class com.cyberqbit.ceptekabin.domain.model.** { *; }
+
+# 2. KombinExportData sınıfını ve tüm field'larını koru
+-keep class com.cyberqbit.ceptekabin.util.KombinExportData { *; }
+
+# 3. Gson için gerekli config (reflection kullanıyor)
+-keepattributes Signature
+-keepattributes *Annotation*

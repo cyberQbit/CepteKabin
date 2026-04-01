@@ -1,5 +1,8 @@
 package com.cyberqbit.ceptekabin.domain.model
 
+import androidx.annotation.Keep
+
+@Keep // Proguard'ın bu sınıfın ismini değiştirmesini engeller (Gson serileştirmesi için)
 data class Kiyaket(
     val id: Long = 0,
     val barkod: String? = null,
@@ -23,6 +26,7 @@ data class Kiyaket(
     val alternatifBarkodlar: List<String>? = null
 )
 
+@Keep // Proguard'ın bu enum'un ismini değiştirmesini engeller (Gson serileştirmesi için)
 enum class KiyaketTur(val displayName: String) {
     TISORT("Tişört"), GOMLEK("Gömlek"), PANTOLON("Pantolon"), ETEK("Etek"), SORT("Şort"),
     CEKET("Ceket"), KABAN_MONT("Kaban / Mont"), KABAN("Kaban"), MONTO("Mont"), YAGMURLUK("Yağmurluk"), SWEAT("Sweat"), SWEATSHIRT("Sweatshirt"), KAZAK("Kazak"),
@@ -37,6 +41,7 @@ enum class KiyaketTur(val displayName: String) {
     }
 }
 
+@Keep // Proguard'ın bu enum'un ismini değiştirmesini engeller (Gson serileştirmesi için)
 enum class Mevsim(val displayName: String) {
     ILKBAHAR("İlkbahar"), YAZ("Yaz"), SONBAHAR("Sonbahar"), KIS("Kış"), DORT_MEVSIM("Dört Mevsim");
 
@@ -47,6 +52,7 @@ enum class Mevsim(val displayName: String) {
     }
 }
 
+@Keep // Proguard'ın bu enum'un ismini değiştirmesini engeller (Gson serileştirmesi için)
 enum class Renk(val displayName: String) {
     SIYAH("Siyah"), BEYAZ("Beyaz"), GRI("Gri"), KREM("Krem"), BEJ("Bej"),
     KAHVERENGI("Kahverengi"), KIRMIZI("Kırmızı"), BORDO("Bordo"), PEMBE("Pembe"),
