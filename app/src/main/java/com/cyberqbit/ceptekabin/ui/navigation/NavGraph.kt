@@ -74,9 +74,20 @@ fun NavGraph(
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = if (isLoggedIn) Screen.Home.route else Screen.Auth.route,
+            startDestination = Screen.Splash.route,
             modifier = Modifier.padding(bottom = paddingValues.calculateBottomPadding())
         ) {
+
+            composable(Screen.Splash.route) {
+                com.cyberqbit.ceptekabin.ui.screens.splash.SplashScreen(
+                    onNavigateToHome = {
+                        val destination = if (isLoggedIn) Screen.Home.route else Screen.Auth.route
+                        navController.navigate(destination) {
+                            popUpTo(Screen.Splash.route) { inclusive = true }
+                        }
+                    }
+                )
+            }
 
             composable(Screen.Auth.route) {
                 GoogleSignInScreen(
@@ -189,3 +200,4 @@ fun NavGraph(
         }
     }
 }
+

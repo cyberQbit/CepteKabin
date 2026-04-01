@@ -1,6 +1,7 @@
 package com.cyberqbit.ceptekabin.ui.navigation
 
 sealed class Screen(val route: String) {
+    object Splash : Screen("splash")
     object Auth : Screen("auth")
     object Home : Screen("home")
     object Dolap : Screen("dolap")

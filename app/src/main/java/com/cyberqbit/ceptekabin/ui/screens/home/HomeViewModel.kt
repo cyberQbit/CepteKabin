@@ -32,8 +32,8 @@ class HomeViewModel @Inject constructor(
     private val _sonEklenenler = MutableStateFlow<List<Kiyaket>>(emptyList())
     val sonEklenenler: StateFlow<List<Kiyaket>> = _sonEklenenler.asStateFlow()
 
-    private val _favoriKombinler = MutableStateFlow<List<Kombin>>(emptyList())
-    val favoriKombinler: StateFlow<List<Kombin>> = _favoriKombinler.asStateFlow()
+    private val _onerilenKombinler = MutableStateFlow<List<Kombin>>(emptyList())
+    val onerilenKombinler: StateFlow<List<Kombin>> = _onerilenKombinler.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -53,7 +53,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadSonEklenenler()
-        loadFavoriKombinler()
+        loadAkilliOneriler()
     }
 
     // FIX: guard against duplicate loads; use a single coroutine job
@@ -131,10 +131,35 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun loadFavoriKombinler() {
+    private fun loadAkilliOneriler() {
         viewModelScope.launch {
-            kombinRepository.getFavoriKombinler().collect { kombinler ->
-                _favoriKombinler.value = kombinler
+            kotlinx.coroutines.flow.combine(havaDurumu, kombinRepository.getAllKombinler()) { hava, tumKombinler ->
+                if (tumKombinler.isEmpty()) {
+                    emptyList()
+                } else if (hava == null) {
+                    tumKombinler.shuffled().take(3)
+                } else {
+                    val sicaklik = hava.sicaklik
+
+                    val uygunKombinler = tumKombinler.filter { kombin ->
+                        val parcalar = listOfNotNull(kombin.ustGiyim, kombin.altGiyim, kombin.ayakkabi)
+                        val turler = parcalar.map { it.tur.displayName }
+
+                        when {
+                            sicaklik >= 22.0 -> turler.any { it == "Tişört" || it == "Şort" || it == "Etek" } && !turler.contains("Kaban / Mont")
+                            sicaklik < 15.0 -> turler.any { it == "Kaban / Mont" || it == "Kazak" || it == "Hırka" || it == "Sweatshirt" }
+                            else -> turler.any { it == "Gömlek" || it == "Tişört" || it == "Pantolon" || it == "Ceket" }
+                        }
+                    }
+
+                    if (uygunKombinler.isNotEmpty()) {
+                        uygunKombinler.shuffled().take(3)
+                    } else {
+                        tumKombinler.shuffled().take(3)
+                    }
+                }
+            }.collect { oneriler ->
+                _onerilenKombinler.value = oneriler
             }
         }
     }

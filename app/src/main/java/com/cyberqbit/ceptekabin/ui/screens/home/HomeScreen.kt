@@ -49,7 +49,7 @@ fun HomeScreen(
 ) {
     val havaDurumu by viewModel.havaDurumu.collectAsState()
     val sonEklenenler by viewModel.sonEklenenler.collectAsState()
-    val favoriKombinler by viewModel.favoriKombinler.collectAsState()
+    val onerilenKombinler by viewModel.onerilenKombinler.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val havaDurumuYukleniyor by viewModel.havaDurumuYukleniyor.collectAsState()
     val sehirAdi by viewModel.sehirAdi.collectAsState()
@@ -189,10 +189,10 @@ fun HomeScreen(
         Text("Önerilen Kombinler", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
         Spacer(Modifier.height(12.dp))
 
-        if (favoriKombinler.isNotEmpty()) {
+        if (onerilenKombinler.isNotEmpty()) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(favoriKombinler.take(3)) { kombin ->
-                    KombinMiniCard(kombinAdi = kombin.ad, onClick = {}, isDark = isDark)
+                items(onerilenKombinler) { kombin ->
+                    KombinMiniCard(kombinAdi = kombin.ad, onClick = { onNavigateToKombin() }, isDark = isDark)
                 }
             }
         } else {
