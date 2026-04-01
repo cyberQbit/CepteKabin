@@ -321,3 +321,5 @@ fun KombinMiniCard(kombinAdi: String, onClick: () -> Unit, isDark: Boolean) {
     }
 }
 
+
+

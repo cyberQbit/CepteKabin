@@ -47,7 +47,25 @@ object Constants {
     )
     
     // Kotlin'in aralık (range) özelliği ile numaraları otomatik üretiyoruz
-    val KADIN_AYAKKABI_NUMARALARI = (35..42).map { it.toString() } + "Standart"
-    val ERKEK_AYAKKABI_NUMARALARI = (39..47).map { it.toString() } + "Standart"
-    val COCUK_AYAKKABI_NUMARALARI = (16..35).map { it.toString() } + "Standart"
+    val KADIN_AYAKKABI_NUMARALARI = listOf("Standart") + (16..47).map { it.toString() }
+    val ERKEK_AYAKKABI_NUMARALARI = listOf("Standart") + (16..47).map { it.toString() }
+    val COCUK_AYAKKABI_NUMARALARI = listOf("Standart") + (16..47).map { it.toString() }
+
+    // Kategori ve Tür Arasındaki Mantıksızlıkları Önleme
+    val KATEGORI_ILISKILERI = mapOf(
+        "Erkek Ayakkabısı" to listOf("Spor Ayakkabı", "Klasik Ayakkabı", "Bot", "Sandalet"),
+        "Kadın Ayakkabısı" to listOf("Topuklu", "Spor Ayakkabı", "Bot", "Sandalet"),
+        "Çocuk Ayakkabısı" to listOf("Spor Ayakkabı", "Bot", "Sandalet"),
+        "Dış Giyim" to listOf("Kaban / Mont", "Kaban", "Mont", "Ceket", "Yağmurluk"),
+        "Üst Giyim" to listOf("Tişört", "Gömlek", "Kazak", "Hırka", "Sweatshirt", "Sweat"),
+        "Alt Giyim" to listOf("Pantolon", "Şort", "Etek", "Eşofman"),
+        "Aksesuar" to listOf("Çanta", "Şapka", "Eşarp", "Takı", "Kravat"),
+        "İç Giyim & Plaj" to listOf("İç Çamaşırı", "Çorap", "Plaj", "Terlik")
+    )
+    
+    fun getGecerliTurler(secilenKategori: String): List<String> {
+        return KATEGORI_ILISKILERI[secilenKategori] ?: KIYAFET_TURLERI
+    }
 }
+
+

@@ -567,11 +567,12 @@ androidx.compose.runtime.LaunchedEffect(tur) {
                         expanded = turExpanded,
                         onDismissRequest = { turExpanded = false }
                     ) {
-                        KiyaketTur.entries.filter { it != KiyaketTur.DIGER }.forEach { turOption ->
+                        val gecerliTurler = com.cyberqbit.ceptekabin.util.Constants.getGecerliTurler(model)
+                        gecerliTurler.forEach { turAdi ->
                             DropdownMenuItem(
-                                text = { Text(turOption.displayName) },
+                                text = { Text(turAdi) },
                                 onClick = {
-                                    tur = turOption
+                                    tur = KiyaketTur.fromString(turAdi)
                                     turExpanded = false
                                 }
                             )
@@ -798,6 +799,28 @@ androidx.compose.runtime.LaunchedEffect(tur) {
             }
         }
     }
+}
+
+
+
+
+
+@Composable
+fun EminMisinizDialog(
+    onayla: () -> Unit,
+    iptalEt: () -> Unit
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = iptalEt,
+        title = { androidx.compose.material3.Text("Onay Gerekli") },
+        text = { androidx.compose.material3.Text("Bu ürünü kaydetmek/düzenlemek istediğinize emin misiniz?") },
+        confirmButton = {
+            androidx.compose.material3.TextButton(onClick = onayla) { androidx.compose.material3.Text("Evet, Eminim") }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = iptalEt) { androidx.compose.material3.Text("İptal") }
+        }
+    )
 }
 
 
