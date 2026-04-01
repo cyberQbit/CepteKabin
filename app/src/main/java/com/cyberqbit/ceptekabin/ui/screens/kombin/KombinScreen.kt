@@ -103,6 +103,21 @@ fun KombinCard(
     onClick: () -> Unit,
     onToggleFavori: () -> Unit
 ) {
+    // 1. ADIM: Kombindeki tüm olası parçaları bir listede topla
+    val tumParcalar = listOfNotNull(
+        kombin.ustGiyim,
+        kombin.altGiyim,
+        kombin.ayakkabi,
+        kombin.disGiyim, 
+        kombin.aksesuar
+    )
+
+    // 2. ADIM: Sadece ilk 3 tanesini ekranda göstermek için ayır
+    val gosterilecekParcalar = tumParcalar.take(3)
+    
+    // 3. ADIM: Geriye kalan gösterilmeyen parça sayısını hesapla
+    val kalanSayi = tumParcalar.size - 3
+
     GlassCard(
         modifier = Modifier
             .fillMaxWidth()
@@ -134,17 +149,14 @@ fun KombinCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Kombin öğeleri ikonları
-                listOfNotNull(
-                    kombin.ustGiyim,
-                    kombin.altGiyim,
-                    kombin.ayakkabi
-                ).take(3).forEach { kiyaket ->
+                // Ekrana çizilecek ilk 3 parça
+                gosterilecekParcalar.forEach { kiyaket ->
                     GlassSurface(modifier = Modifier.size(48.dp)) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
+                            // Sadece ikon yerine kıyafetin resmini gösteriyoruz!
                             if (!kiyaket.imageUrl.isNullOrBlank()) {
                                 coil.compose.AsyncImage(
                                     model = kiyaket.imageUrl,
@@ -159,6 +171,25 @@ fun KombinCard(
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
+                        }
+                    }
+                }
+
+                // EĞER 3'TEN FAZLA PARÇA VARSA +1, +2 BALONUNU EKLE
+                if (kalanSayi > 0) {
+                    GlassSurface(
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "+$kalanSayi",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
                         }
                     }
                 }

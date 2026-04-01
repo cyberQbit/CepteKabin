@@ -76,17 +76,7 @@ fun KiyaketEkleScreen(
     var validationError by remember { mutableStateOf<String?>(null) }
 
     // Marka listesi - International + Top Turkish Brands
-    val markaList = listOf(
-        // International
-        "Nike", "Adidas", "Puma", "Reebok", "New Balance",
-        "Asics", "Converse", "Vans", "Tommy Hilfiger", "Calvin Klein",
-        "Ralph Lauren", "Lacoste", "Polo", "Dior", "Gucci",
-        // Top Turkish Brands
-        "Defacto", "Koton", "LC Waikiki", "Terranova", "Boyner",
-        "Vakko", "Westbury", "İpekyol", "D'S Damat", "Kiğılı",
-        "Mavi Jeans", "Derimod", "Crescent", "Karaca", "Pastel",
-        "Diğer"
-    )
+    val markaList = com.cyberqbit.ceptekabin.util.Constants.MARKALAR
 
     // Renk listesi - 20+ renkler
     val renkList = listOf(
@@ -98,14 +88,21 @@ fun KiyaketEkleScreen(
     )
 
     // Beden listesi - eksiksiz
-    val bedenList = listOf(
-        "XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "4XL", "Standart"
-    )
+    val dinamikBedenListesi = when (tur?.displayName) {
+    "Pantolon", "Şort", "Etek", "Eşofman" -> com.cyberqbit.ceptekabin.util.Constants.PANTOLON_BEDENLERI
+    "Kadın Ayakkabısı" -> com.cyberqbit.ceptekabin.util.Constants.KADIN_AYAKKABI_NUMARALARI
+    "Erkek Ayakkabısı" -> com.cyberqbit.ceptekabin.util.Constants.ERKEK_AYAKKABI_NUMARALARI
+    "Çocuk Ayakkabısı" -> com.cyberqbit.ceptekabin.util.Constants.COCUK_AYAKKABI_NUMARALARI
+    else -> com.cyberqbit.ceptekabin.util.Constants.GENEL_BEDENLER
+}
+androidx.compose.runtime.LaunchedEffect(tur) {
+    if (tur != null && !dinamikBedenListesi.contains(beden)) {
+        beden = ""
+    }
+}
 
     // Model/Kategori listesi
-    val kategoriList = listOf(
-        "Üst Giyim", "Alt Giyim", "Dış Giyim", "Ayakkabı", "Aksesuar"
-    )
+    val kategoriList = com.cyberqbit.ceptekabin.util.Constants.KIYAFET_TURLERI
 
     // Image Picker Launchers
         val context = androidx.compose.ui.platform.LocalContext.current
@@ -608,7 +605,7 @@ fun KiyaketEkleScreen(
                         expanded = bedenExpanded,
                         onDismissRequest = { bedenExpanded = false }
                     ) {
-                        bedenList.forEach { bedenOption ->
+                        dinamikBedenListesi.forEach { bedenOption ->
                             DropdownMenuItem(
                                 text = { Text(bedenOption) },
                                 onClick = {
@@ -802,3 +799,5 @@ fun KiyaketEkleScreen(
         }
     }
 }
+
+

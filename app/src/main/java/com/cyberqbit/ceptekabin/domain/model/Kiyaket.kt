@@ -25,10 +25,10 @@ data class Kiyaket(
 
 enum class KiyaketTur(val displayName: String) {
     TISORT("Tişört"), GOMLEK("Gömlek"), PANTOLON("Pantolon"), ETEK("Etek"), SORT("Şort"),
-    CEKET("Ceket"), KABAN("Kaban"), MONTO("Mont"), YAGMURLUK("Yağmurluk"), SWEAT("Sweat"),
-    HIRKA("Hırka"), ELBISE("Elbise"), AYAKKABI("Ayakkabı"), TERLIK("Terlik"), SANTRAFOR("Sandalet"),
+    CEKET("Ceket"), KABAN_MONT("Kaban / Mont"), KABAN("Kaban"), MONTO("Mont"), YAGMURLUK("Yağmurluk"), SWEAT("Sweat"), SWEATSHIRT("Sweatshirt"), KAZAK("Kazak"),
+    HIRKA("Hırka"), ELBISE("Elbise"), AYAKKABI("Ayakkabı"), KADIN_AYAKKABISI("Kadın Ayakkabısı"), ERKEK_AYAKKABISI("Erkek Ayakkabısı"), COCUK_AYAKKABISI("Çocuk Ayakkabısı"), TERLIK("Terlik"), SANTRAFOR("Sandalet"),
     BOT("Bot"), CANTA("Çanta"), SAPKA("Şapka"), ESARP("Eşarp"), TAKI("Takı"), CORAP("Çorap"),
-    ICCAMASIRI("İç Çamaşırı"), PLAJ("Plaj"), DIGER("Diğer");
+    ICCAMASIRI("İç Çamaşırı"), PLAJ("Plaj"), ESOFMAN("Eşofman"), KRAVAT("Kravat"), DIGER("Diğer");
 
     companion object {
         fun fromString(value: String?): KiyaketTur = entries.find {
@@ -60,3 +60,4 @@ enum class Renk(val displayName: String) {
         } ?: DIGER
     }
 }
+

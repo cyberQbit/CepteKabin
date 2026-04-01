@@ -9,6 +9,8 @@ import com.cyberqbit.ceptekabin.domain.model.Kombin
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -23,14 +25,16 @@ object KombinShareHelper {
     private const val JSON_FILE_NAME = "kombin_data.json"
 
     // 1. GÖNDERME: Kombini ve resimleri .kmb dosyasına sıkıştırır
-    suspend fun createKmbFile(context: Context, kombin: Kombin, kiyaketler: List<Kiyaket>): Uri? = withContext(Dispatchers.IO) {
+    suspend fun createKmbFile(
+        context: Context, 
+        kombin: Kombin, 
+        kiyaketler: List<Kiyaket>,
+        shareFile: File = File(context.cacheDir, "Kombin_${System.currentTimeMillis()}$EXTENSION")
+    ): Uri? = withContext(Dispatchers.IO) {
         try {
             val exportData = KombinExportData(kombin, kiyaketler)
             val jsonString = Gson().toJson(exportData)
 
-            // Cache klasöründe geçici bir .kmb dosyası oluştur
-            val shareFile = File(context.cacheDir, "Kombin_${System.currentTimeMillis()}$EXTENSION")
-            
             ZipOutputStream(BufferedOutputStream(FileOutputStream(shareFile))).use { zos ->
                 // JSON'u ekle
                 zos.putNextEntry(ZipEntry(JSON_FILE_NAME))
@@ -124,6 +128,40 @@ object KombinShareHelper {
                 }
             }
             FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    suspend fun uploadKmbToTempCloud(file: File): String? = withContext(Dispatchers.IO) {
+        try {
+            val client = okhttp3.OkHttpClient()
+            
+            val requestBody = okhttp3.MultipartBody.Builder()
+                .setType(okhttp3.MultipartBody.FORM)
+                .addFormDataPart(
+                    "file", 
+                    file.name, 
+                    file.asRequestBody("application/octet-stream".toMediaTypeOrNull())
+                )
+                .build()
+
+            val request = okhttp3.Request.Builder()
+                .url("https://file.io")
+                .post(requestBody)
+                .build()
+
+            val response = client.newCall(request).execute()
+            val responseData = response.body?.string()
+
+            if (response.isSuccessful && responseData != null) {
+                val jsonObject = org.json.JSONObject(responseData)
+                if (jsonObject.getBoolean("success")) {
+                    return@withContext jsonObject.getString("link")
+                }
+            }
+            null
         } catch (e: Exception) {
             e.printStackTrace()
             null

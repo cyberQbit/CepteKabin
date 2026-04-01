@@ -23,4 +23,31 @@ object Constants {
     const val EXTRA_BARKOD = "extra_barkod"
     const val EXTRA_KIYAKET_ID = "extra_kiyaket_id"
     const val EXTRA_KOMBIN_ID = "extra_kombin_id"
+
+    // --- MARKALAR (Alfabetik + Yeni 10 Türk Markası) ---
+    val MARKALAR = listOf(
+        "Adidas", "Avva", "Beymen", "Boyner", "Colin's", "Columbia", "Dagi", "DeFacto",
+        "Derimod", "H&M", "İpekyol", "Kiğılı", "Koton", "LC Waikiki", "Levi's", "Lufian",
+        "Mango", "Mavi", "Network", "Nike", "Polo Ralph Lauren", "Pull&Bear", "Puma",
+        "Sarar", "Under Armour", "Vakko", "Yargıcı", "Zara"
+    ).sorted() + "Diğer" // "Diğer" her zaman en sonda kalır
+
+    // --- KIYAFET TÜRLERİ (Alfabetik + Ayakkabı Kategorileri Ayrıldı) ---
+    val KIYAFET_TURLERI = listOf(
+        "Ceket", "Çocuk Ayakkabısı", "Elbise", "Erkek Ayakkabısı", "Eşofman", "Etek",
+        "Gömlek", "Hırka", "Kaban / Mont", "Kadın Ayakkabısı", "Kazak", "Kravat",
+        "Pantolon", "Sweatshirt", "Şort", "Tişört"
+    ).sorted() + "Diğer"
+
+    // --- KATEGORİYE ÖZEL BEDEN/NUMARA LİSTELERİ ---
+    val GENEL_BEDENLER = listOf("XXS", "XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "Standart")
+    
+    val PANTOLON_BEDENLERI = listOf(
+        "26", "28", "29", "30", "31", "32", "33", "34", "36", "38", "40", "42", "44", "46", "48", "50", "Standart"
+    )
+    
+    // Kotlin'in aralık (range) özelliği ile numaraları otomatik üretiyoruz
+    val KADIN_AYAKKABI_NUMARALARI = (35..42).map { it.toString() } + "Standart"
+    val ERKEK_AYAKKABI_NUMARALARI = (39..47).map { it.toString() } + "Standart"
+    val COCUK_AYAKKABI_NUMARALARI = (16..35).map { it.toString() } + "Standart"
 }

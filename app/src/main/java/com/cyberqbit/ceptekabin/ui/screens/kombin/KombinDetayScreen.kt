@@ -167,42 +167,55 @@ fun KombinDetayScreen(
 
                     com.cyberqbit.ceptekabin.ui.components.GlassButton(onClick = {
                         coroutineScope.launch {
-                            // Kombin kıyafetlerini listeye çevir
                             val kombinKiyafetleri = listOfNotNull(k.ustGiyim, k.altGiyim, k.disGiyim, k.ayakkabi, k.aksesuar)
 
-                            val shareUri = com.cyberqbit.ceptekabin.util.KombinShareHelper.createKmbFile(context, k, kombinKiyafetleri)
-                            val logoUri = com.cyberqbit.ceptekabin.util.KombinShareHelper.getPromoImageUri(context)
+                            val shareFile = java.io.File(context.cacheDir, "CepteKabin_Kombin.kmb")
+                            val shareUri = com.cyberqbit.ceptekabin.util.KombinShareHelper.createKmbFile(context, k, kombinKiyafetleri, shareFile)
 
-                            if (shareUri != null && logoUri != null) {
-                                val promosyonMesaji = """
-                                    Hey! CepteKabin uygulamasında sana özel harika bir kombin hazırladım. 🤩👗👔
-                                    
-                                    ✨ Eğer uygulaman zaten yüklüyse, hemen aşağıdaki .kmb dosyasına tıklayarak kombini anında dolabına ekleyebilirsin!
-                                    
-                                    ⚠️ Henüz CepteKabin'in yok mu? Çok basit:
-                                    1️⃣ Önce şu linkten uygulamayı ücretsiz indir ve kur:
-                                    🔗 https://bit.ly/CepteKabinApp
-                                    
-                                    2️⃣ Kurulum bittikten sonra bu sohbete geri dön ve bu sohbetteki belgeye (.kmb dosyasına) tıkla!
-                                    
-                                    Sihir o an gerçekleşecek ve kombin dolabında belirecek! 🪄
-                                """.trimIndent()
+                            if (shareUri != null) {
+                                val cloudLink = com.cyberqbit.ceptekabin.util.KombinShareHelper.uploadKmbToTempCloud(shareFile)
+                                if (cloudLink != null) {
+                                    val promosyonMesaji = """Hey! CepteKabin'de sana özel harika bir kombin hazırladım. 🤩👗
+                                        
+1️⃣ Uygulaman yoksa önce buradan indir:
+🔗 https://bit.ly/CepteKabinApp
+                                        
+2️⃣ Ardından aşağıdaki kombini indir:
+🔗 ${cloudLink}
+                                        
+(İndirdiğin .kmb dosyasına tıkladığında sihir gerçekleşecek ve kombin dolabına eklenecek! 🪄)""".trimIndent()
 
-                                val uris = java.util.ArrayList<android.net.Uri>().apply {
-                                    add(logoUri)
-                                    add(shareUri)
+                                    val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                        type = "text/plain"
+                                        putExtra(android.content.Intent.EXTRA_TEXT, promosyonMesaji)
+                                        putExtra(android.content.Intent.EXTRA_SUBJECT, "Sana Harika Bir Kombin Gönderdim!")
+                                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    val chooser = android.content.Intent.createChooser(shareIntent, "Kombini Paylaş")
+                                    context.startActivity(chooser)
+                                } else {
+                                    // Fallback to legacy
+                                    val logoUri = com.cyberqbit.ceptekabin.util.KombinShareHelper.getPromoImageUri(context)
+                                    if (logoUri != null) {
+                                        val promosyonMesaji = """Hey! CepteKabin uygulamasında sana özel harika bir kombin hazırladım...
+(Dosya indirilemedi dosyayı gönderdik)""".trimIndent()
+
+                                        val uris = java.util.ArrayList<android.net.Uri>().apply {
+                                            add(logoUri)
+                                            add(shareUri)
+                                        }
+                                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND_MULTIPLE).apply {
+                                            type = "*/*"
+                                            putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, uris)
+                                            putExtra(android.content.Intent.EXTRA_TEXT, promosyonMesaji)
+                                            putExtra(android.content.Intent.EXTRA_SUBJECT, "Sana Harika Bir Kombin Gönderdim!")
+                                            addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                                        }
+                                        val chooser = android.content.Intent.createChooser(shareIntent, "Kombini Paylaş")
+                                        context.startActivity(chooser)
+                                    }
                                 }
-
-                                val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND_MULTIPLE).apply {
-                                    type = "*/*"
-                                    putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, uris)
-                                    putExtra(android.content.Intent.EXTRA_TEXT, promosyonMesaji)
-                                    putExtra(android.content.Intent.EXTRA_SUBJECT, "Sana Harika Bir Kombin Gönderdim!")
-                                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                    addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                                }
-                                val chooser = android.content.Intent.createChooser(shareIntent, "Kombini Paylaş")
-                                context.startActivity(chooser)
                             }
                         }
                     }, modifier = Modifier.fillMaxWidth()) {
@@ -242,3 +255,4 @@ private fun KombinSlotCard(label: String, kiyaket: Kiyaket?, modifier: Modifier 
         }
     }
 }
+
