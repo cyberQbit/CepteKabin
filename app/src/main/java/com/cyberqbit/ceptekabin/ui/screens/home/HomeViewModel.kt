@@ -1,5 +1,8 @@
 package com.cyberqbit.ceptekabin.ui.screens.home
 
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -43,6 +46,9 @@ class HomeViewModel @Inject constructor(
 
     private val _sehirAdi = MutableStateFlow<String?>(null)
     val sehirAdi: StateFlow<String?> = _sehirAdi.asStateFlow()
+
+    private val _sonGuncelleme = MutableStateFlow<String?>(null)
+    val sonGuncelleme: StateFlow<String?> = _sonGuncelleme.asStateFlow()
 
     private val _konumIzniGerekli = MutableStateFlow(false)
     val konumIzniGerekli: StateFlow<Boolean> = _konumIzniGerekli.asStateFlow()
@@ -97,12 +103,19 @@ class HomeViewModel @Inject constructor(
         havaDurumuRepository.getWeatherByCity(city)
             .onSuccess {
                 _havaDurumu.value = it
+                val sdf = SimpleDateFormat("HH.mm - dd/MM/yyyy", Locale("tr", "TR"))
+                _sonGuncelleme.value = "Son Güncelleme: ${sdf.format(Date())}"
                 weatherLoaded = true
             }
             .onFailure {
                 if (city != "Istanbul") {
                     havaDurumuRepository.getWeatherByCity("Istanbul")
-                        .onSuccess { _havaDurumu.value = it }
+                        .onSuccess { 
+                            _havaDurumu.value = it
+                            val sdf = SimpleDateFormat("HH.mm - dd/MM/yyyy", Locale("tr", "TR"))
+                            _sonGuncelleme.value = "Son Güncelleme: ${sdf.format(Date())}"
+                            weatherLoaded = true
+                        }
                 }
             }
     }

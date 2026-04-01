@@ -38,7 +38,7 @@ fun HavaDurumuScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val havaDurumu by viewModel.havaDurumu.collectAsState()
-    val sehirAdi by viewModel.sehirAdi.collectAsState()
+    val sonGuncelleme by viewModel.sonGuncelleme.collectAsState()
     val isLoading by viewModel.havaDurumuYukleniyor.collectAsState()
 
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -101,10 +101,7 @@ fun HavaDurumuScreen(
         } else {
             havaDurumu?.let { hava ->
                 // Ana Hava Durumu Kartı
-                MainWeatherCard(havaDurumu = hava, sehirAdi = sehirAdi, isDark = isDark)
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+                    MainWeatherCard(havaDurumu = hava, sonGuncelleme = sonGuncelleme, isDark = isDark)
                 // Hava Durumu Detayları
                 WeatherDetailsCard(havaDurumu = hava, isDark = isDark)
 
@@ -165,7 +162,7 @@ fun HavaDurumuScreen(
 }
 
 @Composable
-fun MainWeatherCard(havaDurumu: HavaDurumu, sehirAdi: String?, isDark: Boolean) {
+fun MainWeatherCard(havaDurumu: HavaDurumu, sonGuncelleme: String?, isDark: Boolean) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -205,11 +202,11 @@ fun MainWeatherCard(havaDurumu: HavaDurumu, sehirAdi: String?, isDark: Boolean) 
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = sehirAdi ?: havaDurumu.sehir,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isDark) Grey100 else Grey900,
-                    fontSize = 18.sp
+                    text = sonGuncelleme ?: "Son Güncelleme: --.-- - --/--/----",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = if (isDark) Grey400 else Grey600,
+                    fontSize = 14.sp
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -585,3 +582,4 @@ fun OutfitChip(label: String, isDark: Boolean) {
         )
     }
 }
+

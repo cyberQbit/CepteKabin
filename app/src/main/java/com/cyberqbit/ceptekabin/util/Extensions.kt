@@ -33,3 +33,30 @@ fun Int.sicakligaGoreKatmanSayisi(): Int = when {
     this < 22 -> 2
     else -> 1
 }
+
+/**
+ * Uluslararası GS1 standartlarına göre barkodun eksiksiz ve doğru okunup okunmadığını kontrol eder.
+ */
+fun String.isGecerliBarkod(): Boolean {
+    if (!this.matches(Regex("^\\d+$"))) return true 
+    
+    if (this.length !in listOf(8, 12, 13, 14)) return false 
+    
+    try {
+        val checkDigit = this.last().digitToInt() 
+        val payload = this.dropLast(1) 
+        var sum = 0
+        var multiplier = 3
+        
+        for (i in payload.indices.reversed()) {
+            sum += payload[i].digitToInt() * multiplier
+            multiplier = if (multiplier == 3) 1 else 3
+        }
+        
+        val calculatedCheckDigit = (10 - (sum % 10)) % 10
+        
+        return calculatedCheckDigit == checkDigit
+    } catch (e: Exception) {
+        return false
+    }
+}

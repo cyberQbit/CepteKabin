@@ -7,6 +7,7 @@ interface KiyaketRepository {
     fun getAllKiyaketler(): Flow<List<Kiyaket>>
     suspend fun getKiyaketById(id: Long): Kiyaket?
     suspend fun getKiyaketByBarkod(barkod: String): Kiyaket?
+    suspend fun checkBarkodExists(barkod: String): Boolean
     fun getKiyaketlerByKategori(kategoriId: Long): Flow<List<Kiyaket>>
     fun getFavoriKiyaketler(): Flow<List<Kiyaket>>
     fun getKiyaketlerByTur(tur: String): Flow<List<Kiyaket>>

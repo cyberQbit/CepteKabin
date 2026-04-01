@@ -52,7 +52,7 @@ fun HomeScreen(
     val onerilenKombinler by viewModel.onerilenKombinler.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val havaDurumuYukleniyor by viewModel.havaDurumuYukleniyor.collectAsState()
-    val sehirAdi by viewModel.sehirAdi.collectAsState()
+    val sonGuncelleme by viewModel.sonGuncelleme.collectAsState()
 
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
@@ -147,7 +147,7 @@ fun HomeScreen(
         // Hava Durumu Card
         WeatherCard(
             havaDurumu = havaDurumu,
-            sehirAdi = sehirAdi,
+            sonGuncelleme = sonGuncelleme,
             isLoading = havaDurumuYukleniyor,
             isDark = isDark,
             onClick = onNavigateToHavaDurumu,
@@ -213,7 +213,7 @@ fun HomeScreen(
 @Composable
 fun WeatherCard(
     havaDurumu: HavaDurumu?,
-    sehirAdi: String?,
+    sonGuncelleme: String?,
     isLoading: Boolean,
     isDark: Boolean,
     onClick: () -> Unit,
@@ -225,17 +225,17 @@ fun WeatherCard(
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = PrimaryLight)
                     Spacer(Modifier.width(12.dp))
-                    Text("Hava durumu yükleniyor...", style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey400 else Grey600)
+                    Text("Hava durumu güncelleniyor...", style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey400 else Grey600)
                 }
             }
             havaDurumu != null -> {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Column {
                         Text(
-                            sehirAdi ?: havaDurumu.sehir,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (isDark) Grey100 else Grey900
+                            text = sonGuncelleme ?: "Son Güncelleme: --.-- - --/--/----",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = if (isDark) Grey400 else Grey600
                         )
                         Spacer(Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -320,3 +320,4 @@ fun KombinMiniCard(kombinAdi: String, onClick: () -> Unit, isDark: Boolean) {
         }
     }
 }
+

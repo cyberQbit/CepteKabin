@@ -28,7 +28,9 @@ class KiyaketRepositoryImpl @Inject constructor(
     override suspend fun getKiyaketByBarkod(barkod: String): Kiyaket? {
         return kiyaketDao.getByBarkod(barkod)?.toDomain()
     }
-
+    override suspend fun checkBarkodExists(barkod: String): Boolean {
+        return kiyaketDao.checkBarkodExists(barkod) > 0
+    }
     override fun getKiyaketlerByKategori(kategoriId: Long): Flow<List<Kiyaket>> {
         return kiyaketDao.getByKategori(kategoriId).map { entities ->
             entities.map { it.toDomain() }

@@ -15,6 +15,9 @@ interface KiyaketDao {
     @Query("SELECT * FROM kiyafetler WHERE barkod = :barkod LIMIT 1")
     suspend fun getByBarkod(barkod: String): KiyaketEntity?
 
+    @Query("SELECT COUNT(*) FROM kiyafetler WHERE barkod = :barkod")
+    suspend fun checkBarkodExists(barkod: String): Int
+
     @Query("SELECT * FROM kiyafetler WHERE kategoriId = :kategoriId ORDER BY eklenmeTarihi DESC")
     fun getByKategori(kategoriId: Long): Flow<List<KiyaketEntity>>
 

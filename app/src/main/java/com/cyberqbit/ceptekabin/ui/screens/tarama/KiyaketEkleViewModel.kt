@@ -1,5 +1,6 @@
 package com.cyberqbit.ceptekabin.ui.screens.tarama
 
+import com.cyberqbit.ceptekabin.util.isGecerliBarkod
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
@@ -53,6 +54,22 @@ class KiyaketEkleViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
+
+            if (!barkod.isGecerliBarkod()) {
+                _isLoading.value = false
+                _errorMessage.value = "Hatalı barkod okuması. Göze çarpan ışık parlaması veya eksik numara durumu mevcut. Lütfen tekrar deneyin."
+                return@launch
+            }
+
+            try {
+                if (kiyaketRepository.checkBarkodExists(barkod)) {
+                    _isLoading.value = false
+                    _errorMessage.value = "Bu ürün zaten dolabınızda kayıtlı!"
+                    return@launch
+                }
+            } catch (e: Exception) {
+                // Log and ignore DB check error gracefully
+            }
 
             barkodRepository.barkodAra(barkod)
                 .onSuccess { sonuc ->
