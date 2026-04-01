@@ -17,6 +17,8 @@ import com.cyberqbit.ceptekabin.ui.components.GlassCard
 import com.cyberqbit.ceptekabin.ui.components.GlassSurface
 import com.cyberqbit.ceptekabin.ui.theme.*
 
+import kotlinx.coroutines.launch
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KombinDetayScreen(
@@ -158,6 +160,44 @@ fun KombinDetayScreen(
                         Icon(Icons.Default.ThumbUp, null)
                         Spacer(Modifier.width(8.dp))
                         Text("Bu Kombini Giydim (+1 puan)")
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    val coroutineScope = rememberCoroutineScope()
+
+                    com.cyberqbit.ceptekabin.ui.components.GlassButton(onClick = {
+                        coroutineScope.launch {
+                            // Kombin kıyafetlerini listeye çevir
+                            val kombinKiyafetleri = listOfNotNull(k.ustGiyim, k.altGiyim, k.disGiyim, k.ayakkabi, k.aksesuar)
+                            
+                            val shareUri = com.cyberqbit.ceptekabin.util.KombinShareHelper.createKmbFile(context, k, kombinKiyafetleri)
+                            
+                            if (shareUri != null) {
+                                val promosyonMesaji = """
+                                    Hey! CepteKabin uygulamasında sana özel harika bir kombin hazırladım. 🤩👗👔
+                                    
+                                    Eğer uygulaman varsa ekteki .kmb dosyasına tıklayarak bu kombini anında kendi dolabına ekleyebilirsin!
+                                    
+                                    Henüz CepteKabin'in yok mu? Hemen ücretsiz indir:
+                                    👉 https://bit.ly/CepteKabinApp
+                                """.trimIndent()
+
+                                val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                    type = "application/octet-stream"
+                                    putExtra(android.content.Intent.EXTRA_STREAM, shareUri)
+                                    putExtra(android.content.Intent.EXTRA_TEXT, promosyonMesaji)
+                                    putExtra(android.content.Intent.EXTRA_SUBJECT, "Sana Harika Bir Kombin Gönderdim!")
+                                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                context.startActivity(android.content.Intent.createChooser(shareIntent, "Kombini Paylaş"))
+                            }
+                        }
+                    }, modifier = Modifier.fillMaxWidth()) {
+                        Icon(Icons.Default.Share, contentDescription = "Paylaş")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Kombini Gönder")
                     }
                 }
             }
