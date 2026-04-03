@@ -25,7 +25,6 @@
 ---
 
 ## 📋 İçindekiler
-- [🚀 v2.0 ile Gelen Yenilikler](#-v20-ile-gelen-yenilikler)
 - [✨ Temel Özellikler](#-temel-özellikler)
 - [🛠️ Teknoloji Yığını](#️-teknoloji-yığını)
 - [🏗️ Mimari Yapı](#️-mimari-yapı)
@@ -33,18 +32,6 @@
 - [🎨 Liquid Glass Arayüz](#-liquid-glass-arayüz)
 - [⚙️ Kurulum ve Geliştirme](#️-kurulum-ve-geliştirme)
 - [🤝 Katkıda Bulunma](#-katkıda-bulunma)
-
----
-
-## 🚀 v2.0 ile Gelen Yenilikler
-
-CepteKabin v2.0, bir giysi depolama uygulamasından ziyade kişisel stilistiniz olarak yeniden tasarlandı:
-
-* **🪄 Yapay Zeka Arka Plan Silici (Magic Eraser):** Kıyafetinizi nerede çekerseniz çekin, yapay zeka saniyeler içinde arka planı temizler ve profesyonel, şeffaf (PNG) e-ticaret görselleri oluşturur.
-* **🤖 GPT Destekli Stil Chatbot'u:** *"Hafta sonu Antalya'daki düğün için bana 3 kombin öner"* yazın, yapay zeka dolabınızı analiz edip size en uygun parçaları eşleştirsin.
-* **👗 Sanal Kabin (Virtual Try-On):** Kendi fotoğrafınızı yükleyin ve beğendiğiniz kombinleri artırılmış gerçeklik (AR) desteğiyle **kendi üzerinizde** görün!
-* **📅 Kombin Takvimi & CPW Analizi:** Hangi gün ne giydiğinizi şık bir takvimde takip edin. "Giyilme Başına Maliyet" (Cost Per Wear) algoritmasıyla sürdürülebilir modaya katkı sağlayın.
-* **👯 Ortak Dolaplar (Borrow & Share):** Arkadaşlarınızı ekleyin, onların dolaplarını gezin ve hafta sonu için kıyafet ödünç alma istekleri gönderin.
 
 ---
 
