@@ -50,3 +50,9 @@ Thumbs.db
 build.gradle.kts
 
 *.7z
+
+# Sensitive info
+app/google-services.json
+app/*.jks
+*.jks
+key.properties

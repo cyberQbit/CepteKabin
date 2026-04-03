@@ -13,7 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -22,8 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cyberqbit.ceptekabin.R
-import com.cyberqbit.ceptekabin.ui.components.GlassButton
-import com.cyberqbit.ceptekabin.ui.components.GlassSurface
 import com.cyberqbit.ceptekabin.ui.theme.*
 
 @Composable
@@ -38,9 +36,7 @@ fun GoogleSignInScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            viewModel.handleGoogleSignInResult(result.data)
-        }
+        viewModel.handleGoogleSignInResult(result.data)
     }
 
     LaunchedEffect(isLoggedIn) {
@@ -48,95 +44,109 @@ fun GoogleSignInScreen(
     }
 
     val isDark = isSystemInDarkTheme()
+    val bgColor = if (isDark) BackgroundDark else BackgroundLight
+    val cardColor = if (isDark) SurfaceVariantDark else White
+    val textColor = if (isDark) White else Grey900
+    val subTextColor = if (isDark) Grey300 else Grey600
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = if (isDark) {
-                        listOf(Grey900, SurfaceDark)
-                    } else {
-                        listOf(Grey100, White)
-                    }
-                )
-            ),
+            .background(bgColor),
         contentAlignment = Alignment.Center
     ) {
-        GlassSurface(
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(32.dp)
-                .padding(vertical = 48.dp)
+                .shadow(
+                    elevation = if (isDark) 0.dp else 16.dp, 
+                    shape = RoundedCornerShape(24.dp),
+                    ambientColor = PrimaryCyan,
+                    spotColor = PrimaryCyan
+                )
+                .background(cardColor, RoundedCornerShape(24.dp))
+                .padding(vertical = 48.dp, horizontal = 24.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Logo
-                Image(
-                    painter = painterResource(id = R.drawable.app_logo),
-                    contentDescription = "CepteKabin Logo",
+            // Logo
+            Image(
+                painter = painterResource(id = R.drawable.app_logo),
+                contentDescription = "CepteKabin Logo",
+                modifier = Modifier
+                    .size(110.dp)
+                    .clip(RoundedCornerShape(24.dp))
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "CepteKabin",
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.ExtraBold,
+                color = textColor
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Senin Dolabın, Senin Kombinin!",
+                style = MaterialTheme.typography.titleMedium,
+                color = PrimaryLight,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Text(
+                text = "Tüm cihazlardan gardırobuna erişmek için Google hesabınla giriş yap.",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = subTextColor,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            if (isLoading) {
+                CircularProgressIndicator(color = PrimaryCyan)
+            } else {
+                // Yüksek Kontrastlı Standart Buton (Okunabilirlik Garantili)
+                Button(
+                    onClick = {
+                        val signInIntent = viewModel.getGoogleSignInIntent()
+                        launcher.launch(signInIntent)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isDark) White else Grey900,
+                        contentColor = if (isDark) Grey900 else White
+                    ),
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
-                        .size(100.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = "CepteKabin",
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = if (isDark) Grey100 else Grey900
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Senin Dolabın, Senin Kombinin!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (isDark) Grey400 else Grey600
-                )
-
-                Spacer(modifier = Modifier.height(48.dp))
-
-                Text(
-                    text = "Devam etmek için Google hesabınla giriş yap",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    color = if (isDark) Grey500 else Grey600
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(48.dp),
-                        color = PrimaryLight
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    Text(
+                        text = "Google ile Giriş Yap",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                } else {
-                    GlassButton(
-                        onClick = {
-                            val signInIntent = viewModel.getGoogleSignInIntent()
-                            launcher.launch(signInIntent)
-                        },
-                        modifier = Modifier.fillMaxWidth(0.8f)
-                    ) {
-                        Text(
-                            text = "Google ile Giriş Yap",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
                 }
+            }
 
-                errorMessage?.let { error ->
-                    Spacer(modifier = Modifier.height(16.dp))
+            errorMessage?.let { error ->
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
                     Text(
                         text = error,
-                        color = Error,
-                        style = MaterialTheme.typography.bodySmall
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Medium,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(12.dp),
+                        textAlign = TextAlign.Center
                     )
                 }
             }
