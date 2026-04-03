@@ -93,7 +93,7 @@ graph TD
 ## 🔗 Ekosistem & Paylaşım
 
   * **`.kmb` Teknolojisi:** Kombinlerinizi, içindeki kıyafetlerin tam çözünürlüklü görselleriyle beraber tek bir `.kmb` dosyasına sıkıştırarak WhatsApp veya Instagram'dan anında paylaşın.
-  * **Deep Linking (Derin Bağlantılar):** `ceptekabin.com/kombin/...` formatındaki davet linklerine tıklayan kullanıcılar, uygulama yüklüyse direkt kombine, değilse indirme sayfasına yönlendirilir.
+  * **Deep Linking (Derin Bağlantılar):** `bit.ly/ceptekabin` davet linklerine tıklayan kullanıcılar uygulama yüklüyse değilse indirme sayfasına yönlendirilir.
 
 -----
 
