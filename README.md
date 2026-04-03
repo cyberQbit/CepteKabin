@@ -1,157 +1,146 @@
 <div align="center">
   
-  <img src="app/src/main/res/drawable-nodpi/app_logo.webp" alt="CepteKabin Logo" width="150"/>
+  <img src="app/src/main/res/drawable-nodpi/app_logo.webp" alt="CepteKabin Logo" width="175"/>
 
-  # 📱 CepteKabin v1.0
+  # 📱 CepteKabin v2.0
   
-  **Akıllı Dijital Gardırop ve Hava Durumu Tabanlı Kombin Asistanı**
+  **Yapay Zeka Destekli Moda Asistanı, Dijital Gardırop ve Sosyal Stil Ağı**
   
-  [![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue.svg?style=flat-square&logo=kotlin)](https://kotlinlang.org)
+  [![Kotlin](https://img.shields.io/badge/Kotlin-2.0+-blue.svg?style=flat-square&logo=kotlin)](https://kotlinlang.org)
   [![Jetpack Compose](https://img.shields.io/badge/Compose-Material_3-4285F4.svg?style=flat-square&logo=android)](https://developer.android.com/jetpack/compose)
-  [![Firebase](https://img.shields.io/badge/Firebase-Auth_%7C_Firestore-FFCA28.svg?style=flat-square&logo=firebase)](https://firebase.google.com)
-  [![Architecture](https://img.shields.io/badge/Architecture-MVVM_%7C_Clean-success.svg?style=flat-square)](#-mimari-yap%C4%B1)
+  [![Architecture](https://img.shields.io/badge/Architecture-Clean_%7C_MVVM-success.svg?style=flat-square)](#-mimari-yap%C4%B1)
+  [![AI](https://img.shields.io/badge/AI-ML_Kit_%7C_GPT-FF6F00.svg?style=flat-square&logo=google)](https://developers.google.com/ml-kit)
   [![License](https://img.shields.io/badge/License-MIT-gray.svg?style=flat-square)](LICENSE)
 
   <br>
 
-  [![Download APK](https://img.shields.io/badge/📲_Hemen_İndir_(APK)-2EA043?style=for-the-badge&logo=android&logoColor=white)](https://github.com/KULLANICI_ADIN/CepteKabin/releases/latest)
-
-  *Kendi gardırobunu cebinde taşı, hava durumuna en uygun kombini saniyeler içinde yap!*
+  <a href="https://github.com/cyberQbit/CepteKabin/releases/latest">
+    <img src="https://img.shields.io/badge/📥_CEPTEKABİN'İ_HEMEN_İNDİR_(APK)-2EA043?style=for-the-badge&logo=android&logoColor=white" height="65" alt="CepteKabin İndir"/>
+  </a>
+  
+  <p><b>✨ Kendi gardırobunu cebinde taşı, yapay zeka ile tarzını baştan yarat! ✨</b></p>
 
 </div>
 
 ---
 
 ## 📋 İçindekiler
+- [🚀 v2.0 ile Gelen Yenilikler](#-v20-ile-gelen-yenilikler)
 - [✨ Temel Özellikler](#-temel-özellikler)
-- [🛠️ Teknoloji Yığını (Tech Stack)](#️-teknoloji-yığını-tech-stack)
+- [🛠️ Teknoloji Yığını](#️-teknoloji-yığını)
 - [🏗️ Mimari Yapı](#️-mimari-yapı)
-- [🧠 4 Aşamalı Hibrit Barkod Sistemi](#-4-aşamalı-hibrit-barkod-sistemi)
-- [🎨 Liquid Glass UI Tasarımı](#-liquid-glass-ui-tasarımı)
+- [🔗 Ekosistem & Paylaşım](#-ekosistem--paylaşım)
+- [🎨 Liquid Glass Arayüz](#-liquid-glass-arayüz)
 - [⚙️ Kurulum ve Geliştirme](#️-kurulum-ve-geliştirme)
-- [📁 Proje Dizini](#-proje-dizini)
 - [🤝 Katkıda Bulunma](#-katkıda-bulunma)
+
+---
+
+## 🚀 v2.0 ile Gelen Yenilikler
+
+CepteKabin v2.0, bir giysi depolama uygulamasından ziyade kişisel stilistiniz olarak yeniden tasarlandı:
+
+* **🪄 Yapay Zeka Arka Plan Silici (Magic Eraser):** Kıyafetinizi nerede çekerseniz çekin, yapay zeka saniyeler içinde arka planı temizler ve profesyonel, şeffaf (PNG) e-ticaret görselleri oluşturur.
+* **🤖 GPT Destekli Stil Chatbot'u:** *"Hafta sonu Antalya'daki düğün için bana 3 kombin öner"* yazın, yapay zeka dolabınızı analiz edip size en uygun parçaları eşleştirsin.
+* **👗 Sanal Kabin (Virtual Try-On):** Kendi fotoğrafınızı yükleyin ve beğendiğiniz kombinleri artırılmış gerçeklik (AR) desteğiyle **kendi üzerinizde** görün!
+* **📅 Kombin Takvimi & CPW Analizi:** Hangi gün ne giydiğinizi şık bir takvimde takip edin. "Giyilme Başına Maliyet" (Cost Per Wear) algoritmasıyla sürdürülebilir modaya katkı sağlayın.
+* **👯 Ortak Dolaplar (Borrow & Share):** Arkadaşlarınızı ekleyin, onların dolaplarını gezin ve hafta sonu için kıyafet ödünç alma istekleri gönderin.
 
 ---
 
 ## ✨ Temel Özellikler
 
-* **☁️ Gerçek Zamanlı Hava Durumu:** `mooweather-api` destekli, 5 günlük hava durumu ve anlık sıcaklık takibi.
-* **🤖 Akıllı Kombin Önerisi:** O günkü hava sıcaklığına, mevsime ve ürünün stok/sezon durumuna göre otomatik kıyafet seçimi.
-* **📸 Gelişmiş Ürün Ekleme:** Sadece barkod okutarak veya Google ML Kit (OCR) ile etiket fotoğrafı çekerek saniyeler içinde dolaba kıyafet ekleme.
-* **🔄 Bulut Senkronizasyonu:** Firebase Google Sign-In ile cihazlar arası kesintisiz veri aktarımı (Offline-First destekli).
-* **🧊 Camsız Cam (Glassmorphism) Arayüz:** Göz yormayan, minimalist ve fütüristik Jetpack Compose UI tasarımı.
-* **📦 Sezonlu Ürün Takibi:** "Satışta", "Stokta Yok" veya "Üretimden Kalktı" gibi detaylı ürün yaşam döngüsü yönetimi.
+* **☁️ Gerçek Zamanlı Hava Durumu:** Konumunuza özel 5 günlük hava durumu raporu ve o günkü hava sıcaklığına / mevsime tam uyumlu otomatik kombin önerileri.
+* **🧠 4 Aşamalı Hibrit Tarayıcı:** Barkod okutun, yerel DB, global e-ticaret ağları ve **Google ML Kit OCR** (akıllı etiket okuyucu) ile kıyafetlerinizi saniyeler içinde manuel veri girmeden ekleyin.
+* **📦 %100 Gizlilik (Offline-First):** V2 mimarisiyle birlikte görselleriniz artık bulutta değil, cihazınızın kalıcı hafızasında gizli klasörlerde (`.nomedia`) şifrelenerek saklanır. Kotanızı yemez, galerinizde görünmez.
+* **✏️ Tam Teşekküllü Düzenleme:** Dinamik beden algoritması (Ayakkabılar için 16-47 numara vb.) ve mantıksal kategori eşleşmesi ile tüm dolabınızı özgürce yönetin.
 
 ---
 
-## 🛠️ Teknoloji Yığını (Tech Stack)
+## 🛠️ Teknoloji Yığını
 
-Uygulama, modern Android geliştirme standartlarına (Modern Android Development - MAD) %100 uyumlu olarak geliştirilmiştir.
+Proje, **Modern Android Development (MAD)** vizyonunun en güncel prensipleriyle kodlanmıştır.
 
-| Kategori | Teknolojiler / Kütüphaneler |
+| Kategori | Teknolojiler / Araçlar |
 | :--- | :--- |
-| **Dil & Arayüz** | Kotlin, Jetpack Compose, Material Design 3 |
-| **Mimari** | Clean Architecture, MVVM (Model-View-ViewModel) |
-| **Asenkron İşlemler** | Kotlin Coroutines, Kotlin Flow |
-| **Ağ Katmanı (Network)** | Retrofit2, OkHttp3, Gson Converter |
-| **Yerel Veritabanı** | Room Database (SQLite tabanlı) |
-| **Bulut & Yetkilendirme**| Firebase Authentication (Google Sign-In), Cloud Firestore |
-| **Bağımlılık Enjeksiyonu**| Dagger - Hilt |
-| **Yapay Zeka / Görüntü** | Google ML Kit (Barcode Scanning & Text Recognition OCR) |
-| **Görsel Yükleme** | Coil (Compose destekli) |
-| **Kamera İşlemleri** | CameraX API |
+| **Dil & UI** | Kotlin, Jetpack Compose, Material Design 3 |
+| **Mimari** | Clean Architecture, MVVM, Compose Navigation |
+| **Asenkron / Akış** | Coroutines, StateFlow, SharedFlow |
+| **Veritabanı (Yerel)** | Room Database (Kompleks İlişkiler & Fallback) |
+| **Ağ (Network)** | Retrofit2, OkHttp3, Gson |
+| **AI & Görüntü İşleme**| Google ML Kit (Vision/OCR), Background Remover Service |
+| **Bulut (Opsiyonel)** | Firebase Authentication, Cloud Firestore |
+| **Diğer** | Dagger-Hilt (DI), Coil, CameraX, Android FileProvider |
 
 ---
 
 ## 🏗️ Mimari Yapı
 
-Proje, Sürdürülebilirlik ve Test Edilebilirlik ilkeleri gereği **Clean Architecture (Temiz Mimari)** baz alınarak katmanlı bir yapıda tasarlanmıştır.
+Sürdürülebilirlik ve test edilebilirlik için katı bir **Clean Architecture** benimsenmiştir.
 
 ```mermaid
 graph TD
-  UI[UI Layer / Jetpack Compose] --> VM[ViewModel]
+  UI[UI Layer / Compose Screens] --> VM[ViewModel]
   VM --> UseCase[Domain Layer / UseCases]
   UseCase --> RepoInt[Repository Interfaces]
   RepoInt -.-> RepoImpl[Data Layer / RepositoryImpl]
-  RepoImpl --> Local[(Room Database)]
-  RepoImpl --> Remote((Firebase / Retrofit))
+  RepoImpl --> Local[(Room DB / Cihaz Hafızası)]
+  RepoImpl --> Remote((Hava Durumu API / OCR))
 ````
 
-1.  **UI Katmanı:** Sadece arayüzü çizer (`GlassCard`, `TaramaScreen` vb.) ve ViewModel'dan gelen `State`'leri dinler.
-2.  **Domain Katmanı:** İş mantığını barındırır. Saf Kotlin ile yazılmıştır, Android framework'ünden bağımsızdır.
-3.  **Data Katmanı:** Verinin nereden (Room, Firebase veya API) geleceğine karar veren Depo (Repository) uygulamalarını içerir.
+-----
+
+## 🔗 Ekosistem & Paylaşım
+
+  * **`.kmb` Teknolojisi:** Kombinlerinizi, içindeki kıyafetlerin tam çözünürlüklü görselleriyle beraber tek bir `.kmb` dosyasına sıkıştırarak WhatsApp veya Instagram'dan anında paylaşın.
+  * **Deep Linking (Derin Bağlantılar):** `ceptekabin.com/kombin/...` formatındaki davet linklerine tıklayan kullanıcılar, uygulama yüklüyse direkt kombine, değilse indirme sayfasına yönlendirilir.
 
 -----
 
-## 🧠 4 Aşamalı Hibrit Barkod Sistemi
+## 🎨 Liquid Glass Arayüz
 
-Piyasadaki standart uygulamaların aksine CepteKabin, okutulan bir barkodu bulmak için agresif ve akıllı bir "Şelale (Fallback)" mimarisi kullanır:
-
-1.  **Aşama 1 (Yerel Önbellek - \<0.1sn):** Önce Room Database üzerinde aranır. Daha önce sisteme eklenmişse anında getirilir.
-2.  **Aşama 2 (Global API Havuzu - 0.5sn):** Ürün yerelde yoksa arka planda `UPCItemDb` ve `OpenBeautyFacts` gibi global havuzlar eşzamanlı taranır.
-3.  **Aşama 3 (Web Scraping - 1.0sn):** Global API'lerde bulunamazsa, özel algoritmalar ile popüler e-ticaret sitelerinde (Trendyol vb.) arka planda kazıma işlemi yapılarak ürün başlığı ayrıştırılır.
-4.  **Aşama 4 (Google ML Kit OCR - Fallback):** Hiçbir veritabanında kaydı olmayan (özel dikim veya etiketsiz) ürünler için kullanıcı kamerayı açar, kıyafetin iç etiketini çeker ve yapay zeka metinleri okuyarak (Örn: "%100 Pamuk, M Beden, Koton") formu otomatik doldurur.
-
------
-
-## 🎨 Liquid Glass UI Tasarımı
-
-Uygulamanın görsel kimliği, fotoğrafların karmaşasını önlemek adına **Monokrom Minimalizm** ve **Liquid Glass (Camsız Cam)** efektleri üzerine kurulmuştur.
-
-  * `GlassCard.kt` bileşeni kullanılarak, yarı saydam yüzeyler, hafif bulanıklaştırma (blur) efektleri ve ince ışık hüzmesi sınırları (borders) ile kullanıcının eklediği kıyafetler adeta bir cam vitrinin arkasındaymış gibi sergilenir.
+Klasik ve sıkıcı kart tasarımları yerine, yarı saydam yüzeyler ve hafif bulanıklaştırma (blur) efektleri sunan **Liquid Glass (Camsız Cam)** felsefesi. Karanlık Mod (Dark Mode) ile tam uyumlu, pürüzsüz 60 FPS Compose animasyonları.
 
 -----
 
 ## ⚙️ Kurulum ve Geliştirme
 
-Projeyi kendi bilgisayarınızda çalıştırmak için aşağıdaki adımları izleyin:
+Projeyi derlemek için aşağıdaki adımları izleyin:
 
 ### Ön Koşullar
 
-  * Android Studio (Iguana veya daha yeni bir sürüm)
-  * JDK 17
-  * Bir Firebase Projesi
+  * Android Studio (Koala veya daha yeni sürüm önerilir)
+  * JDK 17+
+  * Geçerli bir `google-services.json` (Firebase için)
 
-### Adım 1: Projeyi Klonlayın
+### Adımlar
 
-```bash
-git clone [https://github.com/KULLANICI_ADIN/CepteKabin.git](https://github.com/KULLANICI_ADIN/CepteKabin.git)
-cd CepteKabin
-```
-
-### Adım 2: Firebase Kurulumu
-
-1.  [Firebase Console](https://console.firebase.google.com/)'a gidin ve yeni bir proje oluşturun.
-2.  Android uygulamanızı ekleyin (Paket adı: `com.cyberqbit.ceptekabin`).
-3.  İndirdiğiniz `google-services.json` dosyasını projedeki `app/` klasörünün içine yapıştırın.
-4.  Firebase'de **Authentication -\> Sign-in method** altından **Google**'ı aktif edin.
-5.  Projenizin SHA-1 anahtarını Firebase proje ayarlarına eklemeyi unutmayın\!
-
-### Adım 3: API Anahtarlarını Ayarlayın
-
-  * Proje içerisindeki `Constants.kt` (veya ilgili Config) dosyasında bulunan `WEB_CLIENT_ID` alanına Firebase'den aldığınız Web Client ID'yi yapıştırın.
-
-### Adım 4: Derleme ve Çalıştırma
-
-Android Studio üzerinden projeyi Sync (Senkronize) edin ve Emülatör veya gerçek cihaz üzerinden çalıştırın.
-
-> *Not: Render.com üzerindeki hava durumu API'si "Free Tier" (Ücretsiz) katmanında olduğu için, uygulama ilk açıldığında hava durumu verisinin gelmesi sunucunun uyanma süresine bağlı olarak 30-50 saniye sürebilir.*
+1.  Depoyu klonlayın:
+    ```bash
+    git clone [https://github.com/KULLANICI_ADIN/CepteKabin.git](https://github.com/KULLANICI_ADIN/CepteKabin.git)
+    cd CepteKabin
+    ```
+2.  Proje kök dizinine, Firebase Console'dan aldığınız `google-services.json` dosyasını `app/` klasörü altına yapıştırın.
+3.  `Constants.kt` içerisindeki `WEB_CLIENT_ID` alanına kendi Firebase Web Client ID'nizi girin.
+4.  VSCode veya Android Studio terminali üzerinden projeyi temizleyip derleyin:
+    ```bash
+    ./gradlew clean
+    ./gradlew assembleRelease
+    ```
 
 -----
 
 ## 🤝 Katkıda Bulunma
 
-CepteKabin açık kaynaklı bir projedir ve katkılara her zaman açıktır\! Katkıda bulunmak isterseniz:
+Açık kaynak dünyasını destekliyoruz\! Yeni özellikler eklemek, bug çözmek veya arayüzü geliştirmek için:
 
-1.  Bu depoyu Fork'layın.
-2.  Yeni bir özellik dalı (branch) oluşturun (`git checkout -b feature/YeniOzellik`).
-3.  Değişikliklerinizi commit'leyin (`git commit -m 'Yeni bir harika özellik eklendi'`).
-4.  Dalınızı push'layın (`git push origin feature/YeniOzellik`).
-5.  Bir Pull Request (PR) açın.
+1.  Projeyi Fork'layın.
+2.  Yeni bir branch oluşturun (`git checkout -b feature/YeniFikir`).
+3.  Değişikliklerinizi commit'leyin (`git commit -m 'Yapay zeka modülü eklendi'`).
+4.  Branch'inizi push'layın ve Pull Request (PR) açın.
 
 -----
 
-<div align="center"\>
-<p> <b>cyberQbit</b> tarafından ❤️ ve <b>Kotlin</b> kullanılarak geliştirilmiştir.</p>
+<div align="center">
+<p><b>cyberQbit</b> tarafından ❤️ ile geliştirilmiştir.</p>
 </div>
