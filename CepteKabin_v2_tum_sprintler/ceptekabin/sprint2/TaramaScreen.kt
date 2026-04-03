@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.cyberqbit.ceptekabin.data.service.DppUrlService
+import com.cyberqbit.ceptekabin.data.remote.api.DppUrlService
 import com.cyberqbit.ceptekabin.ui.components.GlassSurface
 import com.cyberqbit.ceptekabin.ui.theme.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi

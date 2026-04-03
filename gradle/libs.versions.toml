@@ -107,6 +107,7 @@ hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWo
 hilt-work-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltWork" }
 ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "ucrop" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
+jsoup = { module = "org.jsoup:jsoup", version = "1.17.2" }
 
 [plugins] 
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" } 

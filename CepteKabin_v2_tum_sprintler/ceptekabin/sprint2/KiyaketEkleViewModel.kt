@@ -7,7 +7,7 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cyberqbit.ceptekabin.data.service.DppUrlService
+import com.cyberqbit.ceptekabin.data.remote.api.DppUrlService
 import com.cyberqbit.ceptekabin.data.remote.api.UrunKoduSearchService
 import com.cyberqbit.ceptekabin.data.remote.firebase.StorageService
 import com.cyberqbit.ceptekabin.domain.model.BarkodSonuc
@@ -71,8 +71,7 @@ class KiyaketEkleViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value    = true
             _errorMessage.value = null
-            val result = dppUrlService.urunBilgisiCek(url)
-            val sonuc = result.getOrNull()
+            val sonuc = dppUrlService.fetchDppProduct(url)
             if (sonuc != null) {
                 _barkodSonuc.value = sonuc
                 _kaynak.value      = "QR (DPP)"

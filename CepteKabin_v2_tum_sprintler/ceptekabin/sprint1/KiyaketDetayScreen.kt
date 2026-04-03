@@ -251,7 +251,7 @@ private fun Kiyaket.kategoriDisplayName(): String {
 
 @Composable
 private fun DetayRow(icon: ImageVector, label: String, value: String, isDark: Boolean) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), Alignment.CenterVertically) {
         Icon(icon, null, tint = PrimaryLight, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(10.dp))
         Text("$label:", style = MaterialTheme.typography.bodySmall,

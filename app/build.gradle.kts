@@ -36,8 +36,9 @@ android {
         minSdk        = 24
         targetSdk     = 35
         versionCode   = 2
-        versionName   = "2.0.0"
+        versionName   = "2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "VERSION_NAME", "\"${versionName}\"")
     }
 
     buildTypes {
@@ -144,6 +145,7 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
+    implementation(libs.jsoup)
 
     // Test
     testImplementation(libs.junit)

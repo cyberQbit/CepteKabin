@@ -15,6 +15,18 @@ class KiyaketRepositoryImpl @Inject constructor(
     private val kiyaketDao: KiyaketDao
 ) : KiyaketRepository {
 
+    override fun getTemizKiyaketler(): Flow<List<Kiyaket>> {
+        return kiyaketDao.getTemiz().map { entities -> entities.map { it.toDomain() } }
+    }
+
+    override fun getKirliKiyaketler(): Flow<List<Kiyaket>> {
+        return kiyaketDao.getKirli().map { entities -> entities.map { it.toDomain() } }
+    }
+
+    override suspend fun toggleDirty(id: Long, isDirty: Boolean) {
+        kiyaketDao.updateDirty(id, isDirty)
+    }
+
     override fun getAllKiyaketler(): Flow<List<Kiyaket>> {
         return kiyaketDao.getAll().map { entities ->
             entities.map { it.toDomain() }
@@ -119,3 +131,5 @@ class KiyaketRepositoryImpl @Inject constructor(
         alternatifBarkodlar = alternatifBarkodlar?.joinToString(",")
     )
 }
+
+
