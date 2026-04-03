@@ -8,7 +8,6 @@ object Constants {
     const val UPC_ITEM_DB_URL = "https://api.upcitemdb.com/pup/trial/lookup?upc="
     const val OPEN_BEAUTY_FACTS_URL = "https://world.openbeautyfacts.org/api/v2/product/"
     const val GITHUB_RELEASES_URL = "https://api.github.com/repos/cyberQbit/CepteKabin/releases/latest"
-    const val APP_STORE_LINK = "https://bit.ly/CepteKabin"
 
     const val PREFS_NAME = "ceptekabin_prefs"
     const val PREF_USER_ID = "user_id"
@@ -98,6 +97,6 @@ object Constants {
 
     fun getGecerliTurler(kategori: String): List<String> =
         KATEGORI_TURLERI[kategori] ?: KIYAFET_TURLERI
+
+    val KATEGORI_ILISKILERI = KATEGORI_TURLERI
 }
-
-

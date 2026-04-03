@@ -9,6 +9,14 @@ sealed class Screen(val route: String) {
     object HavaDurumu    : Screen("hava_durumu")
     object Tarama        : Screen("tarama")
     object Ayarlar       : Screen("ayarlar")
+    object KombinTakvim  : Screen("kombin_takvim")
+    object StyleChatbot  : Screen("style_chatbot")
+    object FriendDolap   : Screen("friend_dolap/{userId}") {
+        fun createRoute(userId: String) = "friend_dolap/$userId"
+    }
+    object VirtualTryOn  : Screen("virtual_tryon/{kombinId}") {
+        fun createRoute(kombinId: Long) = "virtual_tryon/$kombinId"
+    }
 
     object KiyaketEkle : Screen("kiyaket_ekle?barkod={barkod}&kiyaketId={kiyaketId}") {
         fun createRoute(barkod: String = "", kiyaketId: Long = 0L) = "kiyaket_ekle?barkod=$barkod&kiyaketId=$kiyaketId"
@@ -27,10 +35,6 @@ sealed class Screen(val route: String) {
         fun createRoute(id: Long) = "kategori/$id"
     }
 
-    /**
-     * Gelen .kmb dosyasının import ekranı.
-     * [uri] parametresi Uri.encode() ile URL-encode edilmiş olmalıdır.
-     */
     object KombinImport : Screen("kombin_import/{uri}") {
         fun createRoute(encodedUri: String) = "kombin_import/$encodedUri"
     }

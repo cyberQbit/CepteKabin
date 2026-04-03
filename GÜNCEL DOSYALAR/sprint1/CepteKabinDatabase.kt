@@ -1,9 +1,7 @@
 package com.cyberqbit.ceptekabin.data.local.database
 
 import android.content.Context
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.cyberqbit.ceptekabin.data.local.database.dao.*
 import com.cyberqbit.ceptekabin.data.local.database.entity.*
@@ -18,8 +16,8 @@ import kotlinx.coroutines.launch
         KategoriEntity::class,
         BarkodOnbellekEntity::class,
         SezonluUrunEntity::class,
-        WeatherCacheEntity::class,
-        KombinKullanimEntity::class
+        WeatherCacheEntity::class,       // Sprint 1 — skeleton loading
+        KombinKullanimEntity::class      // Sprint 2 — OOTD takvim
     ],
     version = 4,
     exportSchema = false
@@ -34,8 +32,7 @@ abstract class CepteKabinDatabase : RoomDatabase() {
     abstract fun kombinKullanimDao(): KombinKullanimDao
 
     companion object {
-        @Volatile
-        private var INSTANCE: CepteKabinDatabase? = null
+        @Volatile private var INSTANCE: CepteKabinDatabase? = null
 
         fun getDatabase(context: Context): CepteKabinDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -64,15 +61,13 @@ abstract class CepteKabinDatabase : RoomDatabase() {
         }
 
         suspend fun populateDatabase(kategoriDao: KategoriDao) {
-            kategoriDao.insertAll(
-                listOf(
-                    KategoriEntity(1, "Üst Giyim", "shirt", 1),
-                    KategoriEntity(2, "Alt Giyim", "pants", 2),
-                    KategoriEntity(3, "Dış Giyim", "jacket", 3),
-                    KategoriEntity(4, "Ayakkabı", "shoe", 4),
-                    KategoriEntity(5, "Aksesuar", "accessory", 5)
-                )
-            )
+            kategoriDao.insertAll(listOf(
+                KategoriEntity(1, "Üst Giyim",  "shirt",     1),
+                KategoriEntity(2, "Alt Giyim",  "pants",     2),
+                KategoriEntity(3, "Dış Giyim",  "jacket",    3),
+                KategoriEntity(4, "Ayakkabı",   "shoe",      4),
+                KategoriEntity(5, "Aksesuar",   "accessory", 5)
+            ))
         }
     }
 }
