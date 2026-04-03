@@ -1,47 +1,21 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
-
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
-# ───────────────────────────────────────────────────────────────────────────
-# CepteKabin: Release Modunda Gson Serileştirmesi İçin Gerekli Kurallar
-# ───────────────────────────────────────────────────────────────────────────
-# Sorun: Release modunda Proguard/R8 veri sınıflarının isimlerini değiştirir ve
-# Gson JSON'da eşleşecek field adını bulamaz. Bu kurallar bunu engeller.
-
-# 1. Tüm domain model sınıflarını şifreleme
+# Modelleri Sifrelemeden Koru (Cokmeleri Onlemek Icin)
 -keep class com.cyberqbit.ceptekabin.domain.model.** { *; }
+-keep class com.cyberqbit.ceptekabin.data.local.database.entity.** { *; }
 
-# 2. KombinExportData sınıfını ve tüm field'larını koru
--keep class com.cyberqbit.ceptekabin.util.KombinExportData { *; }
-
-# 3. Gson için gerekli config (reflection kullanıyor)
--keepattributes Signature
+# Retrofit & Gson
+-keepattributes Signature, InnerClasses, EnclosingMethod
 -keepattributes *Annotation*
-
-# --- GSON KORUMA KURALLARI ---
--keep class sun.misc.Unsafe { *; }
 -keep class com.google.gson.** { *; }
+-keep class * extends com.google.gson.TypeAdapter
 
-# --- CEPTEKABİN VERİ MODELLERİ KORUMA ---
--keep enum com.cyberqbit.ceptekabin.domain.model.** { *; }
+# Hilt / Dagger DI
+-keep class dagger.** { *; }
+-keep class hilt_aggregated_deps.** { *; }
+-keep class * extends androidx.lifecycle.ViewModel
 
-# --- PAYLAŞIM VERİ SINIFI KORUMA ---
-# (KombinExportData zaten korunuyor, ama enum'lar için ek kural)
+# Firebase & Play Services
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+
+# Room Database
+-keep class * extends androidx.room.RoomDatabase
