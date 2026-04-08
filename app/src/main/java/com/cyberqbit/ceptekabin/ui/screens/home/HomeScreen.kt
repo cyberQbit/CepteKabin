@@ -1,17 +1,13 @@
 package com.cyberqbit.ceptekabin.ui.screens.home
 
 import android.Manifest
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.animation.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -20,20 +16,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.cyberqbit.ceptekabin.R
+import coil.compose.AsyncImage
+import com.cyberqbit.ceptekabin.domain.engine.SmartKombinSuggester
+import com.cyberqbit.ceptekabin.domain.engine.WeatherOutfitEngine
 import com.cyberqbit.ceptekabin.domain.model.HavaDurumu
 import com.cyberqbit.ceptekabin.domain.model.Kiyaket
-import com.cyberqbit.ceptekabin.domain.model.Kombin
 import com.cyberqbit.ceptekabin.ui.components.GlassCard
 import com.cyberqbit.ceptekabin.ui.components.GlassSurface
 import com.cyberqbit.ceptekabin.ui.theme.*
@@ -50,16 +47,18 @@ fun HomeScreen(
     onNavigateToHavaDurumu: () -> Unit,
     onNavigateToKiyaket: (Long) -> Unit = {},
     onNavigateToKombinTakvim: () -> Unit = {},
-    onNavigateToVirtualTryOn: () -> Unit = {}, 
+    onNavigateToVirtualTryOn: () -> Unit = {},
+    onNavigateToKombinOlustur: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val havaDurumu by viewModel.havaDurumu.collectAsState()
     val sonEklenenler by viewModel.sonEklenenler.collectAsState()
     val onerilenKombinler by viewModel.onerilenKombinler.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
+    val dolapIstatistikleri by viewModel.dolapIstatistikleri.collectAsState()
+    val userName by viewModel.userName.collectAsState()
     val havaDurumuYukleniyor by viewModel.havaDurumuYukleniyor.collectAsState()
 
-    val context = LocalContext.current
+    val isDark = isSystemInDarkTheme()
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     var permissionRequested by remember { mutableStateOf(false) }
@@ -68,229 +67,311 @@ fun HomeScreen(
         viewModel.checkAndShowSharePrompt()
         if (!permissionRequested) {
             permissionRequested = true
-            if (!locationPermission.status.isGranted) {
-                locationPermission.launchPermissionRequest()
-            }
+            if (!locationPermission.status.isGranted) locationPermission.launchPermissionRequest()
         }
     }
 
     LaunchedEffect(locationPermission.status.isGranted) {
-        if (locationPermission.status.isGranted) {
-            viewModel.loadHavaDurumuWithLocation()
-        } else {
-            viewModel.loadHavaDurumuByCity("Ankara")
-        }
+        if (locationPermission.status.isGranted) viewModel.loadHavaDurumuWithLocation()
+        else viewModel.loadHavaDurumuByCity("Ankara")
     }
-
-    val isDark = isSystemInDarkTheme()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    if (isDark) listOf(Grey900, Grey900.copy(alpha = 0.95f))
-                    else listOf(Grey100, White)
-                )
-            )
-            // Yüzen bottom bar için alt padding eklendi
+            .background(Brush.verticalGradient(
+                if (isDark) listOf(Grey900, Grey900.copy(alpha = 0.95f)) else listOf(Grey100, White)
+            ))
             .padding(bottom = 80.dp)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(PrimaryDark),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.app_logo),
-                        contentDescription = "CepteKabin Logo",
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
-                Spacer(Modifier.width(12.dp))
-                Column {
-                    Text("CepteKabin", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
-                    Text("Senin Dolabın, Senin Kombinin!", style = MaterialTheme.typography.bodySmall, color = if (isDark) Grey500 else Grey600)
-                }
-            }
-            IconButton(
-                onClick = onNavigateToTarama,
-                modifier = Modifier.clip(CircleShape).background(if (isDark) GlassDark else GlassLight)
-            ) {
-                Icon(Icons.Default.QrCodeScanner, "Tarama", tint = if (isDark) Grey100 else Grey800)
-            }
-        }
+        Spacer(Modifier.height(12.dp))
 
+        WelcomeHeader(userName = userName, isDark = isDark)
         Spacer(Modifier.height(16.dp))
 
-        // Hava Durumu
-        WeatherCompactBar(
-            havaDurumu = havaDurumu, 
-            isLoading = havaDurumuYukleniyor, 
-            isDark = isDark, 
-            onClick = onNavigateToHavaDurumu
+        TodayWeatherBar(havaDurumu = havaDurumu, isLoading = havaDurumuYukleniyor, isDark = isDark, onClick = onNavigateToHavaDurumu)
+        Spacer(Modifier.height(20.dp))
+
+        Text("Hızlı İşlemler", style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
+        Spacer(Modifier.height(10.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            QuickActionCard(Icons.Default.QrCodeScanner, "Barkod Tara", "Ürün ekle",
+                onNavigateToTarama, Modifier.weight(1f), isDark)
+            QuickActionCard(Icons.Default.Style, "Kombin Yap", "Kıyafet kombinle",
+                onNavigateToKombin, Modifier.weight(1f), isDark)
+            QuickActionCard(Icons.Default.CalendarMonth, "Takvim", "Kombin planla",
+                onNavigateToKombinTakvim, Modifier.weight(1f), isDark)
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        DailyOutfitSection(
+            oneriler = onerilenKombinler, havaDurumu = havaDurumu, isDark = isDark,
+            dolapBos = dolapIstatistikleri.toplamKiyafet == 0,
+            onNavigateToDolap = onNavigateToDolap,
+            onNavigateToKombinOlustur = onNavigateToKombinOlustur
         )
 
         Spacer(Modifier.height(24.dp))
 
-        // Hızlı İşlemler
-        Text("Hızlı İşlemler", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
-        Spacer(Modifier.height(12.dp))
-
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            QuickActionCard(Icons.Default.QrCodeScanner, "Barkod Tara", onNavigateToTarama, Modifier.weight(1f), isDark)
-            QuickActionCard(Icons.Default.Style, "Kombin Yap", onNavigateToKombin, Modifier.weight(1f), isDark)
-            QuickActionCard(Icons.Default.CalendarMonth, "Takvim", onNavigateToKombinTakvim, Modifier.weight(1f), isDark)
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        // Sanal Kabin Kartı
-        GlassCard(modifier = Modifier.fillMaxWidth().clickable { onNavigateToVirtualTryOn() }) {
-            Row(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(AccentGold.copy(alpha = 0.2f)), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.AccessibilityNew, contentDescription = "Sanal Kabin", tint = AccentGold, modifier = Modifier.size(24.dp))
-                }
-                Spacer(Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Sanal Kabin (AR)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
-                    Text("Kombinlerini kendi üzerinde gör!", style = MaterialTheme.typography.bodySmall, color = if (isDark) Grey400 else Grey600)
-                }
-                Icon(Icons.Default.ChevronRight, contentDescription = "Git", tint = if (isDark) Grey400 else Grey600)
-            }
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        // YENİ: SADECE BİR TANE AI KOMBİN ÖNERİSİ BÖLÜMÜ
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.AutoAwesome, "Yapay Zeka", tint = PrimaryCyan, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(6.dp))
-                Text("AI Günün Kombinleri", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
-            }
-        }
-        Spacer(Modifier.height(12.dp))
-
-        if (onerilenKombinler.isNotEmpty()) {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(onerilenKombinler) { kombin ->
-                    SmartKombinMiniCard(kombin = kombin, onClick = { onNavigateToKombin() }, isDark = isDark)
-                }
-            }
-        } else {
-            GlassCard(modifier = Modifier.fillMaxWidth()) {
-                Column(Modifier.fillMaxWidth().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.AutoAwesomeMosaic, null, Modifier.size(40.dp), tint = if (isDark) Grey600 else Grey400)
-                    Spacer(Modifier.height(8.dp))
-                    Text("Yapay Zeka dolabını inceliyor...", style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey400 else Grey600, textAlign = TextAlign.Center)
-                    Text("Daha iyi öneriler için dolabına yeni kıyafetler ekle.", style = MaterialTheme.typography.labelSmall, color = PrimaryLight, textAlign = TextAlign.Center)
-                }
-            }
-        }
-
-        Spacer(Modifier.height(24.dp))
-
-        // Son Eklenenler
-        if (sonEklenenler.isNotEmpty()) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text("Son Eklenenler", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
-                TextButton(onClick = onNavigateToDolap) { Text("Tümünü Gör", style = MaterialTheme.typography.labelMedium) }
-            }
-            Spacer(Modifier.height(8.dp))
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(sonEklenenler.take(5)) { kiyaket ->
-                    KiyaketMiniCard(kiyaket = kiyaket, isDark = isDark, onClick = { onNavigateToKiyaket(kiyaket.id) })
-                }
-            }
+        if (dolapIstatistikleri.toplamKiyafet > 0) {
+            DolapStatsCard(stats = dolapIstatistikleri, isDark = isDark, onNavigateToDolap = onNavigateToDolap)
             Spacer(Modifier.height(24.dp))
         }
+
+        if (sonEklenenler.isNotEmpty()) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                Text("Son Eklenenler", style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
+                TextButton(onClick = onNavigateToDolap) { Text("Tümünü Gör") }
+            }
+            Spacer(Modifier.height(10.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(sonEklenenler) { kiyaket ->
+                    RecentClothingCard(kiyaket = kiyaket, isDark = isDark, onClick = { onNavigateToKiyaket(kiyaket.id) })
+                }
+            }
+        }
+        Spacer(Modifier.height(24.dp))
     }
 }
 
+data class DolapIstatistikleri(
+    val toplamKiyafet: Int = 0,
+    val toplamKombin: Int = 0,
+    val enCokGiyilen: String? = null,
+    val kategoriler: Map<String, Int> = emptyMap()
+)
+
 @Composable
-fun SmartKombinMiniCard(kombin: Kombin, onClick: () -> Unit, isDark: Boolean) {
-    GlassSurface(modifier = Modifier.width(160.dp).height(120.dp).clickable(onClick = onClick)) {
-        Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.SpaceBetween) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-                Icon(Icons.Default.AutoAwesome, null, Modifier.size(24.dp), tint = AccentGold)
-                Text(kombin.ad.replace("AI Önerisi: ", ""), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey800, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).padding(start=4.dp))
-            }
-            Spacer(Modifier.height(8.dp))
-            Text("Uyum Puanı: %${kombin.puan}", style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey400 else Grey600, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            Spacer(Modifier.height(8.dp))
-            Text("Detay", style = MaterialTheme.typography.labelSmall, color = PrimaryLight, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.End)
+private fun WelcomeHeader(userName: String?, isDark: Boolean) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically) {
+        Column {
+            Text(
+                text = if (!userName.isNullOrBlank()) "Merhaba, $userName" else "Merhaba",
+                style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold,
+                color = if (isDark) Grey100 else Grey900)
+            Text("Bugün ne giyeceksin?", style = MaterialTheme.typography.bodyMedium,
+                color = if (isDark) Grey400 else Grey600)
         }
     }
 }
 
 @Composable
-fun WeatherCompactBar(havaDurumu: HavaDurumu?, isLoading: Boolean, isDark: Boolean, onClick: () -> Unit) {
+private fun TodayWeatherBar(havaDurumu: HavaDurumu?, isLoading: Boolean, isDark: Boolean, onClick: () -> Unit) {
     GlassSurface(modifier = Modifier.fillMaxWidth().height(64.dp).clickable { onClick() }) {
-        Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             if (isLoading) {
-                Text("Hava durumu güncelleniyor...", style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey400 else Grey600)
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp, color = PrimaryLight)
+                Text("Hava durumu güncelleniyor...", style = MaterialTheme.typography.bodyMedium,
+                    color = if (isDark) Grey400 else Grey600)
+                CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = PrimaryLight)
             } else if (havaDurumu != null) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(havaDurumu.durum.toEmoji(), fontSize = 28.sp)
-                    Spacer(Modifier.width(12.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    Text(havaDurumu.durum.toEmoji(), fontSize = 24.sp)
+                    Spacer(Modifier.width(10.dp))
                     Column {
                         Row(verticalAlignment = Alignment.Bottom) {
-                            Text("${havaDurumu.sicaklik.toInt()}°C", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
+                            Text("${havaDurumu.sicaklik.toInt()}°C", style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
                             Spacer(Modifier.width(8.dp))
-                            Text(havaDurumu.durum.displayName, style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey300 else Grey700)
+                            Text(havaDurumu.durum.displayName, style = MaterialTheme.typography.bodyMedium,
+                                color = if (isDark) Grey300 else Grey700)
                         }
-                        Text("Detaylı tahmin ve öneriler için dokun", style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey500)
+                        val kisaOneri = WeatherOutfitEngine.getRecommendation(havaDurumu).kisaAciklama
+                        Text(kisaOneri, style = MaterialTheme.typography.labelSmall,
+                            color = if (isDark) Grey500 else Grey600, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
-                Icon(Icons.Default.ChevronRight, contentDescription = "Detay", tint = if (isDark) Grey400 else Grey600)
+                Icon(Icons.Default.ChevronRight, null, Modifier.size(18.dp),
+                    tint = if (isDark) Grey500 else Grey400)
             } else {
-                Text("Hava durumu alınamadı.", style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey400 else Grey600)
-                Icon(Icons.Default.Refresh, contentDescription = "Yenile", tint = PrimaryLight)
+                Text("Hava durumu alınamadı.", style = MaterialTheme.typography.bodyMedium,
+                    color = if (isDark) Grey400 else Grey600)
+                Icon(Icons.Default.Refresh, null, tint = PrimaryLight)
             }
         }
     }
 }
 
 @Composable
-fun QuickActionCard(icon: ImageVector, title: String, onClick: () -> Unit, modifier: Modifier = Modifier, isDark: Boolean) {
+private fun QuickActionCard(icon: ImageVector, title: String, subtitle: String,
+    onClick: () -> Unit, modifier: Modifier, isDark: Boolean) {
     GlassSurface(modifier = modifier.height(90.dp).clickable(onClick = onClick)) {
-        Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(icon, title, tint = PrimaryLight, modifier = Modifier.size(28.dp))
-            Spacer(Modifier.height(8.dp))
-            Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900, textAlign = TextAlign.Center)
+        Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.Center) {
+            Icon(icon, title, tint = PrimaryLight, modifier = Modifier.size(24.dp))
+            Spacer(Modifier.height(6.dp))
+            Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold,
+                color = if (isDark) Grey100 else Grey900, maxLines = 1)
+            Text(subtitle, style = MaterialTheme.typography.labelSmall,
+                color = if (isDark) Grey400 else Grey600, maxLines = 1, fontSize = 10.sp)
         }
     }
 }
 
 @Composable
-fun KiyaketMiniCard(kiyaket: Kiyaket, isDark: Boolean, onClick: () -> Unit) {
-    GlassSurface(modifier = Modifier.size(100.dp).clickable(onClick = onClick)) {
-        Column(Modifier.fillMaxSize().padding(8.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-            if (!kiyaket.imageUrl.isNullOrBlank()) {
-                coil.compose.AsyncImage(
-                    model = kiyaket.imageUrl, contentDescription = kiyaket.marka, modifier = Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)), contentScale = ContentScale.Crop
-                )
-            } else {
-                Icon(Icons.Default.Checkroom, null, Modifier.size(32.dp), tint = PrimaryLight)
+private fun DailyOutfitSection(oneriler: List<SmartKombinSuggester.KombinOnerisi>,
+    havaDurumu: HavaDurumu?, isDark: Boolean, dolapBos: Boolean,
+    onNavigateToDolap: () -> Unit, onNavigateToKombinOlustur: () -> Unit) {
+    Text("Bugünkü Önerin", style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
+    Spacer(Modifier.height(10.dp))
+
+    if (dolapBos) {
+        GlassCard(modifier = Modifier.fillMaxWidth()) {
+            Column(Modifier.fillMaxWidth().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Default.AutoAwesome, null, Modifier.size(36.dp), tint = AccentGold)
+                Spacer(Modifier.height(10.dp))
+                Text("Dolabına kıyafet ekleyerek\nkişisel öneriler almaya başla!",
+                    style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium,
+                    color = if (isDark) Grey200 else Grey800, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(12.dp))
+                Button(onClick = onNavigateToDolap, colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight),
+                    shape = RoundedCornerShape(12.dp)) {
+                    Icon(Icons.Default.Add, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
+                    Text("İlk Kıyafetini Ekle")
+                }
             }
-            Spacer(Modifier.height(8.dp))
-            Text(kiyaket.marka, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium, color = if (isDark) Grey100 else Grey800, maxLines = 1)
-            Text(kiyaket.tur.displayName, style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600, maxLines = 1)
+        }
+    } else if (oneriler.isEmpty()) {
+        GlassCard(modifier = Modifier.fillMaxWidth()) {
+            Row(Modifier.fillMaxWidth().padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.WbCloudy, null, Modifier.size(28.dp), tint = if (isDark) Grey500 else Grey400)
+                Spacer(Modifier.width(12.dp))
+                Text("Hava durumu yüklenince kombinler önerilecek",
+                    style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey300 else Grey700)
+            }
+        }
+    } else {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            items(oneriler) { oneri ->
+                SuggestionCard(oneri = oneri, isDark = isDark, onClick = onNavigateToKombinOlustur)
+            }
         }
     }
+}
+
+@Composable
+private fun SuggestionCard(oneri: SmartKombinSuggester.KombinOnerisi, isDark: Boolean, onClick: () -> Unit) {
+    Surface(modifier = Modifier.width(220.dp).clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = if (isDark) Grey800.copy(alpha = 0.6f) else White.copy(alpha = 0.9f),
+        shadowElevation = 4.dp) {
+        Column(Modifier.padding(14.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(shape = RoundedCornerShape(8.dp),
+                    color = when {
+                        oneri.puanDetay.toplamPuan >= 80 -> Color(0xFF4CAF50).copy(alpha = 0.15f)
+                        oneri.puanDetay.toplamPuan >= 60 -> AccentGold.copy(alpha = 0.15f)
+                        else -> Color(0xFFFF9800).copy(alpha = 0.15f)
+                    }) {
+                    Text("${oneri.puanDetay.toplamPuan}%", style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            oneri.puanDetay.toplamPuan >= 80 -> Color(0xFF4CAF50)
+                            oneri.puanDetay.toplamPuan >= 60 -> AccentGold
+                            else -> Color(0xFFFF9800)
+                        }, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+                }
+                Spacer(Modifier.width(8.dp))
+                Text("uyum", style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600)
+            }
+            Spacer(Modifier.height(12.dp))
+            oneri.ustGiyim?.let { KiyafetSatir("Üst", "${it.marka} ${it.tur.displayName}", isDark) }
+            oneri.altGiyim?.let { KiyafetSatir("Alt", "${it.marka} ${it.tur.displayName}", isDark) }
+            oneri.disGiyim?.let { KiyafetSatir("Dış", "${it.marka} ${it.tur.displayName}", isDark) }
+            oneri.ayakkabi?.let { KiyafetSatir("Ayak", "${it.marka} ${it.tur.displayName}", isDark) }
+            Spacer(Modifier.height(10.dp))
+            Text(oneri.aciklama, style = MaterialTheme.typography.labelSmall,
+                color = if (isDark) Grey400 else Grey600, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+    }
+}
+
+@Composable
+private fun KiyafetSatir(label: String, text: String, isDark: Boolean) {
+    Row(Modifier.padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(label, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = PrimaryLight,
+            modifier = Modifier.width(28.dp))
+        Spacer(Modifier.width(4.dp))
+        Text(text, style = MaterialTheme.typography.bodySmall,
+            color = if (isDark) Grey200 else Grey800, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+@Composable
+private fun DolapStatsCard(stats: DolapIstatistikleri, isDark: Boolean, onNavigateToDolap: () -> Unit) {
+    GlassCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onNavigateToDolap)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            StatItem(stats.toplamKiyafet.toString(), "Kıyafet", Icons.Default.Checkroom, isDark)
+            StatItem(stats.toplamKombin.toString(), "Kombin", Icons.Default.Style, isDark)
+            stats.enCokGiyilen?.let { StatItem(it, "En çok giyilen", Icons.Default.Favorite, isDark, true) }
+        }
+    }
+}
+
+@Composable
+private fun StatItem(value: String, label: String, icon: ImageVector, isDark: Boolean, isText: Boolean = false) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = 4.dp)) {
+        Icon(icon, null, Modifier.size(20.dp), tint = PrimaryLight)
+        Spacer(Modifier.height(4.dp))
+        Text(value, style = if (isText) MaterialTheme.typography.labelMedium else MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600)
+    }
+}
+
+@Composable
+private fun RecentClothingCard(kiyaket: Kiyaket, isDark: Boolean, onClick: () -> Unit) {
+    Surface(modifier = Modifier.width(120.dp).clickable(onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        color = if (isDark) Grey800.copy(alpha = 0.5f) else White.copy(alpha = 0.9f),
+        shadowElevation = 2.dp) {
+        Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(Modifier.size(80.dp).clip(RoundedCornerShape(10.dp))
+                .background(if (isDark) Grey700 else Grey200), contentAlignment = Alignment.Center) {
+                if (kiyaket.imageUrl != null) {
+                    AsyncImage(model = kiyaket.imageUrl, contentDescription = kiyaket.tur.displayName,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(10.dp)))
+                } else {
+                    Icon(Icons.Default.Checkroom, null, Modifier.size(32.dp), tint = if (isDark) Grey500 else Grey400)
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (!kiyaket.renk.isNullOrBlank()) {
+                    RenkDairesi(renk = kiyaket.renk!!, size = 10); Spacer(Modifier.width(4.dp))
+                }
+                Text(kiyaket.tur.displayName, style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Medium, color = if (isDark) Grey200 else Grey800, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            Text(kiyaket.marka, style = MaterialTheme.typography.labelSmall,
+                color = if (isDark) Grey500 else Grey600, maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 10.sp)
+        }
+    }
+}
+
+@Composable
+fun RenkDairesi(renk: String, size: Int = 12) {
+    val renkKodu = renkToColor(renk)
+    Box(modifier = Modifier.size(size.dp).clip(CircleShape).background(renkKodu)
+        .then(if (renk in listOf("Beyaz", "Krem", "Ekru")) Modifier.border(0.5.dp, Grey400, CircleShape) else Modifier))
+}
+
+private fun renkToColor(renk: String): Color = when (renk) {
+    "Siyah" -> Color(0xFF1A1A1A); "Beyaz" -> Color(0xFFF5F5F5); "Gri" -> Color(0xFF9E9E9E)
+    "Lacivert" -> Color(0xFF1A237E); "Mavi" -> Color(0xFF2196F3); "Kırmızı" -> Color(0xFFE53935)
+    "Bordo" -> Color(0xFF880E4F); "Pembe" -> Color(0xFFE91E63); "Mor" -> Color(0xFF9C27B0)
+    "Yeşil" -> Color(0xFF4CAF50); "Haki" -> Color(0xFF827717); "Sarı" -> Color(0xFFFDD835)
+    "Turuncu" -> Color(0xFFFF9800); "Kahverengi" -> Color(0xFF795548); "Bej" -> Color(0xFFD7CCC8)
+    "Krem" -> Color(0xFFFFF8E1); "Ekru" -> Color(0xFFF5F0E1); "Hardal" -> Color(0xFFF9A825)
+    "Petrol" -> Color(0xFF006064); "Çoklu / Desenli" -> Color(0xFFFF6F00)
+    else -> Color(0xFFBDBDBD)
 }

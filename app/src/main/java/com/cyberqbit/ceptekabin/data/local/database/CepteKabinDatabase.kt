@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
         KombinKullanimEntity::class,     // Sprint 2 — OOTD takvim
         TakvimGirisiEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class CepteKabinDatabase : RoomDatabase() {

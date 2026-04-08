@@ -24,7 +24,35 @@ data class Kiyaket(
     val satinAlmaTarihi: Long? = null,
     val satinAlmaFiyati: Double? = null,
     val alternatifBarkodlar: List<String>? = null
-)
+) {
+    /** v2: Fotoğraf yolu (imageUrl alias) */
+    val fotografYolu: String? get() = imageUrl
+
+    /** v2: Oluşturma tarihi (eklenmeTarihi alias) */
+    val olusturmaTarihi: Long get() = eklenmeTarihi
+
+    /** v2: KiyaketTur'dan otomatik kategori belirleme */
+    val kategori: String get() = when (tur) {
+        KiyaketTur.TISORT, KiyaketTur.GOMLEK, KiyaketTur.POLO, KiyaketTur.BLUZ,
+        KiyaketTur.KAZAK, KiyaketTur.HIRKA, KiyaketTur.SWEATSHIRT, KiyaketTur.CROP_TOP,
+        KiyaketTur.TANK_TOP, KiyaketTur.ATLET, KiyaketTur.ELBISE -> "Üst Giyim"
+        KiyaketTur.PANTOLON, KiyaketTur.KOT_PANTOLON, KiyaketTur.SORT, KiyaketTur.ETEK,
+        KiyaketTur.ESOFMAN_ALTI, KiyaketTur.TAYT, KiyaketTur.JOGGER, KiyaketTur.CHINO,
+        KiyaketTur.BERMUDA -> "Alt Giyim"
+        KiyaketTur.CEKET, KiyaketTur.BLAZER, KiyaketTur.KABAN_MONT, KiyaketTur.KABAN,
+        KiyaketTur.MONT, KiyaketTur.PARKA, KiyaketTur.TRENCKOT, KiyaketTur.YAGMURLUK,
+        KiyaketTur.DERI_CEKET, KiyaketTur.BOMBER -> "Dış Giyim"
+        KiyaketTur.AYAKKABI, KiyaketTur.KADIN_AYAKKABISI, KiyaketTur.ERKEK_AYAKKABISI,
+        KiyaketTur.COCUK_AYAKKABISI, KiyaketTur.SPOR_AYAKKABI, KiyaketTur.KLASIK_AYAKKABI,
+        KiyaketTur.SNEAKER, KiyaketTur.LOAFER, KiyaketTur.BOT, KiyaketTur.CIZME,
+        KiyaketTur.SANDALET, KiyaketTur.TERLIK, KiyaketTur.OXFORD, KiyaketTur.MOKASEN -> "Ayakkabı"
+        KiyaketTur.CANTA, KiyaketTur.SIRT_CANTASI, KiyaketTur.EL_CANTASI, KiyaketTur.SAPKA,
+        KiyaketTur.BERE, KiyaketTur.ESARP, KiyaketTur.KRAVAT, KiyaketTur.PAPYON,
+        KiyaketTur.KEMER, KiyaketTur.KOLYE, KiyaketTur.BILEKLIK, KiyaketTur.GOZLUK,
+        KiyaketTur.CORAP, KiyaketTur.ELDIVEN, KiyaketTur.TAKI -> "Aksesuar"
+        else -> "Diğer"
+    }
+}
 
 @Keep
 enum class KiyaketTur(val displayName: String) {

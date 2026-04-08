@@ -14,76 +14,76 @@ class DolapViewModel @Inject constructor(
     private val kiyaketRepository: KiyaketRepository
 ) : ViewModel() {
 
-    private val _kiyaketler = MutableStateFlow<List<Kiyaket>>(emptyList())
-    val kiyaketler: StateFlow<List<Kiyaket>> = _kiyaketler.asStateFlow()
+    private val _kiyafetler = MutableStateFlow<List<Kiyaket>>(emptyList())
+    val kiyafetler: StateFlow<List<Kiyaket>> = _kiyafetler.asStateFlow()
 
-    private val _seciliKategori = MutableStateFlow("Tümü")
-    val seciliKategori: StateFlow<String> = _seciliKategori.asStateFlow()
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    private val _selectedCategory = MutableStateFlow("Tümü")
+    val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
 
-    // Favori modunda olup olmadığımızı takip eden değişken
+    private val _selectedIds = MutableStateFlow<Set<Long>>(emptySet())
+    val selectedIds: StateFlow<Set<Long>> = _selectedIds.asStateFlow()
+
+    private val _isMultiSelectMode = MutableStateFlow(false)
+    val isMultiSelectMode: StateFlow<Boolean> = _isMultiSelectMode.asStateFlow()
+
+    // Geriye uyumluluk
+    val seciliKategori: StateFlow<String> get() = _selectedCategory
     private val _sadeceFavoriler = MutableStateFlow(false)
     val sadeceFavoriler: StateFlow<Boolean> = _sadeceFavoriler.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            kiyaketRepository.getAllKiyaketler().collect { _kiyafetler.value = it }
+        }
+    }
+
+    fun setSearchQuery(query: String) { _searchQuery.value = query }
+    fun setCategory(category: String) { _selectedCategory.value = category }
+    fun kategoriSec(kategori: String) { setCategory(kategori) }
+
+    fun enterMultiSelect(firstId: Long) {
+        _isMultiSelectMode.value = true
+        _selectedIds.value = setOf(firstId)
+    }
+
+    fun toggleSelection(id: Long) {
+        _selectedIds.update { current -> if (id in current) current - id else current + id }
+        if (_selectedIds.value.isEmpty()) _isMultiSelectMode.value = false
+    }
+
+    fun exitMultiSelect() {
+        _isMultiSelectMode.value = false
+        _selectedIds.value = emptySet()
+    }
+
+    fun deleteSelected() {
+        viewModelScope.launch {
+            _selectedIds.value.forEach { id -> kiyaketRepository.deleteKiyaketById(id) }
+            exitMultiSelect()
+        }
+    }
 
     fun toggleFavoriler() {
         _sadeceFavoriler.value = !_sadeceFavoriler.value
         if (_sadeceFavoriler.value) {
-            // Sadece favorileri getir (Repository'den)
             viewModelScope.launch {
-                kiyaketRepository.getFavoriKiyaketler().collect { list ->
-                    _kiyaketler.value = filtrele(list, _seciliKategori.value)
-                }
+                kiyaketRepository.getFavoriKiyaketler().collect { _kiyafetler.value = it }
             }
         } else {
-            // Favori modundan çıkınca kıyafetleri tekrar getir
-            kategoriSec(_seciliKategori.value)
-        }
-    }
-
-    init {
-        loadKiyaketler()
-    }
-
-    private fun loadKiyaketler() {
-        viewModelScope.launch {
-            kiyaketRepository.getAllKiyaketler().collect { liste ->
-                _kiyaketler.value = filtrele(liste, _seciliKategori.value)
+            viewModelScope.launch {
+                kiyaketRepository.getAllKiyaketler().collect { _kiyafetler.value = it }
             }
-        }
-    }
-
-    fun kategoriSec(kategori: String) {
-        _seciliKategori.value = kategori
-        viewModelScope.launch {
-            kiyaketRepository.getAllKiyaketler().collect { liste ->
-                _kiyaketler.value = filtrele(liste, kategori)
-            }
-        }
-    }
-
-    private fun filtrele(liste: List<Kiyaket>, kategori: String): List<Kiyaket> {
-        return when (kategori) {
-            "Tümü" -> liste
-            "Üst Giyim" -> liste.filter { it.tur.name in listOf("TISORT", "GOMLEK", "SWEAT", "HIRKA") }
-            "Alt Giyim" -> liste.filter { it.tur.name in listOf("PANTOLON", "ETEK", "SORT") }
-            "Dış Giyim" -> liste.filter { it.tur.name in listOf("CEKET", "KABAN", "MONTO", "YAGMURLUK") }
-            "Ayakkabı" -> liste.filter { it.tur.name in listOf("AYAKKABI", "TERLIK", "SANTRAFOR", "BOT") }
-            "Aksesuar" -> liste.filter { it.tur.name in listOf("CANTA", "SAPKA", "ESARP", "TAKI", "CORAP") }
-            else -> liste
         }
     }
 
     fun toggleFavori(kiyaket: Kiyaket) {
-        viewModelScope.launch {
-            kiyaketRepository.toggleFavori(kiyaket.id, !kiyaket.favori)
-        }
+        viewModelScope.launch { kiyaketRepository.toggleFavori(kiyaket.id, !kiyaket.favori) }
     }
 
     fun deleteKiyaket(kiyaket: Kiyaket) {
-        viewModelScope.launch {
-            kiyaketRepository.deleteKiyaket(kiyaket)
-        }
+        viewModelScope.launch { kiyaketRepository.deleteKiyaket(kiyaket) }
     }
 }

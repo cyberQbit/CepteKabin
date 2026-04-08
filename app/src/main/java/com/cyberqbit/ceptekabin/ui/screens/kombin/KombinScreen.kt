@@ -1,95 +1,100 @@
 package com.cyberqbit.ceptekabin.ui.screens.kombin
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.cyberqbit.ceptekabin.domain.model.Kiyaket
 import com.cyberqbit.ceptekabin.domain.model.Kombin
-import com.cyberqbit.ceptekabin.ui.components.GlassCard
-import com.cyberqbit.ceptekabin.ui.components.GlassSurface
+import com.cyberqbit.ceptekabin.ui.theme.*
+
+enum class KombinSiralama(val label: String) {
+    EN_YENI("En yeni"), FAVORILER("Favoriler"), EN_COK_GIYILEN("En çok giyilen")
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KombinScreen(
     viewModel: KombinViewModel,
     onNavigateToKombinDetay: (Long) -> Unit,
-    onNavigateToKombinOlustur: () -> Unit
+    onNavigateToKombinOlustur: () -> Unit,
+    onNavigateToDolap: () -> Unit = {}
 ) {
     val kombinler by viewModel.kombinler.collectAsState()
     val favorilerOnly by viewModel.favorilerOnly.collectAsState()
+    val siralama by viewModel.siralama.collectAsState()
+    val dolapBos by viewModel.dolapBos.collectAsState()
+
+    val isDark = isSystemInDarkTheme()
+    var showSiralamaMenu by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Kombinlerim") },
                 actions = {
-                    IconButton(onClick = { viewModel.toggleFavorilerOnly() }) {
-                        Icon(
-                            if (favorilerOnly) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                            contentDescription = "Favoriler",
-                            tint = if (favorilerOnly) MaterialTheme.colorScheme.error else LocalContentColor.current
-                        )
+                    Box {
+                        IconButton(onClick = { showSiralamaMenu = true }) { Icon(Icons.Default.Sort, "Sırala") }
+                        DropdownMenu(expanded = showSiralamaMenu, onDismissRequest = { showSiralamaMenu = false }) {
+                            KombinSiralama.entries.forEach { s ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            if (siralama == s) { Icon(Icons.Default.Check, null, Modifier.size(18.dp), tint = PrimaryLight); Spacer(Modifier.width(8.dp)) }
+                                            Text(s.label)
+                                        }
+                                    },
+                                    onClick = { viewModel.setSiralama(s); showSiralamaMenu = false }
+                                )
+                            }
+                        }
                     }
-                }
+                    IconButton(onClick = { viewModel.toggleFavorilerOnly() }) {
+                        Icon(if (favorilerOnly) Icons.Default.Favorite else Icons.Default.FavoriteBorder, "Favoriler",
+                            tint = if (favorilerOnly) MaterialTheme.colorScheme.error else LocalContentColor.current)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = if (isDark) SurfaceDark else SurfaceLight)
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToKombinOlustur) {
-                Icon(Icons.Default.Add, contentDescription = "Yeni Kombin")
+            if (!dolapBos) {
+                FloatingActionButton(onClick = onNavigateToKombinOlustur, containerColor = PrimaryLight) {
+                    Icon(Icons.Default.Add, "Yeni Kombin", tint = White)
+                }
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp)
-        ) {
+        Column(Modifier.fillMaxSize()
+            .background(Brush.verticalGradient(if (isDark) listOf(Grey900, SurfaceDark) else listOf(Grey100, White)))
+            .padding(paddingValues).padding(horizontal = 16.dp)) {
             if (kombinler.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            Icons.Default.Style,
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = if (favorilerOnly) "Favori kombinin yok" else "Henüz kombin oluşturmadın",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Kombinlerini oluşturmaya başla",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
-                    }
-                }
+                EmptyKombinState(dolapBos, isDark, onNavigateToDolap, onNavigateToKombinOlustur)
             } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(kombinler) { kombin ->
-                        KombinCard(
-                            kombin = kombin,
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(vertical = 8.dp)) {
+                    items(kombinler, key = { it.id }) { kombin ->
+                        KombinCard(kombin, isDark,
                             onClick = { onNavigateToKombinDetay(kombin.id) },
-                            onToggleFavori = { viewModel.toggleFavori(kombin) }
-                        )
+                            onShareClick = { viewModel.shareKombin(kombin) },
+                            onFavoriToggle = { viewModel.toggleFavori(kombin) })
                     }
                 }
             }
@@ -98,119 +103,93 @@ fun KombinScreen(
 }
 
 @Composable
-fun KombinCard(
-    kombin: Kombin,
-    onClick: () -> Unit,
-    onToggleFavori: () -> Unit
-) {
-    // 1. ADIM: Kombindeki tüm olası parçaları bir listede topla
-    val tumParcalar = listOfNotNull(
-        kombin.ustGiyim,
-        kombin.altGiyim,
-        kombin.ayakkabi,
-        kombin.disGiyim, 
-        kombin.aksesuar
-    )
-
-    // 2. ADIM: Sadece ilk 3 tanesini ekranda göstermek için ayır
-    val gosterilecekParcalar = tumParcalar.take(3)
-    
-    // 3. ADIM: Geriye kalan gösterilmeyen parça sayısını hesapla
-    val kalanSayi = tumParcalar.size - 3
-
-    GlassCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = kombin.ad,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                IconButton(onClick = onToggleFavori) {
-                    Icon(
-                        if (kombin.favori) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Favori",
-                        tint = if (kombin.favori) MaterialTheme.colorScheme.error else LocalContentColor.current
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // Ekrana çizilecek ilk 3 parça
-                gosterilecekParcalar.forEach { kiyaket ->
-                    GlassSurface(modifier = Modifier.size(48.dp)) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            // Sadece ikon yerine kıyafetin resmini gösteriyoruz!
-                            if (!kiyaket.imageUrl.isNullOrBlank()) {
-                                coil.compose.AsyncImage(
-                                    model = kiyaket.imageUrl,
-                                    contentDescription = kiyaket.marka,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = androidx.compose.ui.layout.ContentScale.Crop
-                                )
-                            } else {
-                                Icon(
-                                    Icons.Default.Checkroom,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
+private fun KombinCard(kombin: Kombin, isDark: Boolean, onClick: () -> Unit,
+    onShareClick: () -> Unit, onFavoriToggle: () -> Unit) {
+    Surface(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        color = if (isDark) Grey800.copy(alpha = 0.5f) else White.copy(alpha = 0.9f),
+        shadowElevation = 3.dp) {
+        Column(Modifier.padding(14.dp)) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically) {
+                Text(kombin.ad, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
+                    color = if (isDark) Grey100 else Grey900, maxLines = 1, overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f))
+                Row {
+                    IconButton(onClick = onShareClick, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Share, "Paylaş", Modifier.size(18.dp), tint = if (isDark) Grey400 else Grey600)
                     }
-                }
-
-                // EĞER 3'TEN FAZLA PARÇA VARSA +1, +2 BALONUNU EKLE
-                if (kalanSayi > 0) {
-                    GlassSurface(
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "+$kalanSayi",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                    IconButton(onClick = onFavoriToggle, modifier = Modifier.size(32.dp)) {
+                        Icon(if (kombin.favori) Icons.Default.Favorite else Icons.Default.FavoriteBorder, "Favori",
+                            Modifier.size(18.dp), tint = if (kombin.favori) MaterialTheme.colorScheme.error
+                            else if (isDark) Grey400 else Grey600)
                     }
                 }
             }
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                kombin.ustGiyim?.let { KiyafetThumbnail(it, "Üst", isDark) }
+                kombin.altGiyim?.let { KiyafetThumbnail(it, "Alt", isDark) }
+                kombin.disGiyim?.let { KiyafetThumbnail(it, "Dış", isDark) }
+                kombin.ayakkabi?.let { KiyafetThumbnail(it, "Ayak", isDark) }
+                kombin.aksesuar?.let { KiyafetThumbnail(it, "Aks", isDark) }
+            }
+            Spacer(Modifier.height(8.dp))
+            val sdf = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale("tr"))
+            Text(sdf.format(java.util.Date(kombin.olusturmaTarihi)),
+                style = MaterialTheme.typography.labelSmall, color = Grey500)
+        }
+    }
+}
 
-            Spacer(modifier = Modifier.height(12.dp))
+@Composable
+private fun KiyafetThumbnail(kiyaket: Kiyaket, label: String, isDark: Boolean) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.width(56.dp)) {
+        Box(Modifier.size(50.dp).clip(RoundedCornerShape(10.dp))
+            .background(if (isDark) Grey700 else Grey200), contentAlignment = Alignment.Center) {
+            if (kiyaket.imageUrl != null) {
+                AsyncImage(model = kiyaket.imageUrl, contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(10.dp)))
+            } else {
+                Icon(Icons.Default.Checkroom, null, Modifier.size(22.dp), tint = if (isDark) Grey500 else Grey400)
+            }
+        }
+        Spacer(Modifier.height(3.dp))
+        Text(label, style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600, fontSize = 9.sp)
+    }
+}
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    Icons.Default.Star,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "${kombin.puan} puan",
-                    style = MaterialTheme.typography.bodySmall
-                )
+@Composable
+private fun EmptyKombinState(dolapBos: Boolean, isDark: Boolean,
+    onNavigateToDolap: () -> Unit, onNavigateToKombinOlustur: () -> Unit) {
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
+            Surface(shape = CircleShape, color = PrimaryLight.copy(alpha = 0.1f), modifier = Modifier.size(80.dp)) {
+                Box(contentAlignment = Alignment.Center) { Icon(Icons.Default.Style, null, Modifier.size(40.dp), tint = PrimaryLight) }
+            }
+            Spacer(Modifier.height(20.dp))
+            if (dolapBos) {
+                Text("Önce dolabına kıyafet ekle,\nsonra kombinle!", style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = onNavigateToDolap, colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight),
+                    shape = RoundedCornerShape(14.dp)) {
+                    Icon(Icons.Default.Add, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
+                    Text("Dolaba Git", fontWeight = FontWeight.SemiBold)
+                }
+            } else {
+                Text("Henüz kombin oluşturmadın", style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(8.dp))
+                Text("Kıyafetlerini birleştirerek harika kombinler yarat!", style = MaterialTheme.typography.bodyMedium,
+                    color = if (isDark) Grey400 else Grey600, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(16.dp))
+                Button(onClick = onNavigateToKombinOlustur, colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight),
+                    shape = RoundedCornerShape(14.dp)) {
+                    Icon(Icons.Default.Add, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
+                    Text("İlk Kombini Oluştur", fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }

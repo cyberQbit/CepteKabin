@@ -1,17 +1,63 @@
 package com.cyberqbit.ceptekabin.data.local.database.entity
 
-import androidx.annotation.Keep
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room.*
 
-@Keep
-@Entity(tableName = "takvim_girisleri")
+@Entity(
+    tableName = "takvim_girisi",
+    indices = [
+        Index(value = ["tarih_gun", "slot"], unique = true),
+        Index(value = ["kombin_id"])
+    ]
+)
 data class TakvimGirisiEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val tarihGunu: Long, // Gece yarısı (00:00) timestamp'i
-    val ogun: String, // Örn: "SABAH", "ÖĞLE", "AKŞAM"
+
+    @ColumnInfo(name = "tarih_gun")
+    val tarihGun: Long,
+
+    @ColumnInfo(name = "slot")
+    val slot: Int = 0,
+
+    @ColumnInfo(name = "kombin_id")
     val kombinId: Long,
-    val kombinAd: String, // Kombin silinse bile adı kalsın diye (Snapshot)
-    val kombinGorselleri: String // Virgülle ayrılmış resim URL'leri (Snapshot)
+
+    @ColumnInfo(name = "kombin_ad")
+    val kombinAd: String,
+
+    @ColumnInfo(name = "ust_giyim_ad")
+    val ustGiyimAd: String? = null,
+
+    @ColumnInfo(name = "alt_giyim_ad")
+    val altGiyimAd: String? = null,
+
+    @ColumnInfo(name = "dis_giyim_ad")
+    val disGiyimAd: String? = null,
+
+    @ColumnInfo(name = "ayakkabi_ad")
+    val ayakkabiAd: String? = null,
+
+    @ColumnInfo(name = "aksesuar_ad")
+    val aksesuarAd: String? = null,
+
+    @ColumnInfo(name = "ust_giyim_resim")
+    val ustGiyimResim: String? = null,
+
+    @ColumnInfo(name = "alt_giyim_resim")
+    val altGiyimResim: String? = null,
+
+    @ColumnInfo(name = "dis_giyim_resim")
+    val disGiyimResim: String? = null,
+
+    @ColumnInfo(name = "ayakkabi_resim")
+    val ayakkabiResim: String? = null,
+
+    @ColumnInfo(name = "aksesuar_resim")
+    val aksesuarResim: String? = null,
+
+    @ColumnInfo(name = "ekleme_zamani")
+    val eklemeZamani: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "kombin_silinmis")
+    val kombinSilinmis: Boolean = false
 )

@@ -31,6 +31,7 @@ import com.cyberqbit.ceptekabin.ui.screens.kombin.KombinImportScreen
 import com.cyberqbit.ceptekabin.ui.screens.kombin.KombinOlusturScreen
 import com.cyberqbit.ceptekabin.ui.screens.kombin.KombinScreen
 import com.cyberqbit.ceptekabin.ui.screens.kombin.KombinViewModel
+import com.cyberqbit.ceptekabin.ui.screens.onboarding.OnboardingScreen
 import com.cyberqbit.ceptekabin.ui.screens.tarama.KiyaketEkleScreen
 import com.cyberqbit.ceptekabin.ui.screens.tarama.TaramaScreen
 import com.cyberqbit.ceptekabin.ui.theme.*
@@ -105,7 +106,8 @@ fun NavGraph(
                     onNavigateToHavaDurumu   = { navController.navigate(Screen.HavaDurumu.route) },
                     onNavigateToKiyaket      = { id -> navController.navigate(Screen.KiyaketDetay.createRoute(id)) },
                     onNavigateToKombinTakvim = { navController.navigate(Screen.KombinTakvim.route) },
-                    onNavigateToVirtualTryOn = { navController.navigate(Screen.VirtualTryOn.route) }
+                    onNavigateToVirtualTryOn = { navController.navigate(Screen.VirtualTryOn.route) },
+                    onNavigateToKombinOlustur = { navController.navigate(Screen.KombinOlustur.route) }
                 )
             }
             composable(Screen.Dolap.route) {
@@ -119,7 +121,8 @@ fun NavGraph(
                 KombinScreen(
                     viewModel = kombinViewModel,
                     onNavigateToKombinDetay  = { id -> navController.navigate(Screen.KombinDetay.createRoute(id)) },
-                    onNavigateToKombinOlustur = { navController.navigate(Screen.KombinOlustur.route) }
+                    onNavigateToKombinOlustur = { navController.navigate(Screen.KombinOlustur.route) },
+                    onNavigateToDolap = { navController.navigate(Screen.Dolap.route) }
                 )
             }
             composable(Screen.HavaDurumu.route) {
@@ -182,6 +185,15 @@ fun NavGraph(
                 com.cyberqbit.ceptekabin.ui.screens.tryon.VirtualTryOnScreen(
                     kombinId = 0L,
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(Screen.Onboarding.route) {
+                OnboardingScreen(
+                    onComplete = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        }
+                    }
                 )
             }
         }

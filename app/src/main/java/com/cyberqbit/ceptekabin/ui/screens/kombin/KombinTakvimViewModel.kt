@@ -42,9 +42,7 @@ class KombinTakvimViewModel @Inject constructor(
 
     private fun loadKombinler() {
         viewModelScope.launch {
-            kombinRepository.getAllKombinler().collect { kombinler ->
-                _tumKombinler.value = kombinler
-            }
+            kombinRepository.getAllKombinler().collect { _tumKombinler.value = it }
         }
     }
 
@@ -54,27 +52,28 @@ class KombinTakvimViewModel @Inject constructor(
         }
     }
 
-    fun addKombinToDate(kombin: Kombin, ogun: String = "GÜNLÜK") {
+    fun addKombinToDate(kombin: Kombin) {
         viewModelScope.launch {
             val currentGirisler = takvimDao.getGirislerForGun(_selectedDate.value)
             if (currentGirisler.size < 3) {
-                // Kombindeki parçaların resim url'lerini toplayıp virgülle ayırarak kombinGorselleri alanına yazıyoruz
-                val imageUrls = listOfNotNull(
-                    kombin.ustGiyim?.imageUrl,
-                    kombin.altGiyim?.imageUrl,
-                    kombin.disGiyim?.imageUrl,
-                    kombin.ayakkabi?.imageUrl,
-                    kombin.aksesuar?.imageUrl
-                ).joinToString(",")
-                
+                val slot = currentGirisler.size
                 val newGiris = TakvimGirisiEntity(
-                    tarihGunu = _selectedDate.value,
-                    ogun = ogun,
+                    tarihGun = _selectedDate.value,
+                    slot = slot,
                     kombinId = kombin.id,
                     kombinAd = kombin.ad,
-                    kombinGorselleri = imageUrls
+                    ustGiyimAd = kombin.ustGiyim?.let { "${it.marka} ${it.tur.displayName}" },
+                    altGiyimAd = kombin.altGiyim?.let { "${it.marka} ${it.tur.displayName}" },
+                    disGiyimAd = kombin.disGiyim?.let { "${it.marka} ${it.tur.displayName}" },
+                    ayakkabiAd = kombin.ayakkabi?.let { "${it.marka} ${it.tur.displayName}" },
+                    aksesuarAd = kombin.aksesuar?.let { "${it.marka} ${it.tur.displayName}" },
+                    ustGiyimResim = kombin.ustGiyim?.imageUrl,
+                    altGiyimResim = kombin.altGiyim?.imageUrl,
+                    disGiyimResim = kombin.disGiyim?.imageUrl,
+                    ayakkabiResim = kombin.ayakkabi?.imageUrl,
+                    aksesuarResim = kombin.aksesuar?.imageUrl
                 )
-                takvimDao.insertTakvimGirisi(newGiris)
+                takvimDao.insert(newGiris)
                 loadGirislerForDate(_selectedDate.value)
             }
         }
@@ -82,19 +81,16 @@ class KombinTakvimViewModel @Inject constructor(
 
     fun removeTakvimGirisi(giris: TakvimGirisiEntity) {
         viewModelScope.launch {
-            takvimDao.deleteTakvimGirisi(giris)
+            takvimDao.delete(giris)
             loadGirislerForDate(_selectedDate.value)
         }
     }
 
     private fun getMidnightTimestamp(timeInMillis: Long): Long {
-        val cal = Calendar.getInstance().apply {
+        return Calendar.getInstance().apply {
             this.timeInMillis = timeInMillis
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return cal.timeInMillis
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
     }
 }

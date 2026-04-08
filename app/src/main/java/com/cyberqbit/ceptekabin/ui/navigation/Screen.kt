@@ -27,4 +27,5 @@ sealed class Screen(val route: String) {
     // V2 EKRANLARI (Kullanılmayanlar Silindi)
     object KombinTakvim : Screen("kombin_takvim")
     object VirtualTryOn : Screen("virtual_try_on")
+    object Onboarding : Screen("onboarding")
 }
