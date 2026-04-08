@@ -370,7 +370,7 @@ fun KiyaketEkleScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = PrimaryCyan)
             ) {
-                Text(if (kiyaketId > 0L) "Güncelle" else "Kaydet", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = White)
+                Text(if (kiyaketId > 0L) "Güncelle" else "Kaydet", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.Black)
             }
             Spacer(Modifier.height(80.dp)) // Alt bar için kaydırma payı
         }

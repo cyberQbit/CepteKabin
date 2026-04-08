@@ -35,7 +35,7 @@ import com.cyberqbit.ceptekabin.ui.theme.*
 fun DolapScreen(
     onNavigateToTarama: () -> Unit,
     onNavigateToKiyaketDetay: (Long) -> Unit,
-    onNavigateToKiyaketEkle: () -> Unit = onNavigateToTarama,
+    onNavigateToKiyaketEkle: () -> Unit,
     viewModel: DolapViewModel = hiltViewModel()
 ) {
     val kiyafetler by viewModel.kiyafetler.collectAsState()
@@ -82,7 +82,11 @@ fun DolapScreen(
         },
         floatingActionButton = {
             if (!isMultiSelectMode) {
-                FloatingActionButton(onClick = onNavigateToTarama, containerColor = PrimaryLight) {
+                FloatingActionButton(
+                    onClick = onNavigateToKiyaketEkle,
+                    containerColor = PrimaryLight,
+                    modifier = Modifier.padding(bottom = 72.dp)
+                ) {
                     Icon(Icons.Default.Add, "Kıyafet Ekle", tint = White)
                 }
             }
@@ -201,31 +205,33 @@ private fun KiyafetCard(kiyaket: Kiyaket, isDark: Boolean, isSelected: Boolean,
 
 @Composable
 private fun EmptyDolapState(onBarkodTara: () -> Unit, onManuelEkle: () -> Unit, isDark: Boolean) {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
-            Surface(shape = CircleShape, color = PrimaryLight.copy(alpha = 0.1f), modifier = Modifier.size(100.dp)) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.Checkroom, null, Modifier.size(48.dp), tint = PrimaryLight)
-                }
+    Column(
+        Modifier.fillMaxSize().padding(horizontal = 32.dp).padding(top = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Surface(shape = CircleShape, color = PrimaryLight.copy(alpha = 0.1f), modifier = Modifier.size(100.dp)) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.Checkroom, null, Modifier.size(48.dp), tint = PrimaryLight)
             }
-            Spacer(Modifier.height(24.dp))
-            Text("İlk kıyafetini ekle!", style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
-            Spacer(Modifier.height(8.dp))
-            Text("Barkod okutarak veya manuel olarak\ndolabını oluşturmaya başla",
-                style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey400 else Grey600, textAlign = TextAlign.Center)
-            Spacer(Modifier.height(24.dp))
-            Button(onClick = onBarkodTara, modifier = Modifier.fillMaxWidth(0.7f),
-                colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight), shape = RoundedCornerShape(14.dp)) {
-                Icon(Icons.Default.QrCodeScanner, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp))
-                Text("Barkod ile Ekle", fontWeight = FontWeight.SemiBold)
-            }
-            Spacer(Modifier.height(10.dp))
-            OutlinedButton(onClick = onManuelEkle, modifier = Modifier.fillMaxWidth(0.7f),
-                shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, PrimaryLight)) {
-                Icon(Icons.Default.Edit, null, Modifier.size(20.dp), tint = PrimaryLight); Spacer(Modifier.width(8.dp))
-                Text("Manuel Ekle", color = PrimaryLight, fontWeight = FontWeight.SemiBold)
-            }
+        }
+        Spacer(Modifier.height(24.dp))
+        Text("İlk kıyafetini ekle!", style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
+        Spacer(Modifier.height(8.dp))
+        Text("Barkod okutarak veya manuel olarak\ndolabını oluşturmaya başla",
+            style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey400 else Grey600, textAlign = TextAlign.Center)
+        Spacer(Modifier.height(28.dp))
+        Button(onClick = onBarkodTara, modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight), shape = RoundedCornerShape(14.dp)) {
+            Icon(Icons.Default.QrCodeScanner, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp))
+            Text("Barkod ile Ekle", fontWeight = FontWeight.SemiBold)
+        }
+        Spacer(Modifier.height(10.dp))
+        OutlinedButton(onClick = onManuelEkle, modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp), border = BorderStroke(1.dp, PrimaryLight)) {
+            Icon(Icons.Default.Edit, null, Modifier.size(20.dp), tint = PrimaryLight); Spacer(Modifier.width(8.dp))
+            Text("Manuel Ekle", color = PrimaryLight, fontWeight = FontWeight.SemiBold)
         }
     }
 }

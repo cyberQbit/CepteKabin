@@ -89,7 +89,6 @@ class HomeViewModel @Inject constructor(
 
     private val gson = Gson()
     private var weatherJob: Job? = null
-    private var weatherLoaded = false
 
     init {
         loadUserName()
@@ -182,7 +181,6 @@ class HomeViewModel @Inject constructor(
     }
 
     fun loadHavaDurumuWithLocation() {
-        if (weatherLoaded && !_showingCachedWeather.value) return
         weatherJob?.cancel()
         weatherJob = viewModelScope.launch {
             _isLoading.value = true
@@ -227,7 +225,6 @@ class HomeViewModel @Inject constructor(
                 _weatherLoadState.value = WeatherLoadState.LOADED
                 val sdf = SimpleDateFormat("HH.mm - dd/MM/yyyy", Locale("tr", "TR"))
                 _sonGuncelleme.value = "Son güncelleme: ${sdf.format(Date())}"
-                weatherLoaded = true
                 saveWeatherToCache(hava)
                 val kiyafetler = _sonEklenenler.value
                 if (kiyafetler.isNotEmpty()) guncelleOneriler(kiyafetler, hava)

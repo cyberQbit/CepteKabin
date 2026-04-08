@@ -55,7 +55,9 @@ fun HavaDurumuScreen(
         ?: if (isDark) listOf(Grey900, SurfaceDark) else listOf(Grey100, White)
 
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bgColors))
-        .statusBarsPadding().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp)) {
+        .statusBarsPadding().navigationBarsPadding()
+        .verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp)
+        .padding(bottom = 16.dp)) {
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically) {
@@ -114,7 +116,6 @@ fun HavaDurumuScreen(
                 }
             }
         }
-        Spacer(Modifier.height(24.dp))
     }
 }
 

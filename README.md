@@ -30,7 +30,7 @@
 - [🛠️ Teknoloji Yığını](#️-teknoloji-yığını)
 - [🏗️ Mimari Yapı](#️-mimari-yapı)
 - [📅 Kombin Takvimi](#-kombin-takvimi)
-- [🎨 Liquid Glass Arayüz](#-liquid-glass-arayüz)
+- [🎨 Modern Arayüz](#-modern-arayüz)
 - [⚙️ Kurulum ve Geliştirme](#️-kurulum-ve-geliştirme)
 - [🤝 Katkıda Bulunma](#-katkıda-bulunma)
 
@@ -158,7 +158,7 @@ Planlama özellikleri:
 
 ---
 
-## 🎨 Liquid Glass Arayüz
+## 🎨 Modern Arayüz
 
 **Liquid Glass (Camsız Cam)** felsefesi - yarı saydam yüzeyler ve blur efektleri:
 

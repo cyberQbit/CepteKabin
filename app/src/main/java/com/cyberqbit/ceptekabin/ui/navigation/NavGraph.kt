@@ -113,7 +113,8 @@ fun NavGraph(
             composable(Screen.Dolap.route) {
                 DolapScreen(
                     onNavigateToTarama = { navController.navigate(Screen.Tarama.route) },
-                    onNavigateToKiyaketDetay = { id -> navController.navigate(Screen.KiyaketDetay.createRoute(id)) }
+                    onNavigateToKiyaketDetay = { id -> navController.navigate(Screen.KiyaketDetay.createRoute(id)) },
+                    onNavigateToKiyaketEkle = { navController.navigate(Screen.KiyaketEkle.createRoute("")) }
                 )
             }
             composable(Screen.Kombin.route) {
