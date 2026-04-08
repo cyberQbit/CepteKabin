@@ -17,9 +17,10 @@ import kotlinx.coroutines.launch
         BarkodOnbellekEntity::class,
         SezonluUrunEntity::class,
         WeatherCacheEntity::class,       // Sprint 1 — skeleton loading
-        KombinKullanimEntity::class      // Sprint 2 — OOTD takvim
+        KombinKullanimEntity::class,     // Sprint 2 — OOTD takvim
+        TakvimGirisiEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 abstract class CepteKabinDatabase : RoomDatabase() {
@@ -30,6 +31,7 @@ abstract class CepteKabinDatabase : RoomDatabase() {
     abstract fun sezonluUrunDao(): SezonluUrunDao
     abstract fun weatherCacheDao(): WeatherCacheDao
     abstract fun kombinKullanimDao(): KombinKullanimDao
+    abstract fun takvimGirisiDao(): TakvimGirisiDao
 
     companion object {
         @Volatile private var INSTANCE: CepteKabinDatabase? = null

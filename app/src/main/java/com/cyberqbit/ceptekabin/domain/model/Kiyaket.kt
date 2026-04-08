@@ -2,7 +2,7 @@ package com.cyberqbit.ceptekabin.domain.model
 
 import androidx.annotation.Keep
 
-@Keep // Proguard'ın bu sınıfın ismini değiştirmesini engeller (Gson serileştirmesi için)
+@Keep
 data class Kiyaket(
     val id: Long = 0,
     val barkod: String? = null,
@@ -26,33 +26,41 @@ data class Kiyaket(
     val alternatifBarkodlar: List<String>? = null
 )
 
-@Keep // Proguard'ın bu enum'un ismini değiştirmesini engeller (Gson serileştirmesi için)
+@Keep
 enum class KiyaketTur(val displayName: String) {
-    TISORT("Tişört"), GOMLEK("Gömlek"), PANTOLON("Pantolon"), ETEK("Etek"), SORT("Şort"),
-    CEKET("Ceket"), KABAN_MONT("Kaban / Mont"), KABAN("Kaban"), MONTO("Mont"), YAGMURLUK("Yağmurluk"), SWEAT("Sweat"), SWEATSHIRT("Sweatshirt"), KAZAK("Kazak"),
-    HIRKA("Hırka"), ELBISE("Elbise"), AYAKKABI("Ayakkabı"), KADIN_AYAKKABISI("Kadın Ayakkabısı"), ERKEK_AYAKKABISI("Erkek Ayakkabısı"), COCUK_AYAKKABISI("Çocuk Ayakkabısı"), TERLIK("Terlik"), SANTRAFOR("Sandalet"),
-    BOT("Bot"), CANTA("Çanta"), SAPKA("Şapka"), ESARP("Eşarp"), TAKI("Takı"), CORAP("Çorap"),
-    ICCAMASIRI("İç Çamaşırı"), PLAJ("Plaj"), ESOFMAN("Eşofman"), KRAVAT("Kravat"), DIGER("Diğer");
+    TISORT("Tişört"), GOMLEK("Gömlek"), POLO("Polo"), BLUZ("Bluz"), KAZAK("Kazak"), HIRKA("Hırka"),
+    SWEATSHIRT("Sweatshirt"), CROP_TOP("Crop Top"), TANK_TOP("Tank Top"), ELBISE("Elbise"), ATLET("Atlet"),
+    PANTOLON("Pantolon"), KOT_PANTOLON("Kot Pantolon"), SORT("Şort"), ETEK("Etek"), ESOFMAN_ALTI("Eşofman Altı"),
+    TAYT("Tayt"), JOGGER("Jogger"), CHINO("Chino"), BERMUDA("Bermuda"),
+    CEKET("Ceket"), BLAZER("Blazer"), KABAN_MONT("Kaban / Mont"), KABAN("Kaban"), MONT("Mont"), PARKA("Parka"), TRENCKOT("Trençkot"),
+    YAGMURLUK("Yağmurluk"), DERI_CEKET("Deri Ceket"), BOMBER("Bomber"),
+    AYAKKABI("Ayakkabı"), KADIN_AYAKKABISI("Kadın Ayakkabısı"), ERKEK_AYAKKABISI("Erkek Ayakkabısı"), COCUK_AYAKKABISI("Çocuk Ayakkabısı"),
+    SPOR_AYAKKABI("Spor Ayakkabı"), KLASIK_AYAKKABI("Klasik Ayakkabı"), SNEAKER("Sneaker"), LOAFER("Loafer"),
+    BOT("Bot"), CIZME("Çizme"), SANDALET("Sandalet"), TERLIK("Terlik"), OXFORD("Oxford"), MOKASEN("Mokasen"),
+    CANTA("Çanta"), SIRT_CANTASI("Sırt Çantası"), EL_CANTASI("El Çantası"), SAPKA("Şapka"), BERE("Bere"),
+    ESARP("Eşarp"), KRAVAT("Kravat"), PAPYON("Papyon"), KEMER("Kemer"), KOLYE("Kolye"), BILEKLIK("Bileklik"),
+    GOZLUK("Gözlük"), CORAP("Çorap"), ELDIVEN("Eldiven"), TAKI("Takı"),
+    ICCAMASIRI("İç Çamaşırı"), PLAJ("Plaj"), ESOFMAN("Eşofman"), DIGER("Diğer");
 
     companion object {
         fun fromString(value: String?): KiyaketTur = entries.find {
-            it.displayName == value || it.name == value || it.name.lowercase() == value?.lowercase()
+            it.displayName.equals(value, ignoreCase = true) || it.name.equals(value, ignoreCase = true)
         } ?: DIGER
     }
 }
 
-@Keep // Proguard'ın bu enum'un ismini değiştirmesini engeller (Gson serileştirmesi için)
+@Keep
 enum class Mevsim(val displayName: String) {
     ILKBAHAR("İlkbahar"), YAZ("Yaz"), SONBAHAR("Sonbahar"), KIS("Kış"), DORT_MEVSIM("Dört Mevsim");
 
     companion object {
         fun fromString(value: String?): Mevsim = entries.find {
-            it.displayName == value || it.name == value || it.name.lowercase() == value?.lowercase()
+            it.displayName.equals(value, ignoreCase = true) || it.name.equals(value, ignoreCase = true)
         } ?: DORT_MEVSIM
     }
 }
 
-@Keep // Proguard'ın bu enum'un ismini değiştirmesini engeller (Gson serileştirmesi için)
+@Keep
 enum class Renk(val displayName: String) {
     SIYAH("Siyah"), BEYAZ("Beyaz"), GRI("Gri"), KREM("Krem"), BEJ("Bej"),
     KAHVERENGI("Kahverengi"), KIRMIZI("Kırmızı"), BORDO("Bordo"), PEMBE("Pembe"),
@@ -62,8 +70,7 @@ enum class Renk(val displayName: String) {
 
     companion object {
         fun fromString(value: String?): Renk = entries.find {
-            it.displayName == value || it.name == value || it.name.lowercase() == value?.lowercase()
+            it.displayName.equals(value, ignoreCase = true) || it.name.equals(value, ignoreCase = true)
         } ?: DIGER
     }
 }
-

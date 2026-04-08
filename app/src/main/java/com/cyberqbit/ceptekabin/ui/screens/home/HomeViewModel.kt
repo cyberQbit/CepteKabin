@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.cyberqbit.ceptekabin.domain.engine.SmartKombinSuggester
+import com.cyberqbit.ceptekabin.domain.engine.WeatherOutfitEngine
 
 enum class WeatherLoadState { IDLE, LOADING_SKELETON, LOADING_FRESH, LOADED, ERROR }
 
@@ -241,25 +243,17 @@ class HomeViewModel @Inject constructor(
 
     private fun loadAkilliOneriler() {
         viewModelScope.launch {
-            combine(havaDurumu, kombinRepository.getAllKombinler()) { hava, tumKombinler ->
-                if (tumKombinler.isEmpty()) emptyList()
-                else if (hava == null) tumKombinler.shuffled().take(3)
-                else {
-                    val sicaklik = hava.sicaklik
-                    val uygunlar = tumKombinler.filter { kombin ->
-                        val turler = listOfNotNull(
-                            kombin.ustGiyim, kombin.altGiyim, kombin.ayakkabi
-                        ).map { it.tur.displayName }
-                        when {
-                            sicaklik >= 22.0 -> turler.any { it in listOf("Tişört","Şort","Etek","Crop Top") }
-                                && turler.none { it in listOf("Kaban","Mont","Parka") }
-                            sicaklik < 15.0  -> turler.any { it in listOf("Kaban","Mont","Parka","Kazak","Hırka","Sweatshirt") }
-                            else             -> turler.any { it in listOf("Gömlek","Tişört","Pantolon","Ceket","Blazer") }
-                        }
-                    }
-                    (if (uygunlar.isNotEmpty()) uygunlar else tumKombinler).shuffled().take(3)
+            combine(_havaDurumu, kiyaketRepository.getAllKiyaketler()) { hava, kiyafetler ->
+                Pair(hava, kiyafetler)
+            }.collect { (hava, kiyafetler) ->
+                if (hava != null && kiyafetler.isNotEmpty()) {
+                    val category = WeatherOutfitEngine.analyzeWeather(hava)
+                    val generated = SmartKombinSuggester.generateSmartKombins(kiyafetler, category)
+                    _onerilenKombinler.value = generated
+                } else {
+                    _onerilenKombinler.value = emptyList()
                 }
-            }.collect { _onerilenKombinler.value = it }
+            }
         }
     }
 

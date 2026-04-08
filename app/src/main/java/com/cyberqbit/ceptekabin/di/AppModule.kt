@@ -38,6 +38,7 @@ object AppModule {
     @Provides @Singleton fun provideSezonluUrunDao(db: CepteKabinDatabase)  = db.sezonluUrunDao()
     @Provides @Singleton fun provideWeatherCacheDao(db: CepteKabinDatabase) = db.weatherCacheDao()
     @Provides @Singleton fun provideKombinKullanimDao(db: CepteKabinDatabase) = db.kombinKullanimDao()
+    @Provides @Singleton fun provideTakvimGirisiDao(db: CepteKabinDatabase) = db.takvimGirisiDao()
 
     @Provides @Singleton
     fun provideKiyaketRepository(dao: KiyaketDao): KiyaketRepository =

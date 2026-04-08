@@ -2,11 +2,14 @@ package com.cyberqbit.ceptekabin.ui.screens.tarama
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -15,16 +18,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.CircleShape
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.cyberqbit.ceptekabin.domain.model.*
-import com.cyberqbit.ceptekabin.ui.components.*
+import coil.request.ImageRequest
+import com.cyberqbit.ceptekabin.domain.model.Kiyaket
+import com.cyberqbit.ceptekabin.domain.model.KiyaketTur
+import com.cyberqbit.ceptekabin.domain.model.Mevsim
 import com.cyberqbit.ceptekabin.ui.theme.*
-import com.cyberqbit.ceptekabin.util.Constants
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,478 +44,305 @@ fun KiyaketEkleScreen(
     onKiyaketSaved: () -> Unit,
     viewModel: KiyaketEkleViewModel = hiltViewModel()
 ) {
-    val barkodSonuc              by viewModel.barkodSonuc.collectAsState()
-    val isLoading                by viewModel.isLoading.collectAsState()
-    val errorMessage             by viewModel.errorMessage.collectAsState()
-    val kaynak                   by viewModel.kaynak.collectAsState()
-    val urunKoduAramaYukleniyor  by viewModel.urunKoduAramaYukleniyor.collectAsState()
-    val urunKoduHata             by viewModel.urunKoduHata.collectAsState()
+    val barkodSonuc by viewModel.barkodSonuc.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val urunKoduAramaYukleniyor by viewModel.urunKoduAramaYukleniyor.collectAsState()
 
-    // ── Form state ────────────────────────────────────────────────────────────
-    var urunKoduInput    by remember { mutableStateOf("") }
-    var marka            by remember { mutableStateOf("") }
+    var urunKoduInput by remember { mutableStateOf("") }
+    var marka by remember { mutableStateOf("") }
     var customMarkaField by remember { mutableStateOf("") }
-    var markaExpanded    by remember { mutableStateOf(false) }
+    var markaExpanded by remember { mutableStateOf(false) }
+    
+    var model by remember { mutableStateOf("") }
+    var modelExpanded by remember { mutableStateOf(false) }
+    
+    var tur by remember { mutableStateOf<KiyaketTur?>(null) }
+    var turExpanded by remember { mutableStateOf(false) }
 
-    // #14: Kategori önce, Tür sonra
-    var kategori         by remember { mutableStateOf("") }
-    var kategoriExpanded by remember { mutableStateOf(false) }
-
-    var tur              by remember { mutableStateOf<KiyaketTur?>(null) }
-    var turExpanded      by remember { mutableStateOf(false) }
-
-    // #13: beden sadece Aksesuar dışı kategorilerde gösterilir
-    var beden            by remember { mutableStateOf("") }
-    var bedenExpanded    by remember { mutableStateOf(false) }
-
-    var renk             by remember { mutableStateOf("") }
-    var customRenkField  by remember { mutableStateOf("") }
-    var renkExpanded     by remember { mutableStateOf(false) }
-
-    var mevsim           by remember { mutableStateOf(Mevsim.DORT_MEVSIM) }
-    var mevsimExpanded   by remember { mutableStateOf(false) }
-
-    var sezon            by remember { mutableStateOf("") }
-    var not              by remember { mutableStateOf("") }
-    var fiyat            by remember { mutableStateOf("") }
-    var saveSuccess      by remember { mutableStateOf(false) }
+    var beden by remember { mutableStateOf("") }
+    var bedenExpanded by remember { mutableStateOf(false) }
+    
+    var renk by remember { mutableStateOf("") }
+    var customRenkField by remember { mutableStateOf("") }
+    var renkExpanded by remember { mutableStateOf(false) }
+    
+    var mevsim by remember { mutableStateOf(Mevsim.DORT_MEVSIM) }
+    var mevsimExpanded by remember { mutableStateOf(false) }
+    
+    var sezon by remember { mutableStateOf("") }
+    var not by remember { mutableStateOf("") }
+    var saveSuccess by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var validationError  by remember { mutableStateOf<String?>(null) }
+    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
 
     val isDark = isSystemInDarkTheme()
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
+    var validationError by remember { mutableStateOf<String?>(null) }
 
-    // #13: Aksesuar kategorisinde beden alanı gizlenir
-    val bedenGizle = Constants.BEDEN_GEREKTIRMEYEN_KATEGORILER.contains(kategori)
+    val markaList = com.cyberqbit.ceptekabin.util.Constants.MARKALAR
+    val renkList = com.cyberqbit.ceptekabin.util.Constants.RENKLER
+    val dinamikBedenListesi = com.cyberqbit.ceptekabin.util.Constants.getBedenListesi(model) ?: emptyList()
 
-    // Kategoriye göre Tür listesi
-    val turListesi = remember(kategori) { Constants.getGecerliTurler(kategori) }
-
-    // Kategoriye göre Beden listesi (null = gizle)
-    val bedenListesi = remember(kategori) { Constants.getBedenListesi(kategori) }
-
-    // Kategori değişince tur/beden sıfırla
-    LaunchedEffect(kategori) {
-        tur   = null
-        beden = ""
+    LaunchedEffect(model) {
+        if (!dinamikBedenListesi.contains(beden)) beden = ""
     }
 
-    // ── Geçici kamera dosyası — #10 FIX ──────────────────────────────────────
-    // Statik isim kullanarak her seferinde üzerine yazıyoruz; asla birikmiyor.
-    val tempCameraFile = remember { File(context.cacheDir, "temp_camera.jpg") }
-    val tempCameraUri = remember {
-        androidx.core.content.FileProvider.getUriForFile(
-            context, "${context.packageName}.fileprovider", tempCameraFile
-        )
+    // Kamera çökmesini önleyen güvenli URI oluşturucu
+    fun createSafeImageUri(): Uri {
+        val file = File(context.cacheDir, "camera_image_${System.currentTimeMillis()}.jpg")
+        return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
     }
 
-    val pickImageLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri -> uri?.let { selectedImageUri = it } }
+    val pickImageLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let { selectedImageUri = it }
+    }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            selectedImageUri = tempCameraUri
+    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) tempCameraUri?.let { selectedImageUri = it }
+    }
+
+    LaunchedEffect(kiyaketId) {
+        if (kiyaketId > 0L) {
+            val existing = viewModel.getKiyaket(kiyaketId)
+            existing?.let {
+                marka = it.marka
+                model = it.model ?: ""
+                tur = it.tur
+                beden = it.beden
+                renk = it.renk ?: ""
+                mevsim = it.mevsim
+                sezon = it.sezon ?: ""
+                not = it.not ?: ""
+                it.imageUrl?.let { url -> selectedImageUri = Uri.parse(url) }
+            }
+        } else if (barkod.isNotBlank()) {
+            viewModel.barkodAra(barkod)
         }
-        // #10 FIX: success==false ise dosyayı sil
-        else if (tempCameraFile.exists()) {
-            tempCameraFile.delete()
-        }
     }
-
-    LaunchedEffect(barkod) { if (barkod.isNotBlank()) viewModel.barkodAra(barkod) }
 
     LaunchedEffect(barkodSonuc) {
-        barkodSonuc?.let { s ->
-            marka = s.marka ?: ""
-            tur   = s.tur?.let { KiyaketTur.fromString(it) }
-            renk  = s.renk ?: ""
+        if (kiyaketId == 0L) {
+            barkodSonuc?.let { sonuc ->
+                marka = sonuc.marka ?: ""
+                model = sonuc.model ?: ""
+                tur = sonuc.tur?.let { KiyaketTur.fromString(it) }
+                renk = sonuc.renk ?: ""
+            }
         }
     }
 
-    LaunchedEffect(saveSuccess) { if (saveSuccess) onKiyaketSaved() }
+    LaunchedEffect(saveSuccess) {
+        if (saveSuccess) onKiyaketSaved()
+    }
 
     if (validationError != null) {
         AlertDialog(
             onDismissRequest = { validationError = null },
             title = { Text("Eksik Bilgi") },
-            text  = { Text(validationError ?: "") },
-            confirmButton = {
-                TextButton(onClick = { validationError = null }) { Text("Tamam") }
-            }
+            text = { Text(validationError ?: "") },
+            confirmButton = { TextButton(onClick = { validationError = null }) { Text("Tamam") } }
         )
     }
+
+    val containerColor = if (isDark) SurfaceDark else SurfaceLight
+    val cardColor = if (isDark) SurfaceVariantDark else White
+    val textColor = if (isDark) Grey100 else Grey900
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (kiyaketId > 0L) "Kıyafeti Düzenle" else "Kıyafet Ekle") },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri",
-                            tint = if (isDark) Grey100 else Grey800)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = if (isDark) SurfaceDark else SurfaceLight
-                )
+                title = { Text(if (kiyaketId > 0L) "Kıyafeti Düzenle" else "Kıyafet Ekle", fontWeight = FontWeight.Bold) },
+                navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri") } },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor)
             )
-        }
+        },
+        containerColor = containerColor
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Brush.verticalGradient(
-                    if (isDark) listOf(Grey900, SurfaceDark) else listOf(Grey100, White)
-                ))
                 .padding(paddingValues)
-                .padding(16.dp)
-                // #9 FIX: klavye IME padding
-                .imePadding()
                 .verticalScroll(rememberScrollState())
+                .padding(16.dp)
         ) {
-            // ── Ürün Kodu ile Ara ─────────────────────────────────────────────
-            GlassCard(modifier = Modifier.fillMaxWidth()) {
-                Text("Ürün Kodu ile Ara",
-                    style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold,
-                    color = if (isDark) Grey100 else Grey900)
-                Spacer(Modifier.height(4.dp))
-                Text("Etiket üzerindeki referans kodunu girin (örn: W2GL42Z8-CVL)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (isDark) Grey400 else Grey600)
-                Spacer(Modifier.height(10.dp))
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    OutlinedTextField(
-                        value = urunKoduInput, onValueChange = { urunKoduInput = it },
-                        modifier = Modifier.weight(1f),
-                        label = { Text("Ürün Kodu") },
-                        placeholder = { Text("örn: W2GL42Z8-CVL") },
-                        leadingIcon = { Icon(Icons.Default.Search, null) },
-                        singleLine = true,
-                        colors = outlinedColors(isDark)
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    GlassButton(
-                        onClick = { viewModel.urunKoduAra(urunKoduInput) },
-                        enabled = urunKoduInput.isNotBlank() && !urunKoduAramaYukleniyor,
-                        modifier = Modifier.height(56.dp)
-                    ) {
-                        if (urunKoduAramaYukleniyor) CircularProgressIndicator(
-                            Modifier.size(18.dp), White, strokeWidth = 2.dp)
-                        else Text("Ara")
-                    }
-                }
-                urunKoduHata?.let {
-                    Spacer(Modifier.height(6.dp))
-                    Text(it, style = MaterialTheme.typography.bodySmall, color = Error)
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            // ── Barkod bilgisi ────────────────────────────────────────────────
-            if (barkod.isNotBlank()) {
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.QrCode, null, tint = PrimaryLight)
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text("Barkod", style = MaterialTheme.typography.labelSmall,
-                                color = if (isDark) Grey500 else Grey600)
-                            Text(barkod, style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = if (isDark) Grey100 else Grey900)
-                        }
-                        if (kaynak.isNotEmpty()) {
-                            AssistChip(onClick = { },
-                                label = { Text(kaynak.replaceFirstChar { it.uppercase() },
-                                    style = MaterialTheme.typography.labelSmall) },
-                                colors = AssistChipDefaults.assistChipColors(
-                                    containerColor = PrimaryLight.copy(alpha = 0.1f),
-                                    labelColor = PrimaryLight))
-                        }
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            if (isLoading) {
-                Box(Modifier.fillMaxWidth(), Alignment.Center) {
-                    CircularProgressIndicator(color = PrimaryLight)
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            if (errorMessage != null && barkodSonuc == null) {
-                GlassCard(modifier = Modifier.fillMaxWidth()) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Info, null, tint = Info)
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text("Ürün bulunamadı",
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = if (isDark) Grey100 else Grey900)
-                            Text("Bilgileri manuel olarak doldurun",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = if (isDark) Grey400 else Grey600)
-                        }
-                    }
-                }
-                Spacer(Modifier.height(16.dp))
-            }
-
-            // ── Fotoğraf ──────────────────────────────────────────────────────
-            GlassCard(modifier = Modifier.fillMaxWidth()) {
-                Text("Kıyafet Resmi",
-                    style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
-                    color = if (isDark) Grey100 else Grey900)
-                Spacer(Modifier.height(12.dp))
-                if (selectedImageUri != null) {
-                    Box(Modifier.fillMaxWidth()
-                        .aspectRatio(3f / 4f)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Grey700),
-                        contentAlignment = Alignment.TopEnd
-                    ) {
-                        AsyncImage(
-                            model = selectedImageUri, contentDescription = "Seçilen Resim",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit  // #11 FIX: Fit değil Crop
-                        )
-                        IconButton(
-                            onClick = { selectedImageUri = null },
-                            modifier = Modifier.padding(4.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.6f))
-                        ) {
-                            Icon(Icons.Default.Close, "Kaldır", tint = White)
-                        }
-                    }
-                } else {
-                    Box(Modifier.fillMaxWidth().height(150.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (isDark) Grey800.copy(0.5f) else Grey300.copy(0.3f)),
-                        Alignment.Center) {
-                        Icon(Icons.Default.Image, null,
-                            tint = if (isDark) Grey500 else Grey600,
-                            modifier = Modifier.size(48.dp))
-                    }
-                }
-                Spacer(Modifier.height(12.dp))
-                Row(Modifier.fillMaxWidth(), Arrangement.spacedBy(8.dp)) {
-                    GlassButton(
-                        onClick = { cameraLauncher.launch(tempCameraUri) },
-                        modifier = Modifier.weight(1f).height(40.dp)
-                    ) {
-                        Icon(Icons.Default.PhotoCamera, null, Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Fotoğraf", fontSize = MaterialTheme.typography.labelSmall.fontSize)
-                    }
-                    GlassButton(
-                        onClick = {
-                            pickImageLauncher.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                            )
-                        },
-                        modifier = Modifier.weight(1f).height(40.dp)
-                    ) {
-                        Icon(Icons.Default.PhotoLibrary, null, Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Galeriden", fontSize = MaterialTheme.typography.labelSmall.fontSize)
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            // ── Ürün Bilgileri ────────────────────────────────────────────────
-            GlassCard(modifier = Modifier.fillMaxWidth()) {
-                Text("Ürün Bilgileri",
-                    style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
-                    color = if (isDark) Grey100 else Grey900)
-                Spacer(Modifier.height(16.dp))
-
-                // Marka
-                DropdownField("Marka *", Icons.Default.Business, marka, markaExpanded,
-                    { markaExpanded = it }, isDark) {
-                    Constants.MARKALAR.forEach { m ->
-                        DropdownMenuItem(text = { Text(m) }, onClick = { marka = m; customMarkaField = ""; markaExpanded = false })
-                    }
-                }
-                if (marka == "Diğer") {
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(value = customMarkaField, onValueChange = { customMarkaField = it },
-                        modifier = Modifier.fillMaxWidth(), label = { Text("Marka Adı") },
-                        placeholder = { Text("Markayı yazın") }, singleLine = true,
-                        colors = outlinedColors(isDark))
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                // #14 FIX: Kategori → Tür sıralaması
-                DropdownField("Kategori *", Icons.Default.GridView, kategori, kategoriExpanded,
-                    { kategoriExpanded = it }, isDark) {
-                    Constants.ANA_KATEGORILER.forEach { k ->
-                        DropdownMenuItem(text = { Text(k) }, onClick = { kategori = k; kategoriExpanded = false })
-                    }
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                DropdownField("Tür *", Icons.Default.Category,
-                    tur?.displayName ?: "", turExpanded, { turExpanded = it }, isDark,
-                    enabled = kategori.isNotBlank()) {
-                    turListesi.forEach { t ->
-                        DropdownMenuItem(text = { Text(t) }, onClick = {
-                            tur = KiyaketTur.fromString(t); turExpanded = false
-                        })
-                    }
-                }
-
-                // #13 FIX: Aksesuar kategorisinde beden gizlenir
-                if (!bedenGizle && bedenListesi != null) {
+            // Yüksek Kontrastlı Resim Seçici
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = cardColor),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text("Kıyafet Görseli", fontWeight = FontWeight.SemiBold, color = textColor)
                     Spacer(Modifier.height(12.dp))
-                    DropdownField("Beden *", Icons.Default.Straighten,
-                        beden, bedenExpanded, { bedenExpanded = it }, isDark) {
-                        bedenListesi.forEach { b ->
-                            DropdownMenuItem(text = { Text(b) }, onClick = { beden = b; bedenExpanded = false })
+                    
+                    if (selectedImageUri != null) {
+                        Box(modifier = Modifier.fillMaxWidth().height(220.dp).clip(RoundedCornerShape(12.dp)), contentAlignment = Alignment.TopEnd) {
+                            AsyncImage(
+                                model = ImageRequest.Builder(context).data(selectedImageUri).setParameter("time", System.currentTimeMillis(), memoryCacheKey = null).build(),
+                                contentDescription = "Seçilen Resim",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                            IconButton(onClick = { selectedImageUri = null }, modifier = Modifier.padding(8.dp).background(Color.Black.copy(alpha = 0.6f), CircleShape)) {
+                                Icon(Icons.Default.Close, "Kaldır", tint = Color.White)
+                            }
+                        }
+                    } else {
+                        Box(modifier = Modifier.fillMaxWidth().height(150.dp).clip(RoundedCornerShape(12.dp)).background(if (isDark) Grey800 else Grey200), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.AddPhotoAlternate, null, tint = Grey500, modifier = Modifier.size(48.dp))
                         }
                     }
-                }
 
-                Spacer(Modifier.height(12.dp))
-
-                // Renk
-                DropdownField("Renk", Icons.Default.Palette, renk, renkExpanded,
-                    { renkExpanded = it }, isDark) {
-                    Constants.RENKLER.forEach { r ->
-                        DropdownMenuItem(text = { Text(r) }, onClick = { renk = r; customRenkField = ""; renkExpanded = false })
+                    Spacer(Modifier.height(16.dp))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Button(
+                            onClick = { 
+                                val uri = createSafeImageUri()
+                                tempCameraUri = uri
+                                cameraLauncher.launch(uri) 
+                            }, 
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryDark)
+                        ) { Text("Kamera") }
+                        
+                        OutlinedButton(
+                            onClick = { pickImageLauncher.launch(androidx.activity.result.PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, 
+                            modifier = Modifier.weight(1f)
+                        ) { Text("Galeri") }
                     }
                 }
-                if (renk == "Diğer") {
-                    Spacer(Modifier.height(8.dp))
-                    OutlinedTextField(value = customRenkField, onValueChange = { customRenkField = it },
-                        modifier = Modifier.fillMaxWidth(), label = { Text("Renk Adı") },
-                        singleLine = true, colors = outlinedColors(isDark))
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                // Mevsim
-                DropdownField("Mevsim", Icons.Default.WbSunny,
-                    mevsim.displayName, mevsimExpanded, { mevsimExpanded = it }, isDark) {
-                    Mevsim.entries.forEach { m ->
-                        DropdownMenuItem(text = { Text(m.displayName) }, onClick = { mevsim = m; mevsimExpanded = false })
-                    }
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                OutlinedTextField(value = sezon, onValueChange = { sezon = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Sezon (Opsiyonel)") }, placeholder = { Text("örn: 2025 Yaz") },
-                    leadingIcon = { Icon(Icons.Default.DateRange, null) }, singleLine = true,
-                    colors = outlinedColors(isDark))
-
-                Spacer(Modifier.height(12.dp))
-
-                OutlinedTextField(value = fiyat, onValueChange = { fiyat = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Satın Alma Fiyatı (₺ — Opsiyonel)") },
-                    leadingIcon = { Icon(Icons.Default.Payments, null) }, singleLine = true,
-                    colors = outlinedColors(isDark))
-
-                Spacer(Modifier.height(12.dp))
-
-                OutlinedTextField(value = not, onValueChange = { not = it },
-                    modifier = Modifier.fillMaxWidth(), label = { Text("Not (Opsiyonel)") },
-                    leadingIcon = { Icon(Icons.Default.Comment, null) }, maxLines = 3,
-                    colors = outlinedColors(isDark))
             }
 
             Spacer(Modifier.height(24.dp))
 
-            GlassButton(
-                onClick = {
-                    val finalMarka = if (marka == "Diğer") customMarkaField else marka
-                    val finalRenk  = if (renk  == "Diğer") customRenkField  else renk
-                    val finalBeden = if (bedenGizle) "Standart" else beden
-                    val fiyatDouble = fiyat.replace(",", ".").toDoubleOrNull()
+            // Yüksek Kontrastlı Form
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = cardColor),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(Modifier.padding(16.dp)) {
+                    Text("Ürün Detayları", fontWeight = FontWeight.SemiBold, color = textColor)
+                    Spacer(Modifier.height(16.dp))
 
-                    if (finalMarka.isBlank() || tur == null || kategori.isBlank() ||
-                        (!bedenGizle && finalBeden.isBlank())) {
-                        validationError = "Lütfen Marka, Kategori ve Tür alanlarını eksiksiz doldurun."
-                        return@GlassButton
+                    // Marka Dropdown
+                    ExposedDropdownMenuBox(expanded = markaExpanded, onExpandedChange = { markaExpanded = it }) {
+                        OutlinedTextField(
+                            value = marka, onValueChange = { }, readOnly = true,
+                            label = { Text("Marka *") }, modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = markaExpanded) },
+                            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor)
+                        )
+                        ExposedDropdownMenu(expanded = markaExpanded, onDismissRequest = { markaExpanded = false }) {
+                            markaList.forEach { m -> DropdownMenuItem(text = { Text(m) }, onClick = { marka = m; customMarkaField = ""; markaExpanded = false }) }
+                        }
+                    }
+                    if (marka == "Diğer") {
+                        OutlinedTextField(value = customMarkaField, onValueChange = { customMarkaField = it }, label = { Text("Marka Adı") }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
                     }
 
-                    viewModel.saveKiyaket(
-                        kiyaket = Kiyaket(
-                            barkod           = barkod.takeIf { it.isNotBlank() },
-                            marka            = finalMarka,
-                            model            = tur?.displayName,
-                            tur              = tur!!,
-                            beden            = finalBeden,
-                            renk             = finalRenk.takeIf { it.isNotBlank() },
-                            mevsim           = mevsim,
-                            sezon            = sezon.takeIf { it.isNotBlank() },
-                            not              = not.takeIf { it.isNotBlank() },
-                            imageUrl         = selectedImageUri?.toString(),
-                            satinAlmaFiyati  = fiyatDouble
-                        ),
-                        onSuccess = { saveSuccess = true },
-                        onError   = { validationError = it }
+                    Spacer(Modifier.height(16.dp))
+
+                    // Model/Kategori
+                    ExposedDropdownMenuBox(expanded = modelExpanded, onExpandedChange = { modelExpanded = it }) {
+                        OutlinedTextField(
+                            value = model, onValueChange = { }, readOnly = true,
+                            label = { Text("Kategori *") }, modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = modelExpanded) },
+                            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor)
+                        )
+                        ExposedDropdownMenu(expanded = modelExpanded, onDismissRequest = { modelExpanded = false }) {
+                            com.cyberqbit.ceptekabin.util.Constants.ANA_KATEGORILER.forEach { k -> DropdownMenuItem(text = { Text(k) }, onClick = { model = k; modelExpanded = false; tur = null; beden = "" }) }
+                        }
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Tür
+                    ExposedDropdownMenuBox(expanded = turExpanded, onExpandedChange = { turExpanded = it }) {
+                        OutlinedTextField(
+                            value = tur?.displayName ?: "", onValueChange = { }, readOnly = true,
+                            label = { Text("Tür *") }, modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = turExpanded) },
+                            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor)
+                        )
+                        ExposedDropdownMenu(expanded = turExpanded, onDismissRequest = { turExpanded = false }) {
+                            com.cyberqbit.ceptekabin.util.Constants.getGecerliTurler(model).forEach { t -> DropdownMenuItem(text = { Text(t) }, onClick = { tur = KiyaketTur.fromString(t); turExpanded = false }) }
+                        }
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Beden
+                    if (dinamikBedenListesi.isNotEmpty()) {
+                        ExposedDropdownMenuBox(expanded = bedenExpanded, onExpandedChange = { bedenExpanded = it }) {
+                            OutlinedTextField(
+                                value = beden, onValueChange = { }, readOnly = true,
+                                label = { Text("Beden *") }, modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = bedenExpanded) },
+                                colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor)
+                            )
+                            ExposedDropdownMenu(expanded = bedenExpanded, onDismissRequest = { bedenExpanded = false }) {
+                                dinamikBedenListesi.forEach { b -> DropdownMenuItem(text = { Text(b) }, onClick = { beden = b; bedenExpanded = false }) }
+                            }
+                        }
+                        Spacer(Modifier.height(16.dp))
+                    }
+
+                    // Renk
+                    ExposedDropdownMenuBox(expanded = renkExpanded, onExpandedChange = { renkExpanded = it }) {
+                        OutlinedTextField(
+                            value = renk, onValueChange = { }, readOnly = true,
+                            label = { Text("Renk") }, modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = renkExpanded) },
+                            colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor)
+                        )
+                        ExposedDropdownMenu(expanded = renkExpanded, onDismissRequest = { renkExpanded = false }) {
+                            renkList.forEach { r -> DropdownMenuItem(text = { Text(r) }, onClick = { renk = r; customRenkField = ""; renkExpanded = false }) }
+                        }
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    // Not
+                    OutlinedTextField(
+                        value = not, onValueChange = { not = it },
+                        label = { Text("Not (İsteğe Bağlı)") }, modifier = Modifier.fillMaxWidth(),
+                        maxLines = 3,
+                        colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor)
                     )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled  = !isLoading
-            ) {
-                Icon(Icons.Default.Save, null)
-                Spacer(Modifier.width(8.dp))
-                Text("Kaydet")
+                }
             }
 
-            Spacer(Modifier.height(12.dp))
-            TextButton(onClick = onNavigateBack, modifier = Modifier.fillMaxWidth()) {
-                Text("İptal", color = if (isDark) Grey400 else Grey600)
+            Spacer(Modifier.height(32.dp))
+
+            // Kaydet Butonu
+            Button(
+                onClick = {
+                    val finalMarka = if (marka == "Diğer") customMarkaField else marka
+                    val finalRenk = if (renk == "Diğer") customRenkField else renk
+                    
+                    if (finalMarka.isNotBlank() && tur != null && model.isNotBlank()) {
+                        viewModel.saveKiyaket(
+                            kiyaket = Kiyaket(
+                                id = kiyaketId, barkod = barkod.takeIf { it.isNotBlank() },
+                                marka = finalMarka, model = model, tur = tur!!, beden = beden, renk = finalRenk,
+                                mevsim = mevsim, sezon = sezon, not = not, imageUrl = selectedImageUri?.toString()
+                            ),
+                            onSuccess = { saveSuccess = true },
+                            onError = { validationError = it }
+                        )
+                    } else {
+                        validationError = "Lütfen yıldızlı (*) alanları eksiksiz doldurun."
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                enabled = !isLoading,
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(if (kiyaketId > 0L) "Güncelle" else "Kaydet", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
+            Spacer(Modifier.height(40.dp)) // Kaydırma payı
         }
     }
 }
-
-// ── Yardımcı bileşenler ───────────────────────────────────────────────────────
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun DropdownField(
-    label: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    value: String,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    isDark: Boolean,
-    enabled: Boolean = true,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    ExposedDropdownMenuBox(expanded = expanded && enabled, onExpandedChange = { if (enabled) onExpandedChange(it) }) {
-        OutlinedTextField(
-            value = value, onValueChange = { },
-            modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, enabled),
-            label = { Text(label) },
-            leadingIcon = { Icon(icon, null) },
-            readOnly = true, enabled = enabled,
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded && enabled) },
-            colors = outlinedColors(isDark)
-        )
-        ExposedDropdownMenu(expanded = expanded && enabled, onDismissRequest = { onExpandedChange(false) },
-            content = content)
-    }
-}
-
-@Composable
-private fun outlinedColors(isDark: Boolean) = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor   = PrimaryLight,
-    unfocusedBorderColor = if (isDark) Grey700 else Grey400
-)

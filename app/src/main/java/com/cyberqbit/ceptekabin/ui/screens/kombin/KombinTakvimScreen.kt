@@ -1,28 +1,29 @@
 package com.cyberqbit.ceptekabin.ui.screens.kombin
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Style
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cyberqbit.ceptekabin.domain.model.Kombin
 import com.cyberqbit.ceptekabin.ui.components.GlassCard
 import com.cyberqbit.ceptekabin.ui.theme.*
 import java.text.SimpleDateFormat
@@ -32,18 +33,32 @@ import java.util.*
 @Composable
 fun KombinTakvimScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToKombinDetay: (Long) -> Unit,
+    onNavigateToKombinDetay: (Long) -> Unit = {},
     viewModel: KombinTakvimViewModel = hiltViewModel()
 ) {
-    val uiState   by viewModel.uiState.collectAsState()
-    val isDark    = isSystemInDarkTheme()
-    val cal       = remember { Calendar.getInstance() }
+    val selectedDate by viewModel.selectedDate.collectAsState()
+    val gunlukGirisler by viewModel.gunlukGirisler.collectAsState()
+    val tumKombinler by viewModel.tumKombinler.collectAsState()
+    
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val isDark = isSystemInDarkTheme()
 
-    var displayedYear  by remember { mutableStateOf(cal.get(Calendar.YEAR)) }
-    var displayedMonth by remember { mutableStateOf(cal.get(Calendar.MONTH)) }
+    // Sadece son 5 gün ve gelecek 30 günü gösterelim
+    val calendarDays = remember {
+        val days = mutableListOf<Long>()
+        val cal = Calendar.getInstance()
+        cal.add(Calendar.DAY_OF_YEAR, -5)
+        for (i in 0..35) {
+            days.add(cal.timeInMillis)
+            cal.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        days
+    }
 
-    LaunchedEffect(displayedYear, displayedMonth) {
-        viewModel.loadMonth(displayedYear, displayedMonth)
+    val todayMidnight = remember {
+        Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0); set(Calendar.SECOND, 0); set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
     }
 
     Scaffold(
@@ -51,222 +66,122 @@ fun KombinTakvimScreen(
             TopAppBar(
                 title = { Text("Kombin Takvimi") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri")
-                    }
+                    IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri") }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = if (isDark) SurfaceDark else SurfaceLight)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = if (isDark) SurfaceDark else SurfaceLight)
             )
         }
-    ) { padding ->
-        LazyColumn(
+    ) { paddingValues ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .background(Brush.verticalGradient(if (isDark) listOf(Grey900, SurfaceDark) else listOf(Grey100, White)))
+                .padding(paddingValues)
         ) {
-            item {
-                Spacer(Modifier.height(8.dp))
-                MonthHeader(
-                    year  = displayedYear,
-                    month = displayedMonth,
-                    onPrev = {
-                        if (displayedMonth == 0) { displayedMonth = 11; displayedYear-- }
-                        else displayedMonth--
-                    },
-                    onNext = {
-                        if (displayedMonth == 11) { displayedMonth = 0; displayedYear++ }
-                        else displayedMonth++
-                    },
-                    isDark = isDark
-                )
-            }
+            // Üst Takvim Şeridi
+            LazyRow(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                items(calendarDays) { dayTimestamp ->
+                    val isSelected = selectedDate == dayTimestamp
+                    val isPast = dayTimestamp < todayMidnight
+                    val dayCal = Calendar.getInstance().apply { timeInMillis = dayTimestamp }
+                    val dayName = SimpleDateFormat("EEE", Locale("tr")).format(dayCal.time)
+                    val dayNum = dayCal.get(Calendar.DAY_OF_MONTH).toString()
 
-            item {
-                CalendarGrid(
-                    year      = displayedYear,
-                    month     = displayedMonth,
-                    aktivGunler = uiState.aktivGunler,
-                    secilenGun = uiState.secilenGun,
-                    onDayClick = { viewModel.selectDay(it) },
-                    isDark    = isDark
-                )
-            }
-
-            if (uiState.secilenGunKombinler.isNotEmpty()) {
-                item {
-                    val sdf = SimpleDateFormat("d MMMM yyyy", Locale("tr", "TR"))
-                    Text(
-                        sdf.format(Date(uiState.secilenGun ?: 0)),
-                        style      = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color      = if (isDark) Grey100 else Grey900
-                    )
-                }
-                items(uiState.secilenGunKombinler) { kullanimItem ->
-                    GlassCard(
-                        modifier = Modifier.fillMaxWidth()
-                            .clickable { onNavigateToKombinDetay(kullanimItem.kombinId) }
+                    Column(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(if (isSelected) PrimaryCyan else if (isDark) GlassDark else GlassLight)
+                            .clickable { viewModel.setSelectedDate(dayTimestamp) }
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Style, null, Modifier.size(24.dp), tint = AccentGold)
-                            Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text(kullanimItem.kombinAd,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium,
-                                    color = if (isDark) Grey100 else Grey900)
-                                val timeFmt = SimpleDateFormat("HH:mm", Locale.getDefault())
-                                Text(timeFmt.format(Date(kullanimItem.tarih)),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = if (isDark) Grey500 else Grey600)
+                        Text(dayName, color = if (isSelected) White else if (isPast) Grey500 else if (isDark) Grey300 else Grey700, style = MaterialTheme.typography.labelMedium)
+                        Spacer(Modifier.height(4.dp))
+                        Text(dayNum, color = if (isSelected) White else if (isPast) Grey500 else if (isDark) Grey100 else Grey900, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            HorizontalDivider(color = if (isDark) GlassDarkBorder else Grey200)
+
+            // Seçili Günün Detayları
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    val dateStr = SimpleDateFormat("dd MMMM yyyy", Locale("tr")).format(Date(selectedDate))
+                    Text(dateStr, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
+                    Spacer(Modifier.height(16.dp))
+                }
+
+                items(gunlukGirisler) { giris ->
+                    GlassCard(modifier = Modifier.fillMaxWidth().clickable { onNavigateToKombinDetay(giris.kombinId) }) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(AccentGold.copy(alpha = 0.2f)), contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Default.Style, null, tint = AccentGold)
+                                }
+                                Spacer(Modifier.width(16.dp))
+                                Column {
+                                    Text(giris.kombinAd, style = MaterialTheme.typography.titleMedium, color = if (isDark) Grey100 else Grey900)
+                                    Text("Planlandı", style = MaterialTheme.typography.bodySmall, color = PrimaryLight)
+                                }
                             }
-                            Icon(Icons.Default.ChevronRight, null,
-                                tint = if (isDark) Grey500 else Grey400)
+                            if (selectedDate >= todayMidnight) {
+                                IconButton(onClick = { viewModel.removeTakvimGirisi(giris) }) {
+                                    Icon(Icons.Default.Delete, "Sil", tint = Error)
+                                }
+                            }
                         }
                     }
                 }
-            } else if (uiState.secilenGun != null) {
+
                 item {
-                    Box(Modifier.fillMaxWidth().height(100.dp), Alignment.Center) {
-                        Text("Bu gün için kombin kaydı yok.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = if (isDark) Grey500 else Grey600)
+                    if (selectedDate >= todayMidnight && gunlukGirisler.size < 3) {
+                        Button(
+                            onClick = { showBottomSheet = true },
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = PrimaryDark)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Kombin Ekle (${3 - gunlukGirisler.size} hak kaldı)")
+                        }
+                    } else if (selectedDate < todayMidnight) {
+                        Text("Geçmiş günlere yeni kombin eklenemez. (Arşiv Modu)", style = MaterialTheme.typography.bodyMedium, color = Grey500)
                     }
                 }
             }
-
-            item { Spacer(Modifier.height(16.dp)) }
         }
-    }
-}
 
-// ── Ay başlığı ────────────────────────────────────────────────────────────────
-@Composable
-private fun MonthHeader(year: Int, month: Int, onPrev: () -> Unit, onNext: () -> Unit, isDark: Boolean) {
-    val months = listOf("Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",
-        "Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık")
-    Row(Modifier.fillMaxWidth(), Arrangement.SpaceBetween, Alignment.CenterVertically) {
-        IconButton(onClick = onPrev) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Önceki ay",
-                tint = if (isDark) Grey300 else Grey700)
-        }
-        Text("${months[month]} $year",
-            style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold,
-            color = if (isDark) Grey100 else Grey900)
-        IconButton(onClick = onNext) {
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, "Sonraki ay",
-                tint = if (isDark) Grey300 else Grey700)
-        }
-    }
-}
-
-// ── Ay ızgarası ───────────────────────────────────────────────────────────────
-@Composable
-private fun CalendarGrid(
-    year: Int,
-    month: Int,
-    aktivGunler: Set<Int>,
-    secilenGun: Long?,
-    onDayClick: (Long) -> Unit,
-    isDark: Boolean
-) {
-    val cal = Calendar.getInstance().apply {
-        set(Calendar.YEAR, year)
-        set(Calendar.MONTH, month)
-        set(Calendar.DAY_OF_MONTH, 1)
-    }
-    val firstDow  = (cal.get(Calendar.DAY_OF_WEEK) - 2 + 7) % 7  // Pazartesi başlangıç
-    val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-    val today = Calendar.getInstance()
-    val todayYear  = today.get(Calendar.YEAR)
-    val todayMonth = today.get(Calendar.MONTH)
-    val todayDay   = today.get(Calendar.DAY_OF_MONTH)
-
-    val dayHeaders = listOf("Pt","Sa","Ça","Pe","Cu","Ct","Pz")
-
-    Column {
-        Row(Modifier.fillMaxWidth()) {
-            dayHeaders.forEach { d ->
-                Text(d, modifier = Modifier.weight(1f), textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (isDark) Grey500 else Grey600)
-            }
-        }
-        Spacer(Modifier.height(4.dp))
-
-        val totalCells = firstDow + daysInMonth
-        val rows = (totalCells + 6) / 7
-
-        for (row in 0 until rows) {
-            Row(Modifier.fillMaxWidth()) {
-                for (col in 0 until 7) {
-                    val cellIndex = row * 7 + col
-                    val dayNum    = cellIndex - firstDow + 1
-                    Modifier.weight(1f)
-
-                    if (dayNum < 1 || dayNum > daysInMonth) {
-                        Box(Modifier.weight(1f).height(40.dp))
+        if (showBottomSheet) {
+            ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
+                Column(Modifier.padding(16.dp).fillMaxWidth()) {
+                    Text("Kombin Seç", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.height(16.dp))
+                    if (tumKombinler.isEmpty()) {
+                        Text("Henüz oluşturulmuş bir kombin yok. Önce kombin oluşturmalısın.", modifier = Modifier.padding(bottom = 32.dp))
                     } else {
-                        val dayMs = Calendar.getInstance().apply {
-                            set(Calendar.YEAR, year)
-                            set(Calendar.MONTH, month)
-                            set(Calendar.DAY_OF_MONTH, dayNum)
-                            set(Calendar.HOUR_OF_DAY, 0)
-                            set(Calendar.MINUTE, 0)
-                            set(Calendar.SECOND, 0)
-                            set(Calendar.MILLISECOND, 0)
-                        }.timeInMillis
-
-                        val isToday   = year == todayYear && month == todayMonth && dayNum == todayDay
-                        val hasKombin = dayNum in aktivGunler
-                        val isSelected = secilenGun?.let {
-                            val selCal = Calendar.getInstance().apply { timeInMillis = it }
-                            selCal.get(Calendar.DAY_OF_MONTH) == dayNum &&
-                            selCal.get(Calendar.MONTH) == month &&
-                            selCal.get(Calendar.YEAR)  == year
-                        } ?: false
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(40.dp)
-                                .padding(2.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    when {
-                                        isSelected -> PrimaryLight
-                                        isToday    -> PrimaryLight.copy(alpha = 0.15f)
-                                        else       -> Color.Transparent
-                                    }
-                                )
-                                .then(
-                                    if (isToday && !isSelected)
-                                        Modifier.border(1.dp, PrimaryLight, CircleShape)
-                                    else Modifier
-                                )
-                                .clickable { onDayClick(dayMs) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text  = dayNum.toString(),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal,
-                                    color = when {
-                                        isSelected -> White
-                                        isToday    -> PrimaryLight
-                                        isDark     -> Grey200
-                                        else       -> Grey800
-                                    }
-                                )
-                                if (hasKombin) {
-                                    Box(
-                                        Modifier.size(5.dp).clip(CircleShape)
-                                            .background(if (isSelected) White else AccentGold)
-                                    )
+                        LazyColumn(modifier = Modifier.padding(bottom = 32.dp)) {
+                            items(tumKombinler) { kombin ->
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable {
+                                        viewModel.addKombinToDate(kombin)
+                                        showBottomSheet = false
+                                    },
+                                    colors = CardDefaults.cardColors(containerColor = if (isDark) SurfaceVariantDark else Grey100)
+                                ) {
+                                    Text(kombin.ad, modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Medium)
                                 }
                             }
                         }

@@ -2,92 +2,99 @@ package com.cyberqbit.ceptekabin.ui.screens.kombin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cyberqbit.ceptekabin.data.local.database.dao.KombinDao
-import com.cyberqbit.ceptekabin.data.local.database.dao.KombinKullanimDao
-import com.cyberqbit.ceptekabin.data.local.database.entity.KombinKullanimEntity
+import com.cyberqbit.ceptekabin.data.local.database.dao.TakvimGirisiDao
+import com.cyberqbit.ceptekabin.data.local.database.entity.TakvimGirisiEntity
+import com.cyberqbit.ceptekabin.domain.model.Kombin
+import com.cyberqbit.ceptekabin.domain.repository.KombinRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.util.*
+import java.util.Calendar
 import javax.inject.Inject
-
-data class KullanimItem(
-    val id: Long,
-    val kombinId: Long,
-    val kombinAd: String,
-    val tarih: Long
-)
-
-data class KombinTakvimUiState(
-    val aktivGunler: Set<Int>                   = emptySet(),
-    val secilenGun: Long?                       = null,
-    val secilenGunKombinler: List<KullanimItem> = emptyList(),
-    val yukleniyor: Boolean                     = false
-)
 
 @HiltViewModel
 class KombinTakvimViewModel @Inject constructor(
-    private val kullanimDao: KombinKullanimDao,
-    private val kombinDao: KombinDao
+    private val takvimDao: TakvimGirisiDao,
+    private val kombinRepository: KombinRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(KombinTakvimUiState())
-    val uiState: StateFlow<KombinTakvimUiState> = _uiState.asStateFlow()
+    private val _selectedDate = MutableStateFlow(getMidnightTimestamp(System.currentTimeMillis()))
+    val selectedDate: StateFlow<Long> = _selectedDate.asStateFlow()
 
-    // Şu anki aya ait subscription'ı tutuyoruz; ay değişince iptal olur
-    private var monthJob: kotlinx.coroutines.Job? = null
+    private val _gunlukGirisler = MutableStateFlow<List<TakvimGirisiEntity>>(emptyList())
+    val gunlukGirisler: StateFlow<List<TakvimGirisiEntity>> = _gunlukGirisler.asStateFlow()
 
-    fun loadMonth(year: Int, month: Int) {
-        monthJob?.cancel()
-        monthJob = viewModelScope.launch {
-            _uiState.update { it.copy(yukleniyor = true) }
+    private val _tumKombinler = MutableStateFlow<List<Kombin>>(emptyList())
+    val tumKombinler: StateFlow<List<Kombin>> = _tumKombinler.asStateFlow()
 
-            val start = Calendar.getInstance().apply {
-                set(year, month, 1, 0, 0, 0); set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
+    init {
+        loadKombinler()
+        loadGirislerForDate(_selectedDate.value)
+    }
 
-            val end = Calendar.getInstance().apply {
-                set(year, month, 1, 23, 59, 59)
-                set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
-            }.timeInMillis
+    fun setSelectedDate(timestamp: Long) {
+        val midnight = getMidnightTimestamp(timestamp)
+        _selectedDate.value = midnight
+        loadGirislerForDate(midnight)
+    }
 
-            kullanimDao.getByDateRange(start, end).collect { list ->
-                val aktifler = list.map { e ->
-                    Calendar.getInstance().apply { timeInMillis = e.tarih }
-                        .get(Calendar.DAY_OF_MONTH)
-                }.toSet()
-                _uiState.update { it.copy(aktivGunler = aktifler, yukleniyor = false) }
+    private fun loadKombinler() {
+        viewModelScope.launch {
+            kombinRepository.getAllKombinler().collect { kombinler ->
+                _tumKombinler.value = kombinler
             }
         }
     }
 
-    fun selectDay(dayMs: Long) {
+    private fun loadGirislerForDate(timestamp: Long) {
         viewModelScope.launch {
-            val dayStart = Calendar.getInstance().apply {
-                timeInMillis = dayMs
-                set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
-                set(Calendar.SECOND, 0);       set(Calendar.MILLISECOND, 0)
-            }.timeInMillis
-            val dayEnd = dayStart + 86_399_999L
-
-            kullanimDao.getByDateRange(dayStart, dayEnd)
-                .map { list ->
-                    list.mapNotNull { entity ->
-                        val kombin = kombinDao.getById(entity.kombinId) ?: return@mapNotNull null
-                        KullanimItem(entity.id, entity.kombinId, kombin.ad, entity.tarih)
-                    }
-                }
-                .first()
-                .also { items ->
-                    _uiState.update { it.copy(secilenGun = dayMs, secilenGunKombinler = items) }
-                }
+            _gunlukGirisler.value = takvimDao.getGirislerForGun(timestamp)
         }
     }
 
-    /** "Giydim" butonundan çağrılır — hem kullanım sayısını artırır hem takvime ekler */
-    fun kaydetKullanim(kombinId: Long) {
+    fun addKombinToDate(kombin: Kombin, ogun: String = "GÜNLÜK") {
         viewModelScope.launch {
-            kullanimDao.insert(KombinKullanimEntity(kombinId = kombinId))
+            val currentGirisler = takvimDao.getGirislerForGun(_selectedDate.value)
+            if (currentGirisler.size < 3) {
+                // Kombindeki parçaların resim url'lerini toplayıp virgülle ayırarak kombinGorselleri alanına yazıyoruz
+                val imageUrls = listOfNotNull(
+                    kombin.ustGiyim?.imageUrl,
+                    kombin.altGiyim?.imageUrl,
+                    kombin.disGiyim?.imageUrl,
+                    kombin.ayakkabi?.imageUrl,
+                    kombin.aksesuar?.imageUrl
+                ).joinToString(",")
+                
+                val newGiris = TakvimGirisiEntity(
+                    tarihGunu = _selectedDate.value,
+                    ogun = ogun,
+                    kombinId = kombin.id,
+                    kombinAd = kombin.ad,
+                    kombinGorselleri = imageUrls
+                )
+                takvimDao.insertTakvimGirisi(newGiris)
+                loadGirislerForDate(_selectedDate.value)
+            }
         }
+    }
+
+    fun removeTakvimGirisi(giris: TakvimGirisiEntity) {
+        viewModelScope.launch {
+            takvimDao.deleteTakvimGirisi(giris)
+            loadGirislerForDate(_selectedDate.value)
+        }
+    }
+
+    private fun getMidnightTimestamp(timeInMillis: Long): Long {
+        val cal = Calendar.getInstance().apply {
+            this.timeInMillis = timeInMillis
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        return cal.timeInMillis
     }
 }
