@@ -1,14 +1,15 @@
 <div align="center">
 
-  <img src="app/src/main/res/drawable-nodpi/app_logo.webp" alt="CepteKabin Logo" width="175"/>
+  <img src="app/src/main/res/drawable-nodpi/app_logo.webp" alt="CepteKabin Logo" width="185"/>
 
-  # 📱 CepteKabin v2.0
+  # 📱 CepteKabin v2.1
 
   **Yapay Zeka Destekli Moda Asistanı, Dijital Gardırop ve Kişisel Kombin Planlayıcı**
 
   [![Kotlin](https://img.shields.io/badge/Kotlin-2.0+-blue.svg?style=flat-square&logo=kotlin)](https://kotlinlang.org)
   [![Jetpack Compose](https://img.shields.io/badge/Compose-Material_3-4285F4.svg?style=flat-square&logo=android)](https://developer.android.com/jetpack/compose)
   [![Architecture](https://img.shields.io/badge/Architecture-Clean_%7C_MVVM-success.svg?style=flat-square)](#-mimari-yap%C4%B1)
+  [![UI](https://img.shields.io/badge/UI-iOS_Style-000000.svg?style=flat-square)](#-modern-aray%C3%BCz)
   [![AI](https://img.shields.io/badge/AI-ML_Kit_%7C_GPT-FF6F00.svg?style=flat-square&logo=google)](https://developers.google.com/ml-kit)
   [![License](https://img.shields.io/badge/License-MIT-gray.svg?style=flat-square)](LICENSE)
 
@@ -25,6 +26,7 @@
 ---
 
 ## 📋 İçindekiler
+- [🎉 v2.1 Yenilikler](#-v21-yenilikler)
 - [✨ Temel Özellikler](#-temel-özellikler)
 - [🧠 Yapay Zeka Motorları](#-yapay-zeka-motorları)
 - [🛠️ Teknoloji Yığını](#️-teknoloji-yığını)
@@ -36,27 +38,63 @@
 
 ---
 
+## 🎉 v2.1 Yenilikler
+
+### 🌟 iOS Tarzı UI Polish
+
+> _"Android'de iOS hissi"_
+
+| Özellik | Önce | Sonra |
+|---------|------|-------|
+| Navigation Bar | Label'lı, düz ikonlar | Sadece ikon, filled/outlined değişimi |
+| Seçili İndikatör | Varsayılan M3 indicator | 52dp yuvarlak background |
+| Kart Press | Ripple efekti | iOS tarzı spring scale (0.97-0.98f) |
+| Loading | Circular progress | Shimmer skeleton animasyonu |
+| Geçişler | Hızlı fade | SlideUpFadeIn (fade + slide) |
+| Status/Nav Bar | Sistem varsayılanı | Edge-to-edge şeffaf |
+
+### 🆕 Yeni Özellikler (v2.1)
+
+| Özellik | Açıklama |
+|---------|----------|
+| **Onboarding Screen** | 3 sayfalık uygulama tanıtımı |
+| **Shimmer Loading** | Veri yüklenirken premium shimmer animasyonu |
+| **Press Effect** | Kartlara basıldığında spring scale animasyonu |
+| **Modern Hotbar** | iOS tarzı filled/outlined ikon değişimi |
+| **PhotoValidationUtil** | ML Kit ile fotoğraf doğrulama |
+| **Kombin Takvimi** | 30 gün görünüm, günde 3 kombin, snapshot |
+
+### 🐛 Hata Düzeltmeleri (v2.1)
+
+- Hotbar'da aynı sekmeye tıklama çalışmıyordu → Düzeltildi
+- Hava durumu yenileme butonu çalışmıyordu → Düzeltildi
+- Alt içerik kesiliyordu → Bottom padding artırıldı (96dp)
+- Dolap boş durumu düzgün hizalanmıyordu → Düzeltildi
+- FAB navigation bar ile çakışıyordu → Margin ayarlandı (80dp)
+
+---
+
 ## ✨ Temel Özellikler
 
 | Özellik | Açıklama |
 |---------|----------|
-| **☁️ Akıllı Hava Durumu** | 5 günlük hava tahmini + dinamik arka planlar. Her gün için tıklanabilir tahmin kartları ve kıyafet önerisi |
-| **🧠 AI Kombin Önerileri** | Dolabındaki kıyafetlerden, hava durumuna ve renk uyumuna göre otomatik kombin önerileri. Konfor endeksi ile kombin puanlaması |
-| **📦 Gizlilik Odaklı Depolama** | Görseller cihazda `.nomedia` klasörlerinde şifrelenerek saklanır. Galeride görünmez, kota yemez |
-| **🛒 Barkod ile Hızlı Ekleme** | Barkod okut, ürün bilgilerini otomatik doldur. ML Kit OCR ile manuel girişe gerek kalmadan saniyeler içinde ekle |
-| **📅 Kombin Takvimi** | Önümüzdeki 30 güne kombin planla. Günde 3 kombin, geçmiş günler arşiv modunda görüntülenir |
-| **🎨 Renk Uyumu Analizi** | 12 renk grubu üzerinden kombinasyon puanlaması. Tam uyum, analog ve komplementer renk eşleştirmeleri |
-| **👤 Sanal Prova (Yakında)** | Fotoğraf doğrulama ile yüz tespiti yap, kıyafetleri üstünde gör. ML Kit ile 400x600+ çözünürlük kontrolü |
+| **☁️ Akıllı Hava Durumu** | 5 günlük hava tahmini + dinamik arka planlar |
+| **🧠 AI Kombin Önerileri** | Hava durumuna ve renk uyumuna göre otomatik kombin önerileri |
+| **📦 Gizlilik Odaklı Depolama** | Görseller `.nomedia` klasörlerinde şifrelenir |
+| **🛒 Barkod ile Hızlı Ekleme** | ML Kit OCR ile barkod okutma |
+| **📅 Kombin Takvimi** | 30 güne kombin planla, günde 3 kombin |
+| **🎨 Renk Uyumu Analizi** | 12 renk grubu üzerinden kombinasyon puanlaması |
+| **👤 Sanal Prova** | Fotoğraf doğrulama ile yüz tespiti |
 
 ---
 
 ## 🧠 Yapay Zeka Motorları
 
 ### WeatherOutfitEngine
-Hava durumunu analiz ederek kıyafet önerir. **7 kategori** destekler:
+7 hava kategorisi ile kıyafet önerir:
 
-| Kategori | Sıcaklık Aralığı | Örnek Kıyafetler |
-|----------|-----------------|-----------------|
+| Kategori | Sıcaklık | Örnek Kıyafetler |
+|----------|----------|------------------|
 | Kavurucu | ≥ 35°C | Tişört, Şort, Sandalet |
 | Sıcak | 28-34°C | Tişört, Polo, Sneaker |
 | Ilık | 20-27°C | Gömlek, Bluz, Chino |
@@ -65,165 +103,152 @@ Hava durumunu analiz ederek kıyafet önerir. **7 kategori** destekler:
 | Çok Soğuk | 0-4°C | Termal içlik, Kaban, Eldiven |
 | Dondurucu | < 0°C | Parka, Yün Çorap, Bere |
 
-**Konfor Endeksi:** Sıcaklık, nem, rüzgar ve yağış faktörlerini birleştiren 0-100 arası skor.
+**Konfor Endeksi:** 0-100 arası skor (sıcaklık, nem, rüzgar, yağış)
 
 ### SmartKombinSuggester
-Dolabındaki kıyafetlerden **en uyumlu kombinasyonları** üretir:
-- Renk uyumu %40, hava uyumu %60 ağırlıklı puanlama
-- Mevsim ve hava durumuna göre katman önerisi (1-3 katman)
+Dolabınızdaki kıyafetlerden **en uyumlu kombinasyonları** üretir:
+- Renk uyumu %40, hava uyumu %60 ağırlıklı
+- Mevsim ve hava durumuna göre 1-3 katman önerisi
 - Maksimum 3 öneri, tekrarlanmayan seçimler
 
 ### ColorHarmonyUtil
-Renk uyumu puanlama algoritması:
-
 ```
 Uyum Puanı (100 üzerinden):
-• Aynı renk grubu         → 85 puan
-• Nötr renk ile kombinasyon → 95 puan
-• Lacivert bazlı          → 90 puan
-• Komplementer (tamamlayıcı) → 80 puan
-• Analog (yan yana)       → 75 puan
-• Çakışan renkler         → 45 puan
+• Aynı renk grubu           → 85 puan
+• Nötr renk ile kombinasyon  → 95 puan
+• Lacivert bazlı            → 90 puan
+• Komplementer              → 80 puan
+• Analog (yan yana)         → 75 puan
+• Çakışan renkler           → 45 puan
 ```
 
 ---
 
 ## 🛠️ Teknoloji Yığını
 
-| Kategori | Teknolojiler / Araçlar |
-|:---------|:-----------------------|
+| Kategori | Teknolojiler |
+|:---------|:-------------|
 | **Dil & UI** | Kotlin, Jetpack Compose, Material Design 3 |
 | **Mimari** | Clean Architecture, MVVM, Compose Navigation |
-| **Asenkron / Akış** | Coroutines, StateFlow, SharedFlow |
-| **Veritabanı** | Room Database (v6, TakvimGirisi, WeatherCache) |
+| **Asenkron** | Coroutines, StateFlow, SharedFlow |
+| **Veritabanı** | Room Database (v6) |
 | **Ağ** | Retrofit2, OkHttp3, Gson |
-| **AI & Görüntü** | Google ML Kit (Face Detection, OCR), CameraX |
-| **Görsel Yükleme** | Coil (AsyncImage) |
-| **Bulut (Opsiyonel)** | Firebase Auth, Cloud Firestore |
+| **AI & Görüntü** | Google ML Kit (Face, OCR), CameraX |
+| **Görsel** | Coil (AsyncImage) |
 | **DI** | Dagger-Hilt |
-| **Dosya** | Android FileProvider, .nomedia korumalı depolama |
+| **Cloud** | Firebase Auth, Cloud Firestore (opsiyonel) |
 
 ---
 
 ## 🏗️ Mimari Yapı
-
-Clean Architecture + MVVM yapısı ile sürdürülebilir ve test edilebilir kod:
-
-```mermaid
-graph TD
-  UI[UI Layer / Compose Screens] --> VM[ViewModel]
-  VM --> Engine[Domain Layer / Engine]
-  Engine --> RepoInt[Repository Interfaces]
-  RepoInt -.-> RepoImpl[Data Layer / RepositoryImpl]
-  RepoImpl --> Local[(Room DB / Cihaz Hafızası)]
-  RepoImpl --> Remote((Hava Durumu API / Barkod API))
-  Engine --> Smart[SmartKombinSuggester]
-  Engine --> Color[ColorHarmonyUtil]
-  Engine --> Weather[WeatherOutfitEngine]
-```
-
-### Ana Modüller
 
 ```
 app/src/main/java/com/cyberqbit/ceptekabin/
 ├── domain/
 │   ├── model/          # Kiyaket, Kombin, HavaDurumu, ForecastItem
 │   ├── engine/          # WeatherOutfitEngine, SmartKombinSuggester, ColorHarmonyUtil
-│   └── repository/      # Repository interfaces
+│   ├── repository/      # Repository interfaces
+│   └── util/           # PhotoValidationUtil
 ├── data/
 │   ├── local/
 │   │   ├── database/   # Room entities, DAOs, Database (v6)
-│   │   └── dao/        # TakvimGirisiDao, WeatherCacheDao, vb.
+│   │   └── dao/        # TakvimGirisiDao, WeatherCacheDao
 │   ├── repository/     # Repository implementations
 │   └── service/        # LocationService
 ├── ui/
 │   ├── screens/        # Home, Dolap, Kombin, HavaDurumu, Takvim, Onboarding
-│   ├── components/      # GlassCard, GlassSurface, RenkDairesi
-│   ├── navigation/      # NavGraph, Screen routes
-│   └── theme/          # Color, Type, Theme (Dark/Light)
-└── util/              # Constants, PhotoValidationUtil
+│   ├── components/     # GlassCard, GlassSurface, ShimmerLoading, RenkDairesi
+│   ├── navigation/     # NavGraph, Screen routes
+│   └── theme/          # Color, Type, Theme, Animations
+└── util/              # Constants
 ```
 
 ---
 
 ## 📅 Kombin Takvimi
 
-Planlama özellikleri:
-
 - **30 günlük görünüm** - geçmişe 5 gün, ileriye 30 gün
-- **Günde 3 kombin hakkı** - sabah, öğle, akşam slotları
+- **Günde 3 kombin** - sabah, öğle, akşam slotları
 - **Arşiv modu** - geçmiş günler salt okunur
-- **Anlık snapshot** - kıyafetin güncel görseli kaydedilir (kıyafet silinse bile görünür)
-- **Kullanım takibi** - her kıyafetin kaç kez giyildiği ve son giyim tarihi
+- **Anlık snapshot** - kıyafet silinse bile görsel kaydedilir
+- **Kullanım takibi** - her kıyafetin kaç kez giyildiği
 
 ---
 
 ## 🎨 Modern Arayüz
 
-**Modern Tasarım Dili Felsefesi** :
+### iOS Tarzı Animasyonlar
 
-- **GlassCard / GlassSurface** - 12+ composable'da tutarlı blur + border + rounded corner
-- **Dynamic Weather Backgrounds** - hava durumuna göre 5 farklı gradient tema
-- **60 FPS Animasyonlar** - pager, scroll, expand/collapse
-- **Karanlık Mod** - tüm ekranlarda tam uyumlu renk paleti
-- **Konfor Endeksi Badge** - yeşil/sarı/kırmızı renk kodlu hava konfor göstergesi
+| Animasyon | Açıklama |
+|-----------|----------|
+| **Press Effect** | 0.97-0.98f scale, spring(damping=0.7, stiffness=400) |
+| **SlideUpFadeIn** | fade(300ms) + slideUp(spring damping=0.8) |
+| **Shimmer** | 1200ms döngü, FastOutSlowInEasing |
+| **Page Transition** | slideHorizontal + fade, spring(damping=0.85) |
+
+### GlassCard / GlassSurface
+- 16dp corner radius
+- Light: 0.85f opacity, Dark: 0.7f opacity
+- 1dp subtle border
+- Soft shadow
+
+### Modern Navigation Bar
+- Sadece ikonlar (label yok)
+- Aktif: dolu (filled) ikon + 52dp yuvarlak background
+- Pasif: çerçeveli (outlined) ikon
+- 28dp ikon boyutu
+- iOS tarzı spring press effect
 
 ### Tasarım Sistemi
 
 | Token | Değer |
 |-------|-------|
-| Primary | `#2196F3` (Mavi) |
-| Secondary | `#00BCD4` (Cyan) |
-| Accent | `#FFB300` (Altın) |
+| Primary | `#2196F3` |
+| Secondary | `#00BCD4` |
+| Accent | `#FFB300` |
 | Error | `#E53935` |
-| Glass Light | `0.7f` opacity + blur |
-| Glass Dark | `0.5f` opacity + blur |
 
 ---
 
 ## ⚙️ Kurulum ve Geliştirme
 
 ### Ön Koşullar
-
-- Android Studio (Koal veya daha yeni)
+- Android Studio (Koal+)
 - JDK 17+
-- `google-services.json` (Firebase için)
-- Google ML Kit bağımlılıkları
+- `google-services.json` (Firebase)
+- Google ML Kit
 
 ### Adımlar
 
-1.  Depoyu klonlayın:
-    ```bash
-    git clone https://github.com/cyberQbit/CepteKabin.git
-    cd CepteKabin
-    ```
+```bash
+git clone https://github.com/cyberQbit/CepteKabin.git
+cd CepteKabin
+```
 
-2.  Firebase Console'dan aldığınız `google-services.json` dosyasını `app/` klasörüne koyun.
+2. Firebase Console'dan `google-services.json`'ı `app/` klasörüne koyun
 
-3.  `Constants.kt` içindeki `WEB_CLIENT_ID` alanını kendi Firebase Web Client ID'niz ile değiştirin.
+3. `Constants.kt` içindeki `WEB_CLIENT_ID`'yi güncelleyin
 
-4.  Projeyi derleyin:
-    ```bash
-    ./gradlew clean
-    ./gradlew assembleRelease
-    ```
+4. Derleyin:
+```bash
+./gradlew clean
+./gradlew assembleRelease
+```
 
 ### Önemli Notlar
 
-> ⚠️ **Veritabanı v6:** Kullanıcılar ilk açılışta versiyon yükseltmesi nedeniyle eski verilerini kaybedecek. `fallbackToDestructiveMigration()` aktif.
+> ⚠️ **Veritabanı v6:** İlk açılışta eski veriler silinecek. `fallbackToDestructiveMigration()` aktif.
 
-> 💡 **Konum İzni:** Hava durumu için `ACCESS_FINE_LOCATION` izni gereklidir. Verilmezse varsayılan "Ankara" gösterilir.
+> 💡 **Konum İzni:** Hava durumu için `ACCESS_FINE_LOCATION` gereklidir.
 
 ---
 
 ## 🤝 Katkıda Bulunma
 
-Açık kaynak dünyasını destekliyoruz! Yeni özellik eklemek, bug çözmek veya arayüzü geliştirmek için:
-
-1.  Projeyi Fork'layın
-2.  Yeni branch oluşturun (`git checkout -b feature/YeniFikir`)
-3.  Değişikliklerinizi commit'leyin (`git commit -m 'AI kombin önerisi modülü eklendi'`)
-4.  Branch'inizi push'layın ve Pull Request açın
+1. Fork'layın
+2. Branch oluşturun (`git checkout -b feature/YeniFikir`)
+3. Commit'leyin
+4. Push'layın ve Pull Request açın
 
 ---
 

@@ -1,7 +1,11 @@
 package com.cyberqbit.ceptekabin.ui.screens.havadurumu
 
 import android.Manifest
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -16,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -26,6 +31,8 @@ import com.cyberqbit.ceptekabin.domain.engine.WeatherOutfitEngine
 import com.cyberqbit.ceptekabin.domain.model.ForecastItem
 import com.cyberqbit.ceptekabin.domain.model.HavaDurumu
 import com.cyberqbit.ceptekabin.domain.model.HavaDurumuDurum
+import com.cyberqbit.ceptekabin.ui.components.GlassCard
+import com.cyberqbit.ceptekabin.ui.components.ShimmerCard
 import com.cyberqbit.ceptekabin.ui.theme.*
 import com.cyberqbit.ceptekabin.ui.screens.home.HomeViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -57,7 +64,7 @@ fun HavaDurumuScreen(
     Column(Modifier.fillMaxSize().background(Brush.verticalGradient(bgColors))
         .statusBarsPadding().navigationBarsPadding()
         .verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp)
-        .padding(bottom = 16.dp)) {
+        .padding(bottom = 96.dp)) {
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically) {
@@ -67,42 +74,56 @@ fun HavaDurumuScreen(
                 Icon(Icons.Default.MyLocation, "Konum", tint = PrimaryLight)
             }
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
         if (isLoading) {
-            Box(Modifier.fillMaxWidth().height(200.dp), Alignment.Center) { CircularProgressIndicator(color = PrimaryLight) }
-        } else {
-            havaDurumu?.let { hava ->
-                MainWeatherCard(hava, sonGuncelleme, isDark)
+            Column(Modifier.fillMaxWidth().padding(vertical = 16.dp)) {
+                ShimmerCard(modifier = Modifier.fillMaxWidth().height(200.dp), isDark = isDark) {}
                 Spacer(Modifier.height(16.dp))
-                WeatherDetailsRow(hava, isDark)
-                Spacer(Modifier.height(20.dp))
-
-                if (hava.forecastList.isNotEmpty()) {
-                    Text("5 Günlük Tahmin", style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
-                    Spacer(Modifier.height(4.dp))
-                    Text("Güne dokunarak kıyafet önerisini gör", style = MaterialTheme.typography.labelSmall,
-                        color = if (isDark) Grey500 else Grey600)
-                    Spacer(Modifier.height(8.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        items(hava.forecastList) { forecast ->
-                            ForecastCard(forecast, secilenForecast == forecast, isDark) {
-                                secilenForecast = if (secilenForecast == forecast) null else forecast
-                            }
-                        }
-                    }
-                    secilenForecast?.let { forecast ->
-                        Spacer(Modifier.height(12.dp))
-                        val rec = WeatherOutfitEngine.getRecommendationForForecast(forecast)
-                        ForecastOutfitCard(forecast, rec, isDark)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    repeat(3) {
+                        ShimmerCard(modifier = Modifier.weight(1f).height(80.dp), isDark = isDark) {}
                     }
                 }
+            }
+        } else {
+            SlideUpFadeIn(visible = havaDurumu != null) {
+                havaDurumu?.let { hava ->
+                    Column {
+                        MainWeatherCard(hava, sonGuncelleme, isDark)
+                        Spacer(Modifier.height(14.dp))
+                        WeatherDetailsRow(hava, isDark)
+                        Spacer(Modifier.height(18.dp))
 
-                Spacer(Modifier.height(20.dp))
-                val recommendation = WeatherOutfitEngine.getRecommendation(hava)
-                OutfitRecommendationCard(recommendation, isDark)
-            } ?: run {
+                        if (hava.forecastList.isNotEmpty()) {
+                            Text("5 Günlük Tahmin", style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
+                            Spacer(Modifier.height(4.dp))
+                            Text("Güne dokunarak kıyafet önerisini gör", style = MaterialTheme.typography.labelSmall,
+                                color = if (isDark) Grey500 else Grey600)
+                            Spacer(Modifier.height(8.dp))
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                items(hava.forecastList) { forecast ->
+                                    ForecastCard(forecast, secilenForecast == forecast, isDark) {
+                                        secilenForecast = if (secilenForecast == forecast) null else forecast
+                                    }
+                                }
+                            }
+                            secilenForecast?.let { forecast ->
+                                Spacer(Modifier.height(10.dp))
+                                val rec = WeatherOutfitEngine.getRecommendationForForecast(forecast)
+                                ForecastOutfitCard(forecast, rec, isDark)
+                            }
+                        }
+
+                        Spacer(Modifier.height(18.dp))
+                        val recommendation = WeatherOutfitEngine.getRecommendation(hava)
+                        OutfitRecommendationCard(recommendation, isDark)
+                    }
+                }
+            }
+
+            SlideUpFadeIn(visible = !isLoading && havaDurumu == null) {
                 Box(Modifier.fillMaxWidth().height(200.dp), Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.CloudOff, null, Modifier.size(48.dp), tint = if (isDark) Grey500 else Grey400)
@@ -123,7 +144,7 @@ fun HavaDurumuScreen(
 private fun MainWeatherCard(hava: HavaDurumu, sonGuncelleme: String?, isDark: Boolean) {
     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
         color = if (isDark) Grey900.copy(alpha = 0.5f) else White.copy(alpha = 0.8f), shadowElevation = 8.dp) {
-        Column(Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             sonGuncelleme?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600); Spacer(Modifier.height(8.dp)) }
             Text(hava.durum.toEmoji(), fontSize = 56.sp)
             Spacer(Modifier.height(8.dp))
@@ -159,9 +180,23 @@ private fun DetailChip(icon: ImageVector, label: String, value: String, isDark: 
 
 @Composable
 private fun ForecastCard(forecast: ForecastItem, isSelected: Boolean, isDark: Boolean, onClick: () -> Unit) {
-    Surface(Modifier.width(80.dp).clickable(onClick = onClick), shape = RoundedCornerShape(14.dp),
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.97f else 1f,
+        animationSpec = spring(dampingRatio = 0.7f, stiffness = 400f),
+        label = "forecast_card_scale"
+    )
+
+    Surface(
+        modifier = Modifier
+            .width(80.dp)
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
         color = if (isSelected) PrimaryLight.copy(alpha = 0.2f) else if (isDark) Grey800.copy(alpha = 0.5f) else White.copy(alpha = 0.8f),
-        border = if (isSelected) BorderStroke(1.5.dp, PrimaryLight) else null) {
+        border = if (isSelected) BorderStroke(1.5.dp, PrimaryLight) else null
+    ) {
         Column(Modifier.padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(forecast.gun.take(3), style = MaterialTheme.typography.labelSmall,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium, color = if (isDark) Grey300 else Grey700)

@@ -15,15 +15,15 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryDark,
     onPrimary = OnPrimaryDark,
-    primaryContainer = PrimaryDark.copy(alpha = 0.3f),
+    primaryContainer = PrimaryDark.copy(alpha = 0.15f),
     onPrimaryContainer = TextPrimaryDark,
     secondary = SecondaryDark,
     onSecondary = OnSecondaryDark,
-    secondaryContainer = SecondaryDark.copy(alpha = 0.2f),
+    secondaryContainer = SecondaryDark.copy(alpha = 0.15f),
     onSecondaryContainer = TextPrimaryDark,
     tertiary = AccentGold,
     onTertiary = BackgroundDark,
-    tertiaryContainer = AccentGold.copy(alpha = 0.2f),
+    tertiaryContainer = AccentGold.copy(alpha = 0.15f),
     onTertiaryContainer = TextPrimaryDark,
     background = BackgroundDark,
     onBackground = TextPrimaryDark,
@@ -31,11 +31,11 @@ private val DarkColorScheme = darkColorScheme(
     onSurface = TextPrimaryDark,
     surfaceVariant = SurfaceVariantDark,
     onSurfaceVariant = TextSecondaryDark,
-    outline = GlassDarkBorder,
-    outlineVariant = GlassDarkHighlight,
+    outline = Grey600.copy(alpha = 0.4f),
+    outlineVariant = Grey700.copy(alpha = 0.3f),
     error = Error,
     onError = White,
-    errorContainer = Error.copy(alpha = 0.2f),
+    errorContainer = Error.copy(alpha = 0.15f),
     onErrorContainer = ErrorLight,
 )
 
@@ -45,12 +45,12 @@ private val LightColorScheme = lightColorScheme(
     primaryContainer = PrimaryLight.copy(alpha = 0.1f),
     onPrimaryContainer = PrimaryDark,
     secondary = SecondaryLight,
-    onSecondary = OnSecondaryLight,
-    secondaryContainer = SecondaryLight.copy(alpha = 0.1f),
+    onSecondary = OnSecondaryDark,
+    secondaryContainer = SecondaryLight.copy(alpha = 0.08f),
     onSecondaryContainer = SecondaryDark,
     tertiary = AccentGold,
     onTertiary = TextPrimaryLight,
-    tertiaryContainer = AccentGold.copy(alpha = 0.1f),
+    tertiaryContainer = AccentGold.copy(alpha = 0.08f),
     onTertiaryContainer = TextPrimaryLight,
     background = BackgroundLight,
     onBackground = TextPrimaryLight,
@@ -58,11 +58,11 @@ private val LightColorScheme = lightColorScheme(
     onSurface = TextPrimaryLight,
     surfaceVariant = SurfaceVariantLight,
     onSurfaceVariant = TextSecondaryLight,
-    outline = GlassLightBorder,
-    outlineVariant = Grey300,
+    outline = Grey300,
+    outlineVariant = Grey200,
     error = Error,
     onError = White,
-    errorContainer = Error.copy(alpha = 0.1f),
+    errorContainer = Error.copy(alpha = 0.08f),
     onErrorContainer = Error,
 )
 
@@ -85,9 +85,11 @@ fun CepteKabinTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
+            // Edge-to-edge: status bar transparent
             window.statusBarColor = Color.Transparent.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             window.navigationBarColor = Color.Transparent.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
         }
     }
 

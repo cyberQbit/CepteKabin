@@ -1,7 +1,12 @@
 package com.cyberqbit.ceptekabin.ui.screens.kombin
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -20,7 +25,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.cyberqbit.ceptekabin.domain.model.Kiyaket
 import com.cyberqbit.ceptekabin.domain.model.Kombin
@@ -42,6 +46,7 @@ fun KombinScreen(
     val favorilerOnly by viewModel.favorilerOnly.collectAsState()
     val siralama by viewModel.siralama.collectAsState()
     val dolapBos by viewModel.dolapBos.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     val isDark = isSystemInDarkTheme()
     var showSiralamaMenu by remember { mutableStateOf(false) }
@@ -77,7 +82,11 @@ fun KombinScreen(
         },
         floatingActionButton = {
             if (!dolapBos) {
-                FloatingActionButton(onClick = onNavigateToKombinOlustur, containerColor = PrimaryLight) {
+                FloatingActionButton(
+                    onClick = onNavigateToKombinOlustur,
+                    containerColor = PrimaryLight,
+                    modifier = Modifier.padding(bottom = 80.dp)
+                ) {
                     Icon(Icons.Default.Add, "Yeni Kombin", tint = White)
                 }
             }
@@ -86,10 +95,22 @@ fun KombinScreen(
         Column(Modifier.fillMaxSize()
             .background(Brush.verticalGradient(if (isDark) listOf(Grey900, SurfaceDark) else listOf(Grey100, White)))
             .padding(paddingValues).padding(horizontal = 16.dp)) {
-            if (kombinler.isEmpty()) {
-                EmptyKombinState(dolapBos, isDark, onNavigateToDolap, onNavigateToKombinOlustur)
+
+            if (isLoading) {
+                Column(Modifier.fillMaxSize().padding(vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    repeat(4) {
+                        com.cyberqbit.ceptekabin.ui.components.ShimmerCard(
+                            modifier = Modifier.fillMaxWidth().height(130.dp),
+                            isDark = isDark
+                        ) {}
+                    }
+                }
+            } else if (kombinler.isEmpty()) {
+                SlideUpFadeIn(visible = true) {
+                    EmptyKombinState(dolapBos, isDark, onNavigateToDolap, onNavigateToKombinOlustur)
+                }
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp), contentPadding = PaddingValues(vertical = 8.dp)) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 6.dp)) {
                     items(kombinler, key = { it.id }) { kombin ->
                         KombinCard(kombin, isDark,
                             onClick = { onNavigateToKombinDetay(kombin.id) },
@@ -105,11 +126,24 @@ fun KombinScreen(
 @Composable
 private fun KombinCard(kombin: Kombin, isDark: Boolean, onClick: () -> Unit,
     onShareClick: () -> Unit, onFavoriToggle: () -> Unit) {
-    Surface(modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.98f else 1f,
+        animationSpec = spring(dampingRatio = 0.7f, stiffness = 400f),
+        label = "kombin_card_scale"
+    )
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .graphicsLayer { scaleX = scale; scaleY = scale }
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         color = if (isDark) Grey800.copy(alpha = 0.5f) else White.copy(alpha = 0.9f),
-        shadowElevation = 3.dp) {
-        Column(Modifier.padding(14.dp)) {
+        shadowElevation = 3.dp
+    ) {
+        Column(Modifier.padding(12.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically) {
                 Text(kombin.ad, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold,
@@ -126,7 +160,7 @@ private fun KombinCard(kombin: Kombin, isDark: Boolean, onClick: () -> Unit,
                     }
                 }
             }
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 kombin.ustGiyim?.let { KiyafetThumbnail(it, "Üst", isDark) }
                 kombin.altGiyim?.let { KiyafetThumbnail(it, "Alt", isDark) }
@@ -134,7 +168,7 @@ private fun KombinCard(kombin: Kombin, isDark: Boolean, onClick: () -> Unit,
                 kombin.ayakkabi?.let { KiyafetThumbnail(it, "Ayak", isDark) }
                 kombin.aksesuar?.let { KiyafetThumbnail(it, "Aks", isDark) }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
             val sdf = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale("tr"))
             Text(sdf.format(java.util.Date(kombin.olusturmaTarihi)),
                 style = MaterialTheme.typography.labelSmall, color = Grey500)
@@ -155,7 +189,7 @@ private fun KiyafetThumbnail(kiyaket: Kiyaket, label: String, isDark: Boolean) {
                 Icon(Icons.Default.Checkroom, null, Modifier.size(22.dp), tint = if (isDark) Grey500 else Grey400)
             }
         }
-        Spacer(Modifier.height(3.dp))
+        Spacer(Modifier.height(2.dp))
         Text(label, style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600, fontSize = 9.sp)
     }
 }
@@ -168,11 +202,11 @@ private fun EmptyKombinState(dolapBos: Boolean, isDark: Boolean,
             Surface(shape = CircleShape, color = PrimaryLight.copy(alpha = 0.1f), modifier = Modifier.size(80.dp)) {
                 Box(contentAlignment = Alignment.Center) { Icon(Icons.Default.Style, null, Modifier.size(40.dp), tint = PrimaryLight) }
             }
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(18.dp))
             if (dolapBos) {
                 Text("Önce dolabına kıyafet ekle,\nsonra kombinle!", style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(14.dp))
                 Button(onClick = onNavigateToDolap, colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight),
                     shape = RoundedCornerShape(14.dp)) {
                     Icon(Icons.Default.Add, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
@@ -181,10 +215,10 @@ private fun EmptyKombinState(dolapBos: Boolean, isDark: Boolean,
             } else {
                 Text("Henüz kombin oluşturmadın", style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
                 Text("Kıyafetlerini birleştirerek harika kombinler yarat!", style = MaterialTheme.typography.bodyMedium,
                     color = if (isDark) Grey400 else Grey600, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(14.dp))
                 Button(onClick = onNavigateToKombinOlustur, colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight),
                     shape = RoundedCornerShape(14.dp)) {
                     Icon(Icons.Default.Add, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))

@@ -1,11 +1,13 @@
 package com.cyberqbit.ceptekabin.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,39 +18,50 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.cyberqbit.ceptekabin.ui.theme.*
 
+/**
+ * Premium GlassCard - iOS Style
+ * - Subtle blur effect (not too heavy)
+ * - Consistent 16.dp corner radius
+ * - Soft shadow for depth
+ * - Smooth press feedback
+ */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    cornerRadius: Dp = 24.dp,
+    isDark: Boolean = isSystemInDarkTheme(),
+    cornerRadius: Int = 16,
+    onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+    val shape = RoundedCornerShape(cornerRadius.dp)
 
-    // Dark: subtle teal-tinted glass; Light: warm cream glass
-    val baseColor = if (isDark) GlassDark else GlassLight
-    val highlightColor = if (isDark) GlassDarkHighlight else GlassLightHighlight
-    val borderColor = if (isDark) GlassDarkBorder else GlassLightBorder
+    val bgColor = if (isDark) {
+        SurfaceDark.copy(alpha = 0.7f)
+    } else {
+        White.copy(alpha = 0.85f)
+    }
 
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(cornerRadius))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        highlightColor.copy(alpha = 0.35f),
-                        baseColor,
-                        baseColor.copy(alpha = 0.55f)
-                    )
-                )
-            )
-            .border(
-                width = 0.8.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(cornerRadius)
-            )
-    ) {
+    val borderColor = if (isDark) {
+        Grey700.copy(alpha = 0.3f)
+    } else {
+        Grey200.copy(alpha = 0.5f)
+    }
+
+    val contentModifier = modifier
+        .clip(shape)
+        .background(bgColor)
+        .border(1.dp, borderColor, shape)
+
+    if (onClick != null) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = contentModifier
+                .clickable(onClick = onClick)
+                .padding(16.dp),
+            content = content
+        )
+    } else {
+        Column(
+            modifier = contentModifier.padding(16.dp),
             content = content
         )
     }

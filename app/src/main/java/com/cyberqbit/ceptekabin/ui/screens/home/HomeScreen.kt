@@ -33,6 +33,7 @@ import com.cyberqbit.ceptekabin.domain.model.HavaDurumu
 import com.cyberqbit.ceptekabin.domain.model.Kiyaket
 import com.cyberqbit.ceptekabin.ui.components.GlassCard
 import com.cyberqbit.ceptekabin.ui.components.GlassSurface
+import com.cyberqbit.ceptekabin.ui.components.ShimmerCard
 import com.cyberqbit.ceptekabin.ui.theme.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -57,6 +58,7 @@ fun HomeScreen(
     val dolapIstatistikleri by viewModel.dolapIstatistikleri.collectAsState()
     val userName by viewModel.userName.collectAsState()
     val havaDurumuYukleniyor by viewModel.havaDurumuYukleniyor.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
 
     val isDark = isSystemInDarkTheme()
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -82,17 +84,21 @@ fun HomeScreen(
             .background(Brush.verticalGradient(
                 if (isDark) listOf(Grey900, Grey900.copy(alpha = 0.95f)) else listOf(Grey100, White)
             ))
-            .padding(bottom = 80.dp)
+            .padding(bottom = 96.dp)
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(8.dp))
 
         WelcomeHeader(userName = userName, isDark = isDark)
         Spacer(Modifier.height(16.dp))
 
-        TodayWeatherBar(havaDurumu = havaDurumu, isLoading = havaDurumuYukleniyor, isDark = isDark, onClick = onNavigateToHavaDurumu)
+        if (isLoading) {
+            ShimmerCard(modifier = Modifier.fillMaxWidth().height(64.dp), isDark = isDark) {}
+        } else {
+            TodayWeatherBar(havaDurumu = havaDurumu, isLoading = havaDurumuYukleniyor, isDark = isDark, onClick = onNavigateToHavaDurumu)
+        }
         Spacer(Modifier.height(20.dp))
 
         Text("Hızlı İşlemler", style = MaterialTheme.typography.titleMedium,
@@ -113,12 +119,13 @@ fun HomeScreen(
             oneriler = onerilenKombinler, havaDurumu = havaDurumu, isDark = isDark,
             dolapBos = dolapIstatistikleri.toplamKiyafet == 0,
             onNavigateToDolap = onNavigateToDolap,
-            onNavigateToKombinOlustur = onNavigateToKombinOlustur
+            onNavigateToKombinOlustur = onNavigateToKombinOlustur,
+            isLoading = isLoading
         )
 
         Spacer(Modifier.height(24.dp))
 
-        if (dolapIstatistikleri.toplamKiyafet > 0) {
+        if (dolapIstatistikleri.toplamKiyafet > 0 && !isLoading) {
             DolapStatsCard(stats = dolapIstatistikleri, isDark = isDark, onNavigateToDolap = onNavigateToDolap)
             Spacer(Modifier.height(24.dp))
         }
@@ -136,6 +143,8 @@ fun HomeScreen(
                     RecentClothingCard(kiyaket = kiyaket, isDark = isDark, onClick = { onNavigateToKiyaket(kiyaket.id) })
                 }
             }
+        } else if (dolapIstatistikleri.toplamKiyafet == 0 && !isLoading) {
+            // Show nothing if empty and not loading
         }
         Spacer(Modifier.height(24.dp))
     }
@@ -203,7 +212,7 @@ private fun TodayWeatherBar(havaDurumu: HavaDurumu?, isLoading: Boolean, isDark:
 @Composable
 private fun QuickActionCard(icon: ImageVector, title: String, subtitle: String,
     onClick: () -> Unit, modifier: Modifier, isDark: Boolean) {
-    GlassSurface(modifier = modifier.height(90.dp).clickable(onClick = onClick)) {
+    GlassSurface(modifier = modifier.height(90.dp).cardPressEffect().clickable(onClick = onClick)) {
         Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.Center) {
             Icon(icon, title, tint = PrimaryLight, modifier = Modifier.size(24.dp))
             Spacer(Modifier.height(6.dp))
@@ -218,7 +227,8 @@ private fun QuickActionCard(icon: ImageVector, title: String, subtitle: String,
 @Composable
 private fun DailyOutfitSection(oneriler: List<SmartKombinSuggester.KombinOnerisi>,
     havaDurumu: HavaDurumu?, isDark: Boolean, dolapBos: Boolean,
-    onNavigateToDolap: () -> Unit, onNavigateToKombinOlustur: () -> Unit) {
+    onNavigateToDolap: () -> Unit, onNavigateToKombinOlustur: () -> Unit,
+    isLoading: Boolean = false) {
     Text("Bugünkü Önerin", style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
     Spacer(Modifier.height(10.dp))
@@ -249,9 +259,11 @@ private fun DailyOutfitSection(oneriler: List<SmartKombinSuggester.KombinOnerisi
             }
         }
     } else {
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(oneriler) { oneri ->
-                SuggestionCard(oneri = oneri, isDark = isDark, onClick = onNavigateToKombinOlustur)
+        SlideUpFadeIn(visible = !isLoading) {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                items(oneriler) { oneri ->
+                    SuggestionCard(oneri = oneri, isDark = isDark, onClick = onNavigateToKombinOlustur)
+                }
             }
         }
     }

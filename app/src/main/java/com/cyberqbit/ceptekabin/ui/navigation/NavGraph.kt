@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -210,11 +211,11 @@ fun NavGraph(
             NavigationBar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
-                    .height(72.dp)
-                    .clip(RoundedCornerShape(32.dp))
-                    .shadow(elevation = 16.dp, shape = RoundedCornerShape(32.dp)),
-                containerColor = if (isDark) SurfaceVariantDark.copy(alpha = 0.98f) else White.copy(alpha = 0.98f),
+                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+                    .height(68.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .shadow(elevation = 12.dp, shape = RoundedCornerShape(28.dp)),
+                containerColor = if (isDark) SurfaceVariantDark.copy(alpha = 0.95f) else White.copy(alpha = 0.95f),
                 tonalElevation = 0.dp,
                 windowInsets = WindowInsets(0, 0, 0, 0)
             ) {
@@ -222,18 +223,30 @@ fun NavGraph(
                     val selected = currentRoute == item.route
                     NavigationBarItem(
                         icon = {
-                            Icon(
-                                imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
-                                contentDescription = item.label,
-                                modifier = Modifier.size(26.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(52.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (selected) PrimaryLight.copy(alpha = 0.15f)
+                                        else Color.Transparent
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                    contentDescription = item.label,
+                                    modifier = Modifier.size(28.dp),
+                                    tint = if (selected) PrimaryLight else if (isDark) Grey500 else Grey500
+                                )
+                            }
                         },
                         label = null,
                         selected = selected,
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = PrimaryLight,
-                            unselectedIconColor = if (isDark) Grey500 else Grey400,
-                            indicatorColor = PrimaryCyan.copy(alpha = 0.2f)
+                            unselectedIconColor = Grey500,
+                            indicatorColor = Color.Transparent
                         ),
                         onClick = {
                             navController.navigate(item.route) {
