@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,13 +37,18 @@ import com.cyberqbit.ceptekabin.ui.screens.tarama.KiyaketEkleScreen
 import com.cyberqbit.ceptekabin.ui.screens.tarama.TaramaScreen
 import com.cyberqbit.ceptekabin.ui.theme.*
 
-data class BottomNavItem(val route: String, val icon: ImageVector, val label: String)
+data class BottomNavItem(
+    val route: String,
+    val selectedIcon: ImageVector,
+    val unselectedIcon: ImageVector,
+    val label: String
+)
 
 val bottomNavItems = listOf(
-    BottomNavItem(Screen.Home.route,       Icons.Default.Home,      "Ana Sayfa"),
-    BottomNavItem(Screen.Dolap.route,      Icons.Default.Checkroom, "Dolap"),
-    BottomNavItem(Screen.Kombin.route,     Icons.Default.Style,     "Kombin"),
-    BottomNavItem(Screen.HavaDurumu.route, Icons.Default.WbSunny,   "Hava")
+    BottomNavItem(Screen.Home.route,       Icons.Filled.Home,      Icons.Outlined.Home,      "Ana Sayfa"),
+    BottomNavItem(Screen.Dolap.route,      Icons.Filled.Checkroom, Icons.Outlined.Checkroom, "Dolap"),
+    BottomNavItem(Screen.Kombin.route,     Icons.Filled.Style,     Icons.Outlined.Style,     "Kombin"),
+    BottomNavItem(Screen.HavaDurumu.route, Icons.Filled.WbSunny,   Icons.Outlined.WbSunny,   "Hava")
 )
 
 private val mainScreenRoutes = bottomNavItems.map { it.route }.toSet()
@@ -204,8 +210,8 @@ fun NavGraph(
             NavigationBar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(start = 24.dp, end = 24.dp, bottom = 24.dp) // Tam simetrik, köşelerden uzak
-                    .height(72.dp) // Standart, ezilmeyen şık bir boyut
+                    .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
+                    .height(72.dp)
                     .clip(RoundedCornerShape(32.dp))
                     .shadow(elevation = 16.dp, shape = RoundedCornerShape(32.dp)),
                 containerColor = if (isDark) SurfaceVariantDark.copy(alpha = 0.98f) else White.copy(alpha = 0.98f),
@@ -213,24 +219,25 @@ fun NavGraph(
                 windowInsets = WindowInsets(0, 0, 0, 0)
             ) {
                 bottomNavItems.forEach { item ->
+                    val selected = currentRoute == item.route
                     NavigationBarItem(
-                        icon = { Icon(item.icon, item.label) },
-                        label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
-                        selected = currentRoute == item.route,
+                        icon = {
+                            Icon(
+                                imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                                contentDescription = item.label,
+                                modifier = Modifier.size(26.dp)
+                            )
+                        },
+                        label = null,
+                        selected = selected,
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = PrimaryLight,
-                            selectedTextColor = PrimaryLight,
-                            unselectedIconColor = if (isDark) Grey400 else Grey600,
-                            unselectedTextColor = if (isDark) Grey400 else Grey600,
+                            unselectedIconColor = if (isDark) Grey500 else Grey400,
                             indicatorColor = PrimaryCyan.copy(alpha = 0.2f)
                         ),
                         onClick = {
-                            if (currentRoute != item.route) {
-                                navController.navigate(item.route) {
-                                    popUpTo(Screen.Home.route) { saveState = item.route == Screen.Home.route }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+                            navController.navigate(item.route) {
+                                launchSingleTop = true
                             }
                         }
                     )

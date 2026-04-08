@@ -160,7 +160,7 @@ Planlama özellikleri:
 
 ## 🎨 Modern Arayüz
 
-**Liquid Glass (Camsız Cam)** felsefesi - yarı saydam yüzeyler ve blur efektleri:
+**Modern Tasarım Dili Felsefesi** :
 
 - **GlassCard / GlassSurface** - 12+ composable'da tutarlı blur + border + rounded corner
 - **Dynamic Weather Backgrounds** - hava durumuna göre 5 farklı gradient tema
