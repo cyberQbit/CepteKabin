@@ -25,7 +25,10 @@ object KombinShareHelper {
 
     private const val EXTENSION = ".kmb"
     private const val JSON_FILE_NAME = "kombin_data.json"
-    const val APP_STORE_LINK = "https://bit.ly/ceptekabin"
+
+    // ─── PLAY STORE LINK ────────────────────────────────────────────────────────
+    // TODO: Play Store onaylandıktan sonra gerçek linki buraya yaz
+    const val PLAY_STORE_LINK = "https://play.google.com/store/apps/details?id=com.cyberqbit.ceptekabin"
 
     // ─── 1. DOSYA OLUŞTURMA ────────────────────────────────────────────────────
 
@@ -251,7 +254,7 @@ object KombinShareHelper {
 $parcalar
 
 ✨ Bu kombini 1 adımda dolabına ekle:
-  1️⃣ CepteKabin'i yükle → $APP_STORE_LINK
+  1️⃣ CepteKabin'i yükle → $PLAY_STORE_LINK
   2️⃣ Bu mesajdaki .kmb dosyasına dokun
   3️⃣ Kombin otomatik dolabına eklenir 🎉
 
@@ -268,7 +271,7 @@ CepteKabin ile:
 ✅ Barkod okutarak saniyede kıyafet ekle
 ✅ Kombinlerini arkadaşlarınla paylaş 💌
 
-📲 Ücretsiz indir: $APP_STORE_LINK
+📲 Ücretsiz indir: $PLAY_STORE_LINK
     """.trimIndent()
 
     // ─── 6. LEGACY (Geriye uyumluluk) ─────────────────────────────────────────
@@ -291,7 +294,7 @@ CepteKabin ile:
 ✅ Hava durumuna göre kombin önerisi al
 ✅ Barkod okutarak saniyede kıyafet ekle
 
-📲 Ücretsiz indir: $APP_STORE_LINK
+📲 Ücretsiz indir: $PLAY_STORE_LINK
         """.trimIndent()
 
         return Intent(Intent.ACTION_SEND).apply {
