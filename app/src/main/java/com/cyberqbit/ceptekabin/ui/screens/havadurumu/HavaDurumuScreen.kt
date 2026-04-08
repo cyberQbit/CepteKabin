@@ -202,7 +202,7 @@ private fun OutfitRecommendationCard(rec: WeatherOutfitEngine.OutfitRecommendati
         Column(Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(shape = RoundedCornerShape(12.dp), color = AccentGold.copy(alpha = 0.2f), modifier = Modifier.size(40.dp)) {
-                    Box(Alignment.Center) { Icon(Icons.Default.Checkroom, null, Modifier.size(22.dp), tint = AccentGold) }
+                    Box(contentAlignment = Alignment.Center) { Icon(Icons.Default.Checkroom, null, Modifier.size(22.dp), tint = AccentGold) }
                 }
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {

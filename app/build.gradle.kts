@@ -116,6 +116,7 @@ dependencies {
     // Camera & ML Kit
     implementation(libs.mlkit.barcode.scanning)
     implementation(libs.mlkit.text.recognition)
+    implementation(libs.mlkit.face.detection)
     implementation(libs.camerax.core)
     implementation(libs.camerax.camera2)
     implementation(libs.camerax.lifecycle)
