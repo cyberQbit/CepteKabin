@@ -15,6 +15,10 @@
 
   <br>
 
+  <a href="https://play.google.com/store/apps/details?id=com.cyberqbit.ceptekabin&hl=tr">
+    <img src="https://img.shields.io/badge/Google_Play'den_İndir-000000?style=for-the-badge&logo=google-play&logoColor=white" height="80" alt="Google Play'den İndir"/>
+  </a>
+  <br><br>
   <a href="https://github.com/cyberQbit/CepteKabin/releases/latest">
     <img src="https://img.shields.io/badge/%F0%9F%93%81_CEPTEKAB%C4%B0N'%C4%B0_HEMEN_%C4%B0ND%C4%B0R_(APK)-2EA043?style=for-the-badge&logo=android&logoColor=white" height="65" alt="CepteKabin İndir"/>
   </a>
