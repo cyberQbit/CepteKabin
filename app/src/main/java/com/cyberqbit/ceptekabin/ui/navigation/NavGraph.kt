@@ -69,173 +69,158 @@ fun NavGraph(
         }
     }
 
-    Scaffold(
-        // Standart bottomBar'ı kullanmıyoruz, Box içinde kendimiz yüzen bar çizeceğiz.
-        containerColor = Color.Transparent
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            
-            // ANA İÇERİK
-            NavHost(
-                navController = navController, 
-                startDestination = Screen.Splash.route, 
-                // Padding'i sadece yukarı için veriyoruz, alt taraf serbest
-                modifier = Modifier.padding(top = paddingValues.calculateTopPadding())
-            ) {
-
-                composable(Screen.Splash.route) {
-                    com.cyberqbit.ceptekabin.ui.screens.splash.SplashScreen(
-                        onNavigateToHome = {
-                            val dest = if (isLoggedIn) Screen.Home.route else Screen.Auth.route
-                            navController.navigate(dest) { popUpTo(Screen.Splash.route) { inclusive = true } }
-                        }
-                    )
-                }
-
-                composable(Screen.Auth.route) {
-                    GoogleSignInScreen(
-                        onSignInSuccess = {
-                            navController.navigate(Screen.Home.route) { popUpTo(Screen.Auth.route) { inclusive = true } }
-                        }
-                    )
-                }
-
-                composable(Screen.Home.route) {
-                    HomeScreen(
-                        onNavigateToDolap        = { navController.navigate(Screen.Dolap.route) },
-                        onNavigateToKombin       = { navController.navigate(Screen.Kombin.route) },
-                        onNavigateToTarama       = { navController.navigate(Screen.Tarama.route) },
-                        onNavigateToHavaDurumu   = { navController.navigate(Screen.HavaDurumu.route) },
-                        onNavigateToKiyaket      = { id -> navController.navigate(Screen.KiyaketDetay.createRoute(id)) },
-                        onNavigateToKombinTakvim = { navController.navigate(Screen.KombinTakvim.route) },
-                        onNavigateToVirtualTryOn = { navController.navigate(Screen.VirtualTryOn.route) }
-                    )
-                }
-
-                composable(Screen.Dolap.route) {
-                    DolapScreen(
-                        onNavigateToTarama = { navController.navigate(Screen.Tarama.route) },
-                        onNavigateToKiyaketDetay = { id -> navController.navigate(Screen.KiyaketDetay.createRoute(id)) }
-                    )
-                }
-
-                composable(Screen.Kombin.route) {
-                    val kombinViewModel: KombinViewModel = hiltViewModel()
-                    KombinScreen(
-                        viewModel = kombinViewModel,
-                        onNavigateToKombinDetay  = { id -> navController.navigate(Screen.KombinDetay.createRoute(id)) },
-                        onNavigateToKombinOlustur = { navController.navigate(Screen.KombinOlustur.route) }
-                    )
-                }
-
-                composable(Screen.HavaDurumu.route) {
-                    HavaDurumuScreen(onNavigateBack = { navController.popBackStack() })
-                }
-
-                composable(Screen.Tarama.route) {
-                    TaramaScreen(
-                        onBarkodFound  = { barkod -> navController.navigate(Screen.KiyaketEkle.createRoute(barkod)) },
-                        onNavigateBack = { navController.popBackStack() }
-                    )
-                }
-
-                composable(route = Screen.KiyaketEkle.route, arguments = listOf(navArgument("barkod") { type = NavType.StringType; defaultValue = "" }, navArgument("kiyaketId") { type = NavType.LongType; defaultValue = 0L })) { backStack ->
-                    val barkod = backStack.arguments?.getString("barkod") ?: ""
-                    val kiyaketId = backStack.arguments?.getLong("kiyaketId") ?: 0L
-                    KiyaketEkleScreen(
-                        barkod = barkod, kiyaketId = kiyaketId, onNavigateBack = { navController.popBackStack() },
-                        onKiyaketSaved = {
-                            navController.navigate(Screen.Dolap.route) { popUpTo(Screen.KiyaketEkle.route) { inclusive = true }; launchSingleTop = true }
-                        }
-                    )
-                }
-
-                composable(route = Screen.KiyaketDetay.route, arguments = listOf(navArgument("id") { type = NavType.LongType })) { backStack ->
-                    val id = backStack.arguments?.getLong("id") ?: 0L
-                    com.cyberqbit.ceptekabin.ui.screens.dolap.KiyaketDetayScreen(
-                        kiyaketId = id, onNavigateBack = { navController.popBackStack() },
-                        onNavigateToEdit = { kId -> navController.navigate(Screen.KiyaketEkle.createRoute("", kId)) }
-                    )
-                }
-
-                composable(route = Screen.KombinDetay.route, arguments = listOf(navArgument("id") { type = NavType.LongType })) { backStack ->
-                    val id = backStack.arguments?.getLong("id") ?: 0L
-                    KombinDetayScreen(
-                        kombinId = id, onNavigateBack = { navController.popBackStack() },
-                        onNavigateToEdit = { kId -> navController.navigate(Screen.KombinOlustur.createRoute(kId)) },
-                        onNavigateToKiyaket = { kId -> navController.navigate(Screen.KiyaketDetay.createRoute(kId)) }
-                    )
-                }
-
-                composable(route = Screen.KombinOlustur.route, arguments = listOf(navArgument("kombinId") { type = NavType.LongType; defaultValue = 0L })) { backStack ->
-                    val kombinId = backStack.arguments?.getLong("kombinId") ?: 0L
-                    KombinOlusturScreen(
-                        kombinId = kombinId, onNavigateBack = { navController.popBackStack() },
-                        onKombinSaved = {
-                            navController.navigate(Screen.Kombin.route) { popUpTo(Screen.KombinOlustur.route) { inclusive = true }; launchSingleTop = true }
-                        }
-                    )
-                }
-
-                composable(route = Screen.KombinImport.route, arguments = listOf(navArgument("uri") { type = NavType.StringType })) { backStack ->
-                    val encodedUri = backStack.arguments?.getString("uri") ?: ""
-                    val uri = Uri.parse(Uri.decode(encodedUri))
-                    KombinImportScreen(
-                        uri = uri, onNavigateBack = { navController.popBackStack() },
-                        onImportSuccess = { kombinId ->
-                            navController.navigate(Screen.KombinDetay.createRoute(kombinId)) { popUpTo(Screen.KombinImport.route) { inclusive = true }; launchSingleTop = true }
-                        }
-                    )
-                }
-                
-                composable(Screen.KombinTakvim.route) {
-                    com.cyberqbit.ceptekabin.ui.screens.kombin.KombinTakvimScreen(
-                        onNavigateBack = { navController.popBackStack() }, 
-                        onNavigateToKombinDetay = { id -> navController.navigate(Screen.KombinDetay.createRoute(id))}
-                    )
-                }
-                composable(Screen.VirtualTryOn.route) {
-                    com.cyberqbit.ceptekabin.ui.screens.tryon.VirtualTryOnScreen(
-                        onNavigateBack = { navController.popBackStack() },
-                        kombinId = 0L // Adding default so it compiles
-                    )
-                }
+    // Scaffold'un lanetli bottomBar slotunu kullanmıyoruz! 
+    // Tüm ekranı bir Box içine alıp, Floating Bar'ı en üste z-index ile bindiriyoruz.
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(if (isDark) BackgroundDark else BackgroundLight)
+    ) {
+        // ANA EKRAN İÇERİKLERİ (Barın arkasından tam boy akacak)
+        NavHost(
+            navController = navController, 
+            startDestination = Screen.Splash.route, 
+            modifier = Modifier.fillMaxSize() 
+        ) {
+            composable(Screen.Splash.route) {
+                com.cyberqbit.ceptekabin.ui.screens.splash.SplashScreen(
+                    onNavigateToHome = {
+                        val dest = if (isLoggedIn) Screen.Home.route else Screen.Auth.route
+                        navController.navigate(dest) { popUpTo(Screen.Splash.route) { inclusive = true } }
+                    }
+                )
             }
+            composable(Screen.Auth.route) {
+                GoogleSignInScreen(
+                    onSignInSuccess = {
+                        navController.navigate(Screen.Home.route) { popUpTo(Screen.Auth.route) { inclusive = true } }
+                    }
+                )
+            }
+            composable(Screen.Home.route) {
+                HomeScreen(
+                    onNavigateToDolap        = { navController.navigate(Screen.Dolap.route) },
+                    onNavigateToKombin       = { navController.navigate(Screen.Kombin.route) },
+                    onNavigateToTarama       = { navController.navigate(Screen.Tarama.route) },
+                    onNavigateToHavaDurumu   = { navController.navigate(Screen.HavaDurumu.route) },
+                    onNavigateToKiyaket      = { id -> navController.navigate(Screen.KiyaketDetay.createRoute(id)) },
+                    onNavigateToKombinTakvim = { navController.navigate(Screen.KombinTakvim.route) },
+                    onNavigateToVirtualTryOn = { navController.navigate(Screen.VirtualTryOn.route) }
+                )
+            }
+            composable(Screen.Dolap.route) {
+                DolapScreen(
+                    onNavigateToTarama = { navController.navigate(Screen.Tarama.route) },
+                    onNavigateToKiyaketDetay = { id -> navController.navigate(Screen.KiyaketDetay.createRoute(id)) }
+                )
+            }
+            composable(Screen.Kombin.route) {
+                val kombinViewModel: KombinViewModel = hiltViewModel()
+                KombinScreen(
+                    viewModel = kombinViewModel,
+                    onNavigateToKombinDetay  = { id -> navController.navigate(Screen.KombinDetay.createRoute(id)) },
+                    onNavigateToKombinOlustur = { navController.navigate(Screen.KombinOlustur.route) }
+                )
+            }
+            composable(Screen.HavaDurumu.route) {
+                HavaDurumuScreen(onNavigateBack = { navController.popBackStack() })
+            }
+            composable(Screen.Tarama.route) {
+                TaramaScreen(
+                    onBarkodFound  = { barkod -> navController.navigate(Screen.KiyaketEkle.createRoute(barkod)) },
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+            composable(route = Screen.KiyaketEkle.route, arguments = listOf(navArgument("barkod") { type = NavType.StringType; defaultValue = "" }, navArgument("kiyaketId") { type = NavType.LongType; defaultValue = 0L })) { backStack ->
+                val barkod = backStack.arguments?.getString("barkod") ?: ""
+                val kiyaketId = backStack.arguments?.getLong("kiyaketId") ?: 0L
+                KiyaketEkleScreen(
+                    barkod = barkod, kiyaketId = kiyaketId, onNavigateBack = { navController.popBackStack() },
+                    onKiyaketSaved = {
+                        navController.navigate(Screen.Dolap.route) { popUpTo(Screen.KiyaketEkle.route) { inclusive = true }; launchSingleTop = true }
+                    }
+                )
+            }
+            composable(route = Screen.KiyaketDetay.route, arguments = listOf(navArgument("id") { type = NavType.LongType })) { backStack ->
+                val id = backStack.arguments?.getLong("id") ?: 0L
+                com.cyberqbit.ceptekabin.ui.screens.dolap.KiyaketDetayScreen(
+                    kiyaketId = id, onNavigateBack = { navController.popBackStack() },
+                    onNavigateToEdit = { kId -> navController.navigate(Screen.KiyaketEkle.createRoute("", kId)) }
+                )
+            }
+            composable(route = Screen.KombinDetay.route, arguments = listOf(navArgument("id") { type = NavType.LongType })) { backStack ->
+                val id = backStack.arguments?.getLong("id") ?: 0L
+                KombinDetayScreen(
+                    kombinId = id, onNavigateBack = { navController.popBackStack() },
+                    onNavigateToEdit = { kId -> navController.navigate(Screen.KombinOlustur.createRoute(kId)) },
+                    onNavigateToKiyaket = { kId -> navController.navigate(Screen.KiyaketDetay.createRoute(kId)) }
+                )
+            }
+            composable(route = Screen.KombinOlustur.route, arguments = listOf(navArgument("kombinId") { type = NavType.LongType; defaultValue = 0L })) { backStack ->
+                val kombinId = backStack.arguments?.getLong("kombinId") ?: 0L
+                KombinOlusturScreen(
+                    kombinId = kombinId, onNavigateBack = { navController.popBackStack() },
+                    onKombinSaved = {
+                        navController.navigate(Screen.Kombin.route) { popUpTo(Screen.KombinOlustur.route) { inclusive = true }; launchSingleTop = true }
+                    }
+                )
+            }
+            composable(route = Screen.KombinImport.route, arguments = listOf(navArgument("uri") { type = NavType.StringType })) { backStack ->
+                val encodedUri = backStack.arguments?.getString("uri") ?: ""
+                val uri = Uri.parse(Uri.decode(encodedUri))
+                KombinImportScreen(
+                    uri = uri, onNavigateBack = { navController.popBackStack() },
+                    onImportSuccess = { kombinId ->
+                        navController.navigate(Screen.KombinDetay.createRoute(kombinId)) { popUpTo(Screen.KombinImport.route) { inclusive = true }; launchSingleTop = true }
+                    }
+                )
+            }
+            composable(Screen.KombinTakvim.route) {
+                com.cyberqbit.ceptekabin.ui.screens.kombin.KombinTakvimScreen(onNavigateBack = { navController.popBackStack() }, onNavigateToKombinDetay = { id -> navController.navigate(Screen.KombinDetay.createRoute(id))})
+            }
+            composable(Screen.VirtualTryOn.route) {
+                com.cyberqbit.ceptekabin.ui.screens.tryon.VirtualTryOnScreen(
+                    kombinId = 0L,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+        }
 
-            // YÜZEN (FLOATING) BOTTOM BAR EKLENTİSİ
-            if (showBottomBar) {
-                NavigationBar(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(horizontal = 16.dp, vertical = 24.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp)),
-                    containerColor = if (isDark) SurfaceVariantDark.copy(alpha = 0.95f) else White.copy(alpha = 0.95f),
-                    tonalElevation = 0.dp
-                ) {
-                    bottomNavItems.forEach { item ->
-                        NavigationBarItem(
-                            icon = { Icon(item.icon, item.label) },
-                            label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
-                            selected = currentRoute == item.route,
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = PrimaryLight,
-                                selectedTextColor = PrimaryLight,
-                                unselectedIconColor = if (isDark) Grey400 else Grey600,
-                                unselectedTextColor = if (isDark) Grey400 else Grey600,
-                                indicatorColor = PrimaryCyan.copy(alpha = 0.2f)
-                            ),
-                            onClick = {
-                                if (currentRoute != item.route) {
-                                    navController.navigate(item.route) {
-                                        popUpTo(Screen.Home.route) { saveState = item.route == Screen.Home.route }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
+        // GERÇEK FLOATING BAR (Katman olarak üstte durur)
+        if (showBottomBar) {
+            NavigationBar(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(start = 24.dp, end = 24.dp, bottom = 24.dp) // Tam simetrik, köşelerden uzak
+                    .height(72.dp) // Standart, ezilmeyen şık bir boyut
+                    .clip(RoundedCornerShape(32.dp))
+                    .shadow(elevation = 16.dp, shape = RoundedCornerShape(32.dp)),
+                containerColor = if (isDark) SurfaceVariantDark.copy(alpha = 0.98f) else White.copy(alpha = 0.98f),
+                tonalElevation = 0.dp,
+                windowInsets = WindowInsets(0, 0, 0, 0)
+            ) {
+                bottomNavItems.forEach { item ->
+                    NavigationBarItem(
+                        icon = { Icon(item.icon, item.label) },
+                        label = { Text(item.label, style = MaterialTheme.typography.labelSmall) },
+                        selected = currentRoute == item.route,
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = PrimaryLight,
+                            selectedTextColor = PrimaryLight,
+                            unselectedIconColor = if (isDark) Grey400 else Grey600,
+                            unselectedTextColor = if (isDark) Grey400 else Grey600,
+                            indicatorColor = PrimaryCyan.copy(alpha = 0.2f)
+                        ),
+                        onClick = {
+                            if (currentRoute != item.route) {
+                                navController.navigate(item.route) {
+                                    popUpTo(Screen.Home.route) { saveState = item.route == Screen.Home.route }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
