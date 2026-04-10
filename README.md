@@ -15,7 +15,7 @@
 
   <br>
 
-  <a href="https://play.google.com/apps/testing/com.cyberqbit.ceptekabin">
+  <a href="https://play.google.com/store/apps/details?id=com.cyberqbit.ceptekabin">
     <img src="https://img.shields.io/badge/Google_Play'den_İndir-000000?style=for-the-badge&logo=google-play&logoColor=white" height="80" alt="Google Play'den İndir"/>
   </a>
   <br><br>
