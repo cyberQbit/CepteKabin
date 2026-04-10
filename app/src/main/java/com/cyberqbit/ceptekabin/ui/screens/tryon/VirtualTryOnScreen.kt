@@ -36,7 +36,7 @@ fun VirtualTryOnScreen(
     viewModel: VirtualTryOnViewModel = hiltViewModel()
 ) {
     val uiState   by viewModel.uiState.collectAsState()
-    val isDark    = isSystemInDarkTheme()
+    val isDark    = true
 
     LaunchedEffect(kombinId) { viewModel.loadKombin(kombinId) }
 
@@ -47,7 +47,7 @@ fun VirtualTryOnScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Üzerimde Gör") },
+                title = { Text("Ãœzerimde GÃ¶r") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri")
@@ -68,7 +68,7 @@ fun VirtualTryOnScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Açıklama kartı
+            // AÃ§Ä±klama kartÄ±
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.AutoAwesome, null, Modifier.size(28.dp), tint = AccentGold)
@@ -79,8 +79,8 @@ fun VirtualTryOnScreen(
                             fontWeight = FontWeight.Bold,
                             color = if (isDark) Grey100 else Grey900)
                         Text(
-                            "Kendi fotoğrafına kombini yapay zeka ile bindiriyoruz. " +
-                            "Fotoğrafın yalnızca işlem için kullanılır ve hemen silinir.",
+                            "Kendi fotoÄŸrafÄ±na kombini yapay zeka ile bindiriyoruz. " +
+                            "FotoÄŸrafÄ±n yalnÄ±zca iÅŸlem iÃ§in kullanÄ±lÄ±r ve hemen silinir.",
                             style = MaterialTheme.typography.bodySmall,
                             color = if (isDark) Grey400 else Grey600
                         )
@@ -95,7 +95,7 @@ fun VirtualTryOnScreen(
                     color = if (isDark) Grey100 else Grey900)
             }
 
-            // Kullanıcı fotoğrafı seçimi
+            // KullanÄ±cÄ± fotoÄŸrafÄ± seÃ§imi
             if (uiState.userPhotoUri == null) {
                 GlassCard(modifier = Modifier
                     .fillMaxWidth()
@@ -104,12 +104,12 @@ fun VirtualTryOnScreen(
                         Icon(Icons.Default.PersonAdd, null, Modifier.size(48.dp),
                             tint = if (isDark) Grey500 else Grey400)
                         Spacer(Modifier.height(12.dp))
-                        Text("Fotoğrafını yükle",
+                        Text("FotoÄŸrafÄ±nÄ± yÃ¼kle",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Medium,
                             color = if (isDark) Grey100 else Grey900)
                         Spacer(Modifier.height(4.dp))
-                        Text("Tam boy, ayakta duran bir fotoğraf seç",
+                        Text("Tam boy, ayakta duran bir fotoÄŸraf seÃ§",
                             style = MaterialTheme.typography.bodySmall,
                             color = if (isDark) Grey400 else Grey600,
                             textAlign = TextAlign.Center)
@@ -125,24 +125,24 @@ fun VirtualTryOnScreen(
                 ) {
                     Icon(Icons.Default.PhotoLibrary, null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Galeriden Fotoğraf Seç")
+                    Text("Galeriden FotoÄŸraf SeÃ§")
                 }
             } else {
-                // Yan yana: kullanıcı fotoğrafı + sonuç
+                // Yan yana: kullanÄ±cÄ± fotoÄŸrafÄ± + sonuÃ§
                 Row(Modifier.fillMaxWidth().height(360.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    // Sol: kullanıcı fotoğrafı
+                    // Sol: kullanÄ±cÄ± fotoÄŸrafÄ±
                     Column(Modifier.weight(1f)) {
                         Text("Sen", style = MaterialTheme.typography.labelSmall,
                             color = if (isDark) Grey500 else Grey600)
                         Spacer(Modifier.height(4.dp))
                         AsyncImage(
-                            model = uiState.userPhotoUri, contentDescription = "Seçilen fotoğraf",
+                            model = uiState.userPhotoUri, contentDescription = "SeÃ§ilen fotoÄŸraf",
                             modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(12.dp)),
                             contentScale = ContentScale.Fit
                         )
                     }
-                    // Sağ: sonuç
+                    // SaÄŸ: sonuÃ§
                     Column(Modifier.weight(1f)) {
                         Text("Kombinle", style = MaterialTheme.typography.labelSmall,
                             color = if (isDark) Grey500 else Grey600)
@@ -157,7 +157,7 @@ fun VirtualTryOnScreen(
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         CircularProgressIndicator(color = PrimaryLight)
                                         Spacer(Modifier.height(8.dp))
-                                        Text("Yapay zeka çalışıyor...",
+                                        Text("Yapay zeka Ã§alÄ±ÅŸÄ±yor...",
                                             style = MaterialTheme.typography.bodySmall,
                                             color = if (isDark) Grey400 else Grey600)
                                     }
@@ -176,7 +176,7 @@ fun VirtualTryOnScreen(
                                             Modifier.size(40.dp),
                                             tint = if (isDark) Grey600 else Grey400)
                                         Spacer(Modifier.height(8.dp))
-                                        Text("Sonuç burada görünecek",
+                                        Text("SonuÃ§ burada gÃ¶rÃ¼necek",
                                             style = MaterialTheme.typography.bodySmall,
                                             textAlign = TextAlign.Center,
                                             color = if (isDark) Grey500 else Grey600)
@@ -196,13 +196,13 @@ fun VirtualTryOnScreen(
                     }
                 }
 
-                // Aksiyon butonları
+                // Aksiyon butonlarÄ±
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     OutlinedButton(
                         onClick = { viewModel.clearPhoto() },
                         modifier = Modifier.weight(1f)
                     ) {
-                        Text("Fotoğrafı Değiştir")
+                        Text("FotoÄŸrafÄ± DeÄŸiÅŸtir")
                     }
                     GlassButton(
                         onClick = { viewModel.process() },

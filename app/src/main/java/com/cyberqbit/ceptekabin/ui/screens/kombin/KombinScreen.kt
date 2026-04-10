@@ -31,7 +31,7 @@ import com.cyberqbit.ceptekabin.domain.model.Kombin
 import com.cyberqbit.ceptekabin.ui.theme.*
 
 enum class KombinSiralama(val label: String) {
-    EN_YENI("En yeni"), FAVORILER("Favoriler"), EN_COK_GIYILEN("En çok giyilen")
+    EN_YENI("En yeni"), FAVORILER("Favoriler"), EN_COK_GIYILEN("En Ã§ok giyilen")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +48,7 @@ fun KombinScreen(
     val dolapBos by viewModel.dolapBos.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
     var showSiralamaMenu by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -57,7 +57,7 @@ fun KombinScreen(
                 title = { Text("Kombinlerim") },
                 actions = {
                     Box {
-                        IconButton(onClick = { showSiralamaMenu = true }) { Icon(Icons.Default.Sort, "Sırala") }
+                        IconButton(onClick = { showSiralamaMenu = true }) { Icon(Icons.Default.Sort, "SÄ±rala") }
                         DropdownMenu(expanded = showSiralamaMenu, onDismissRequest = { showSiralamaMenu = false }) {
                             KombinSiralama.entries.forEach { s ->
                                 DropdownMenuItem(
@@ -151,7 +151,7 @@ private fun KombinCard(kombin: Kombin, isDark: Boolean, onClick: () -> Unit,
                     modifier = Modifier.weight(1f))
                 Row {
                     IconButton(onClick = onShareClick, modifier = Modifier.size(32.dp)) {
-                        Icon(Icons.Default.Share, "Paylaş", Modifier.size(18.dp), tint = if (isDark) Grey400 else Grey600)
+                        Icon(Icons.Default.Share, "PaylaÅŸ", Modifier.size(18.dp), tint = if (isDark) Grey400 else Grey600)
                     }
                     IconButton(onClick = onFavoriToggle, modifier = Modifier.size(32.dp)) {
                         Icon(if (kombin.favori) Icons.Default.Favorite else Icons.Default.FavoriteBorder, "Favori",
@@ -162,9 +162,9 @@ private fun KombinCard(kombin: Kombin, isDark: Boolean, onClick: () -> Unit,
             }
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                kombin.ustGiyim?.let { KiyafetThumbnail(it, "Üst", isDark) }
+                kombin.ustGiyim?.let { KiyafetThumbnail(it, "Ãœst", isDark) }
                 kombin.altGiyim?.let { KiyafetThumbnail(it, "Alt", isDark) }
-                kombin.disGiyim?.let { KiyafetThumbnail(it, "Dış", isDark) }
+                kombin.disGiyim?.let { KiyafetThumbnail(it, "DÄ±ÅŸ", isDark) }
                 kombin.ayakkabi?.let { KiyafetThumbnail(it, "Ayak", isDark) }
                 kombin.aksesuar?.let { KiyafetThumbnail(it, "Aks", isDark) }
             }
@@ -204,7 +204,7 @@ private fun EmptyKombinState(dolapBos: Boolean, isDark: Boolean,
             }
             Spacer(Modifier.height(18.dp))
             if (dolapBos) {
-                Text("Önce dolabına kıyafet ekle,\nsonra kombinle!", style = MaterialTheme.typography.titleMedium,
+                Text("Ã–nce dolabÄ±na kÄ±yafet ekle,\nsonra kombinle!", style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(14.dp))
                 Button(onClick = onNavigateToDolap, colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight),
@@ -213,16 +213,16 @@ private fun EmptyKombinState(dolapBos: Boolean, isDark: Boolean,
                     Text("Dolaba Git", fontWeight = FontWeight.SemiBold)
                 }
             } else {
-                Text("Henüz kombin oluşturmadın", style = MaterialTheme.typography.titleMedium,
+                Text("HenÃ¼z kombin oluÅŸturmadÄ±n", style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(6.dp))
-                Text("Kıyafetlerini birleştirerek harika kombinler yarat!", style = MaterialTheme.typography.bodyMedium,
+                Text("KÄ±yafetlerini birleÅŸtirerek harika kombinler yarat!", style = MaterialTheme.typography.bodyMedium,
                     color = if (isDark) Grey400 else Grey600, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(14.dp))
                 Button(onClick = onNavigateToKombinOlustur, colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight),
                     shape = RoundedCornerShape(14.dp)) {
                     Icon(Icons.Default.Add, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text("İlk Kombini Oluştur", fontWeight = FontWeight.SemiBold)
+                    Text("Ä°lk Kombini OluÅŸtur", fontWeight = FontWeight.SemiBold)
                 }
             }
         }

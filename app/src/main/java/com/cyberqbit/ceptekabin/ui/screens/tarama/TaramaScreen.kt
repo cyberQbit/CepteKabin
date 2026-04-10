@@ -35,10 +35,10 @@ import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 
 /**
- * Taranan değer:
- *  - Normal barkod/QR  → onBarkodFound(value)
- *  - DPP URL           → onDppUrlFound(url) ile KiyaketEkleScreen'e yönlendirilir,
- *                        orada DppUrlService çağrılarak form otomatik doldurulur.
+ * Taranan deÄŸer:
+ *  - Normal barkod/QR  â†’ onBarkodFound(value)
+ *  - DPP URL           â†’ onDppUrlFound(url) ile KiyaketEkleScreen'e yÃ¶nlendirilir,
+ *                        orada DppUrlService Ã§aÄŸrÄ±larak form otomatik doldurulur.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -76,7 +76,7 @@ fun CameraPreviewWithBarcode(
     val lifecycleOwner = LocalLifecycleOwner.current
     var scannedValue   by remember { mutableStateOf<String?>(null) }
     var isProcessing   by remember { mutableStateOf(false) }
-    val isDark         = isSystemInDarkTheme()
+    val isDark         = true
 
     Box(modifier = Modifier.fillMaxSize()) {
         AndroidView(
@@ -153,14 +153,14 @@ fun CameraPreviewWithBarcode(
                     Icon(Icons.Default.QrCodeScanner, null,
                         Modifier.size(48.dp), tint = PrimaryLight)
                     Spacer(Modifier.height(16.dp))
-                    Text("Barkod veya QR kod tarayın",
+                    Text("Barkod veya QR kod tarayÄ±n",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center,
                         color = if (isDark) Grey100 else Grey900)
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "Kıyafet etiketi barkodunu veya ürün QR kodunu\nkameraya tutun — bilgiler otomatik doldurulur",
+                        "KÄ±yafet etiketi barkodunu veya Ã¼rÃ¼n QR kodunu\nkameraya tutun â€” bilgiler otomatik doldurulur",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isDark) Grey400 else Grey600,
                         textAlign = TextAlign.Center
@@ -185,7 +185,7 @@ fun CameraPreviewWithBarcode(
 
 @Composable
 fun PermissionDenied(onNavigateBack: () -> Unit) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
     Column(
         Modifier.fillMaxSize()
             .background(if (isDark) Grey900 else Grey100)
@@ -195,15 +195,15 @@ fun PermissionDenied(onNavigateBack: () -> Unit) {
     ) {
         Icon(Icons.Default.CameraAlt, null, Modifier.size(64.dp), tint = Error)
         Spacer(Modifier.height(24.dp))
-        Text("Kamera İzni Reddedildi",
+        Text("Kamera Ä°zni Reddedildi",
             style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold,
             color = if (isDark) Grey100 else Grey900)
         Spacer(Modifier.height(12.dp))
-        Text("Ayarlardan kamera iznini etkinleştirebilirsiniz.",
+        Text("Ayarlardan kamera iznini etkinleÅŸtirebilirsiniz.",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = if (isDark) Grey400 else Grey600)
         Spacer(Modifier.height(32.dp))
-        TextButton(onClick = onNavigateBack) { Text("Geri Dön", color = PrimaryLight) }
+        TextButton(onClick = onNavigateBack) { Text("Geri DÃ¶n", color = PrimaryLight) }
     }
 }

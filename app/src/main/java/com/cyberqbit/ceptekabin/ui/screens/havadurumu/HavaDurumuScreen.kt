@@ -49,17 +49,17 @@ fun HavaDurumuScreen(
     val sonGuncelleme by viewModel.sonGuncelleme.collectAsState()
     val isLoading by viewModel.havaDurumuYukleniyor.collectAsState()
 
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var secilenForecast by remember { mutableStateOf<ForecastItem?>(null) }
 
     LaunchedEffect(Unit) {
-        // Ekrana her gelindiğinde fresh veri çek (izin durumuna göre)
+        // Ekrana her gelindiÄŸinde fresh veri Ã§ek (izin durumuna gÃ¶re)
         if (locationPermission.status.isGranted) viewModel.loadHavaDurumuWithLocation()
         else viewModel.loadHavaDurumuByCity("Ankara")
     }
 
-    // İzin yeni verildiğinde konuma göre güncelle
+    // Ä°zin yeni verildiÄŸinde konuma gÃ¶re gÃ¼ncelle
     LaunchedEffect(locationPermission.status.isGranted) {
         if (locationPermission.status.isGranted) viewModel.loadHavaDurumuWithLocation()
     }
@@ -102,10 +102,10 @@ fun HavaDurumuScreen(
                         Spacer(Modifier.height(18.dp))
 
                         if (hava.forecastList.isNotEmpty()) {
-                            Text("5 Günlük Tahmin", style = MaterialTheme.typography.titleSmall,
+                            Text("5 GÃ¼nlÃ¼k Tahmin", style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
                             Spacer(Modifier.height(4.dp))
-                            Text("Güne dokunarak kıyafet önerisini gör", style = MaterialTheme.typography.labelSmall,
+                            Text("GÃ¼ne dokunarak kÄ±yafet Ã¶nerisini gÃ¶r", style = MaterialTheme.typography.labelSmall,
                                 color = if (isDark) Grey500 else Grey600)
                             Spacer(Modifier.height(8.dp))
                             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -134,7 +134,7 @@ fun HavaDurumuScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.CloudOff, null, Modifier.size(48.dp), tint = if (isDark) Grey500 else Grey400)
                         Spacer(Modifier.height(12.dp))
-                        Text("Hava durumu yüklenemedi", color = if (isDark) Grey400 else Grey600)
+                        Text("Hava durumu yÃ¼klenemedi", color = if (isDark) Grey400 else Grey600)
                         Spacer(Modifier.height(8.dp))
                         TextButton(onClick = { viewModel.loadHavaDurumuByCity("Ankara") }) {
                             Text("Tekrar dene", color = PrimaryLight)
@@ -154,10 +154,10 @@ private fun MainWeatherCard(hava: HavaDurumu, sonGuncelleme: String?, isDark: Bo
             sonGuncelleme?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600); Spacer(Modifier.height(8.dp)) }
             Text(hava.durum.toEmoji(), fontSize = 56.sp)
             Spacer(Modifier.height(8.dp))
-            Text("${hava.sicaklik.toInt()}°C", fontSize = 52.sp, fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
+            Text("${hava.sicaklik.toInt()}Â°C", fontSize = 52.sp, fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
             Text(hava.durum.displayName, style = MaterialTheme.typography.bodyLarge, color = if (isDark) Grey300 else Grey700)
             Spacer(Modifier.height(4.dp))
-            Text("Hissedilen: ${hava.hissedilenSicaklik.toInt()}°C", style = MaterialTheme.typography.labelMedium, color = if (isDark) Grey500 else Grey600)
+            Text("Hissedilen: ${hava.hissedilenSicaklik.toInt()}Â°C", style = MaterialTheme.typography.labelMedium, color = if (isDark) Grey500 else Grey600)
         }
     }
 }
@@ -165,9 +165,9 @@ private fun MainWeatherCard(hava: HavaDurumu, sonGuncelleme: String?, isDark: Bo
 @Composable
 private fun WeatherDetailsRow(hava: HavaDurumu, isDark: Boolean) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        DetailChip(Icons.Default.Thermostat, "Hissedilen", "${hava.hissedilenSicaklik.toInt()}°", isDark, Modifier.weight(1f))
+        DetailChip(Icons.Default.Thermostat, "Hissedilen", "${hava.hissedilenSicaklik.toInt()}Â°", isDark, Modifier.weight(1f))
         DetailChip(Icons.Default.WaterDrop, "Nem", "${hava.nemOrani}%", isDark, Modifier.weight(1f))
-        DetailChip(Icons.Default.Air, "Rüzgar", "${hava.ruzgarHizi.toInt()} km/s", isDark, Modifier.weight(1f))
+        DetailChip(Icons.Default.Air, "RÃ¼zgar", "${hava.ruzgarHizi.toInt()} km/s", isDark, Modifier.weight(1f))
     }
 }
 
@@ -209,8 +209,8 @@ private fun ForecastCard(forecast: ForecastItem, isSelected: Boolean, isDark: Bo
             Spacer(Modifier.height(4.dp))
             Text(forecast.durum.toEmoji(), fontSize = 24.sp)
             Spacer(Modifier.height(4.dp))
-            Text("${forecast.sicaklikMax.toInt()}°", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall, color = if (isDark) Grey100 else Grey900)
-            Text("${forecast.sicaklikMin.toInt()}°", style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600)
+            Text("${forecast.sicaklikMax.toInt()}Â°", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodySmall, color = if (isDark) Grey100 else Grey900)
+            Text("${forecast.sicaklikMin.toInt()}Â°", style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600)
         }
     }
 }
@@ -220,7 +220,7 @@ private fun ForecastOutfitCard(forecast: ForecastItem, rec: WeatherOutfitEngine.
     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp),
         color = if (isDark) Grey800.copy(alpha = 0.4f) else PrimaryLight.copy(alpha = 0.06f)) {
         Column(Modifier.padding(14.dp)) {
-            Text("${forecast.gun} için öneri", style = MaterialTheme.typography.labelMedium,
+            Text("${forecast.gun} iÃ§in Ã¶neri", style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold, color = PrimaryLight)
             Spacer(Modifier.height(6.dp))
             Text(rec.detayliAciklama, style = MaterialTheme.typography.bodySmall, color = if (isDark) Grey300 else Grey700)
@@ -248,7 +248,7 @@ private fun OutfitRecommendationCard(rec: WeatherOutfitEngine.OutfitRecommendati
                 }
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("Bugün Ne Giymeliyim?", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
+                    Text("BugÃ¼n Ne Giymeliyim?", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
                     Text(rec.kisaAciklama, style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey400 else Grey600)
                 }
                 KonforBadge(rec.konforEndeksi, isDark)
@@ -256,11 +256,11 @@ private fun OutfitRecommendationCard(rec: WeatherOutfitEngine.OutfitRecommendati
             Spacer(Modifier.height(14.dp))
             HorizontalDivider(color = if (isDark) Grey800 else Grey200, thickness = 0.5.dp)
             Spacer(Modifier.height(14.dp))
-            Text("${rec.katmanSayisi} katman öneriliyor", style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600)
+            Text("${rec.katmanSayisi} katman Ã¶neriliyor", style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600)
             Spacer(Modifier.height(8.dp))
-            if (rec.ustGiyim.isNotEmpty()) OutfitRow("Üst:", rec.ustGiyim, isDark)
+            if (rec.ustGiyim.isNotEmpty()) OutfitRow("Ãœst:", rec.ustGiyim, isDark)
             if (rec.altGiyim.isNotEmpty()) OutfitRow("Alt:", rec.altGiyim, isDark)
-            if (rec.disGiyim.isNotEmpty()) OutfitRow("Dış:", rec.disGiyim, isDark)
+            if (rec.disGiyim.isNotEmpty()) OutfitRow("DÄ±ÅŸ:", rec.disGiyim, isDark)
             if (rec.ayakkabi.isNotEmpty()) OutfitRow("Ayak:", rec.ayakkabi, isDark)
             if (rec.aksesuar.isNotEmpty()) OutfitRow("Aks:", rec.aksesuar, isDark)
             Spacer(Modifier.height(12.dp))

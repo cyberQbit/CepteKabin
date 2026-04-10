@@ -57,7 +57,7 @@ fun shimmerBrush(isDark: Boolean): Brush {
 @Composable
 fun ShimmerCard(
     modifier: Modifier = Modifier,
-    isDark: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = true,
     content: @Composable () -> Unit
 ) {
     Box(
@@ -75,7 +75,7 @@ fun ShimmerCard(
 @Composable
 fun ShimmerLoadingCard(
     modifier: Modifier = Modifier,
-    isDark: Boolean = isSystemInDarkTheme()
+    isDark: Boolean = true
 ) {
     ShimmerCard(modifier = modifier, isDark = isDark) {
         Column(Modifier.padding(16.dp)) {
@@ -102,7 +102,7 @@ private fun Modifier.shimmerModifier(isDark: Boolean): Modifier = composed {
  */
 @Composable
 fun ShimmerListItem(
-    isDark: Boolean = isSystemInDarkTheme()
+    isDark: Boolean = true
 ) {
     Row(
         modifier = Modifier
@@ -131,7 +131,7 @@ fun ShimmerListItem(
  */
 @Composable
 fun ShimmerLoadingScreen(
-    isDark: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = true,
     itemCount: Int = 5
 ) {
     Column(Modifier.fillMaxSize().padding(16.dp)) {

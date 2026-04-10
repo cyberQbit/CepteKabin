@@ -28,7 +28,7 @@ import com.cyberqbit.ceptekabin.ui.theme.*
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    isDark: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = true,
     cornerRadius: Int = 16,
     onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
@@ -98,7 +98,7 @@ fun GlassSurface(
     cornerRadius: Dp = 16.dp,
     content: @Composable BoxScope.() -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
 
     val backgroundColor = if (isDark) GlassDarkSurface else GlassLightSurface
     val highlightColor = if (isDark) GlassDarkHighlight else GlassLightHighlight
@@ -131,7 +131,7 @@ fun GlassButton(
     enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
 
     val bgColor = if (enabled) {
         if (isDark) PrimaryDark else PrimaryLight
@@ -163,7 +163,7 @@ fun GlassOutlinedButton(
     enabled: Boolean = true,
     content: @Composable RowScope.() -> Unit
 ) {
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
     val borderColor = if (enabled) {
         if (isDark) GlassDarkBorder else GlassLightBorder
     } else {

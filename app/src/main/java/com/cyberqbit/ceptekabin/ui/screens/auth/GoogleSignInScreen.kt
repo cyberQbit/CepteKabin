@@ -43,7 +43,7 @@ fun GoogleSignInScreen(
         if (isLoggedIn) onSignInSuccess()
     }
 
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
     val bgColor = if (isDark) BackgroundDark else BackgroundLight
     val cardColor = if (isDark) SurfaceVariantDark else White
     val textColor = if (isDark) White else Grey900
@@ -52,7 +52,9 @@ fun GoogleSignInScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(bgColor),
+            .background(bgColor)
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -90,7 +92,7 @@ fun GoogleSignInScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Senin Dolabın, Senin Kombinin!",
+                text = "Senin DolabÄ±n, Senin Kombinin!",
                 style = MaterialTheme.typography.titleMedium,
                 color = PrimaryLight,
                 fontWeight = FontWeight.SemiBold
@@ -99,7 +101,7 @@ fun GoogleSignInScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "Tüm cihazlardan gardırobuna erişmek için Google hesabınla giriş yap.",
+                text = "TÃ¼m cihazlardan gardÄ±robuna eriÅŸmek iÃ§in Google hesabÄ±nla giriÅŸ yap.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = subTextColor,
@@ -111,7 +113,7 @@ fun GoogleSignInScreen(
             if (isLoading) {
                 CircularProgressIndicator(color = PrimaryCyan)
             } else {
-                // Yüksek Kontrastlı Standart Buton (Okunabilirlik Garantili)
+                // YÃ¼ksek KontrastlÄ± Standart Buton (Okunabilirlik Garantili)
                 Button(
                     onClick = {
                         val signInIntent = viewModel.getGoogleSignInIntent()
@@ -127,7 +129,7 @@ fun GoogleSignInScreen(
                         .height(56.dp)
                 ) {
                     Text(
-                        text = "Google ile Giriş Yap",
+                        text = "Google ile GiriÅŸ Yap",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
                     )

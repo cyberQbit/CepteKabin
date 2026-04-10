@@ -38,7 +38,7 @@ fun KombinTakvimScreen(
     val tumKombinler by viewModel.tumKombinler.collectAsState()
 
     var showBottomSheet by remember { mutableStateOf(false) }
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
 
     val calendarDays = remember {
         val days = mutableListOf<Long>()
@@ -109,7 +109,7 @@ fun KombinTakvimScreen(
                                 Spacer(Modifier.width(16.dp))
                                 Column {
                                     Text(giris.kombinAd, style = MaterialTheme.typography.titleMedium, color = if (isDark) Grey100 else Grey900)
-                                    Text("Planlandı", style = MaterialTheme.typography.bodySmall, color = PrimaryLight)
+                                    Text("PlanlandÄ±", style = MaterialTheme.typography.bodySmall, color = PrimaryLight)
                                 }
                             }
                             if (selectedDate >= todayMidnight) {
@@ -128,10 +128,10 @@ fun KombinTakvimScreen(
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = PrimaryDark)) {
                             Icon(Icons.Default.Add, null); Spacer(Modifier.width(8.dp))
-                            Text("Kombin Ekle (${3 - gunlukGirisler.size} hak kaldı)")
+                            Text("Kombin Ekle (${3 - gunlukGirisler.size} hak kaldÄ±)")
                         }
                     } else if (selectedDate < todayMidnight) {
-                        Text("Geçmiş günlere yeni kombin eklenemez. (Arşiv Modu)",
+                        Text("GeÃ§miÅŸ gÃ¼nlere yeni kombin eklenemez. (ArÅŸiv Modu)",
                             style = MaterialTheme.typography.bodyMedium, color = Grey500)
                     }
                 }
@@ -141,10 +141,10 @@ fun KombinTakvimScreen(
         if (showBottomSheet) {
             ModalBottomSheet(onDismissRequest = { showBottomSheet = false }) {
                 Column(Modifier.padding(16.dp).fillMaxWidth()) {
-                    Text("Kombin Seç", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Text("Kombin SeÃ§", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.height(16.dp))
                     if (tumKombinler.isEmpty()) {
-                        Text("Henüz oluşturulmuş bir kombin yok.", modifier = Modifier.padding(bottom = 32.dp))
+                        Text("HenÃ¼z oluÅŸturulmuÅŸ bir kombin yok.", modifier = Modifier.padding(bottom = 32.dp))
                     } else {
                         LazyColumn(modifier = Modifier.padding(bottom = 32.dp)) {
                             items(tumKombinler) { kombin ->

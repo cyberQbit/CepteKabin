@@ -34,7 +34,7 @@ fun FriendDolapScreen(
     viewModel: FriendDolapViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isDark  = isSystemInDarkTheme()
+    val isDark  = true
 
     LaunchedEffect(friendUserId) { viewModel.loadFriendWardrobe(friendUserId) }
 
@@ -43,9 +43,9 @@ fun FriendDolapScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text(uiState.friendName.ifBlank { "Arkadaşın Dolabı" },
+                        Text(uiState.friendName.ifBlank { "ArkadaÅŸÄ±n DolabÄ±" },
                             style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("Salt okunur görünüm",
+                        Text("Salt okunur gÃ¶rÃ¼nÃ¼m",
                             style = MaterialTheme.typography.labelSmall,
                             color = if (isDark) Grey500 else Grey600)
                     }
@@ -88,7 +88,7 @@ fun FriendDolapScreen(
                     contentPadding = PaddingValues(vertical = 12.dp)
                 ) {
                     item {
-                        // Arkadaş profil özeti
+                        // ArkadaÅŸ profil Ã¶zeti
                         FriendProfileBanner(
                             name         = uiState.friendName,
                             kiyafetSayisi = uiState.kiyaketler.size,
@@ -104,7 +104,7 @@ fun FriendDolapScreen(
                                         Modifier.size(48.dp),
                                         tint = if (isDark) Grey600 else Grey400)
                                     Spacer(Modifier.height(8.dp))
-                                    Text("Arkadaşın dolabı boş.",
+                                    Text("ArkadaÅŸÄ±n dolabÄ± boÅŸ.",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = if (isDark) Grey500 else Grey600)
                                 }
@@ -145,7 +145,7 @@ private fun FriendProfileBanner(name: String, kiyafetSayisi: Int, isDark: Boolea
                     Icon(Icons.Default.Checkroom, null, Modifier.size(13.dp),
                         tint = if (isDark) Grey500 else Grey600)
                     Spacer(Modifier.width(4.dp))
-                    Text("$kiyafetSayisi kıyafet",
+                    Text("$kiyafetSayisi kÄ±yafet",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isDark) Grey500 else Grey600)
                 }

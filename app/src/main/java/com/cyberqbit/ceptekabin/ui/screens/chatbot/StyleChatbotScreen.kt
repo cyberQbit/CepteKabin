@@ -31,7 +31,7 @@ fun StyleChatbotScreen(
     viewModel: StyleChatbotViewModel = hiltViewModel()
 ) {
     val uiState       by viewModel.uiState.collectAsState()
-    val isDark        = isSystemInDarkTheme()
+    val isDark        = true
     val listState     = rememberLazyListState()
     val scope         = rememberCoroutineScope()
     var inputText     by remember { mutableStateOf("") }
@@ -68,9 +68,9 @@ fun StyleChatbotScreen(
                         }
                         Spacer(Modifier.width(10.dp))
                         Column {
-                            Text("Stil Asistanı", style = MaterialTheme.typography.titleMedium,
+                            Text("Stil AsistanÄ±", style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold)
-                            Text("Dolabın hakkında her şeyi biliyor",
+                            Text("DolabÄ±n hakkÄ±nda her ÅŸeyi biliyor",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (isDark) Grey400 else Grey600)
                         }
@@ -83,7 +83,7 @@ fun StyleChatbotScreen(
                 },
                 actions = {
                     IconButton(onClick = { showKeyDialog = true }) {
-                        Icon(Icons.Default.Key, "API Ayarları",
+                        Icon(Icons.Default.Key, "API AyarlarÄ±",
                             tint = if (isDark) Grey400 else Grey600)
                     }
                     IconButton(onClick = { viewModel.clearChat() }) {
@@ -112,7 +112,7 @@ fun StyleChatbotScreen(
                         value = inputText,
                         onValueChange = { inputText = it },
                         modifier = Modifier.weight(1f),
-                        placeholder = { Text("örn: Yarın iş toplantısı için ne giyeyim?") },
+                        placeholder = { Text("Ã¶rn: YarÄ±n iÅŸ toplantÄ±sÄ± iÃ§in ne giyeyim?") },
                         shape = RoundedCornerShape(24.dp),
                         maxLines = 3,
                         colors = OutlinedTextFieldDefaults.colors(
@@ -136,7 +136,7 @@ fun StyleChatbotScreen(
                         if (uiState.isLoading) {
                             CircularProgressIndicator(Modifier.size(20.dp), White, strokeWidth = 2.dp)
                         } else {
-                            Icon(Icons.AutoMirrored.Filled.Send, "Gönder", tint = White)
+                            Icon(Icons.AutoMirrored.Filled.Send, "GÃ¶nder", tint = White)
                         }
                     }
                 }
@@ -151,7 +151,7 @@ fun StyleChatbotScreen(
                 ))
                 .padding(padding)
         ) {
-            // Öneri chip'leri (boşsa)
+            // Ã–neri chip'leri (boÅŸsa)
             if (uiState.messages.isEmpty()) {
                 SuggestionChips(
                     onSelect = { viewModel.sendMessage(it) },
@@ -179,14 +179,14 @@ fun StyleChatbotScreen(
 @Composable
 private fun SuggestionChips(onSelect: (String) -> Unit, isDark: Boolean) {
     val suggestions = listOf(
-        "Bugün ne giysem?",
-        "3 günlük İstanbul gezisi için bavul listesi",
-        "Yarın iş toplantısına uygun kombin",
-        "Hafta sonu gündelik kombin öner",
-        "Kış için sıcak ama şık kombinler"
+        "BugÃ¼n ne giysem?",
+        "3 gÃ¼nlÃ¼k Ä°stanbul gezisi iÃ§in bavul listesi",
+        "YarÄ±n iÅŸ toplantÄ±sÄ±na uygun kombin",
+        "Hafta sonu gÃ¼ndelik kombin Ã¶ner",
+        "KÄ±ÅŸ iÃ§in sÄ±cak ama ÅŸÄ±k kombinler"
     )
     Column(Modifier.padding(16.dp)) {
-        Text("Hızlı sorular:",
+        Text("HÄ±zlÄ± sorular:",
             style = MaterialTheme.typography.labelSmall,
             color = if (isDark) Grey500 else Grey600)
         Spacer(Modifier.height(8.dp))
@@ -270,12 +270,12 @@ private fun ApiKeySetupDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit
     var key by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("OpenAI API Anahtarı") },
+        title = { Text("OpenAI API AnahtarÄ±") },
         text  = {
             Column {
                 Text(
-                    "Stil asistanı için kendi OpenAI API anahtarınızı kullanın. " +
-                    "Anahtar yalnızca cihazınızda saklanır, hiçbir sunucuya gönderilmez.",
+                    "Stil asistanÄ± iÃ§in kendi OpenAI API anahtarÄ±nÄ±zÄ± kullanÄ±n. " +
+                    "Anahtar yalnÄ±zca cihazÄ±nÄ±zda saklanÄ±r, hiÃ§bir sunucuya gÃ¶nderilmez.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -291,6 +291,6 @@ private fun ApiKeySetupDialog(onConfirm: (String) -> Unit, onDismiss: () -> Unit
             TextButton(onClick = { if (key.isNotBlank()) onConfirm(key.trim()) },
                 enabled = key.isNotBlank()) { Text("Kaydet") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("İptal") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Ä°ptal") } }
     )
 }

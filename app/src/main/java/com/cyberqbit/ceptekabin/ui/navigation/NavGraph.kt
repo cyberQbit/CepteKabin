@@ -69,7 +69,7 @@ fun NavGraph(
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val showBottomBar = currentRoute in mainScreenRoutes
 
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
     val context = LocalContext.current
 
     LaunchedEffect(pendingImportUri, currentRoute) {
@@ -81,14 +81,14 @@ fun NavGraph(
         }
     }
 
-    // Scaffold'un lanetli bottomBar slotunu kullanmıyoruz! 
-    // Tüm ekranı bir Box içine alıp, Floating Bar'ı en üste z-index ile bindiriyoruz.
+    // Scaffold'un lanetli bottomBar slotunu kullanmÄ±yoruz! 
+    // TÃ¼m ekranÄ± bir Box iÃ§ine alÄ±p, Floating Bar'Ä± en Ã¼ste z-index ile bindiriyoruz.
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(if (isDark) BackgroundDark else BackgroundLight)
     ) {
-        // ANA EKRAN İÇERİKLERİ (Barın arkasından tam boy akacak)
+        // ANA EKRAN Ä°Ã‡ERÄ°KLERÄ° (BarÄ±n arkasÄ±ndan tam boy akacak)
         NavHost(
             navController = navController, 
             startDestination = Screen.Splash.route, 
@@ -208,10 +208,10 @@ fun NavGraph(
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onComplete = {
-                        // Onboarding tamamlandı olarak işaretle
+                        // Onboarding tamamlandÄ± olarak iÅŸaretle
                         val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
                         prefs.edit().putBoolean(Constants.PREF_ONBOARDING_COMPLETED, true).apply()
-                        // Google giriş ekranına yönlendir
+                        // Google giriÅŸ ekranÄ±na yÃ¶nlendir
                         navController.navigate(Screen.Auth.route) {
                             popUpTo(Screen.Onboarding.route) { inclusive = true }
                         }
@@ -220,12 +220,12 @@ fun NavGraph(
             }
         }
 
-        // GERÇEK FLOATING BAR (Katman olarak üstte durur)
+        // GERÃ‡EK FLOATING BAR (Katman olarak Ã¼stte durur)
         if (showBottomBar) {
             NavigationBar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()            // sistem nav bar'ının yukarısına it
+                    .navigationBarsPadding()            // sistem nav bar'Ä±nÄ±n yukarÄ±sÄ±na it
                     .padding(start = 20.dp, end = 20.dp, bottom = 12.dp)
                     .height(68.dp)
                     .clip(RoundedCornerShape(28.dp))

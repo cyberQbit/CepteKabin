@@ -21,7 +21,7 @@ import com.cyberqbit.ceptekabin.ui.theme.*
 @Composable
 fun GlassSurface(
     modifier: Modifier = Modifier,
-    isDark: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = true,
     cornerRadius: Int = 12,
     contentAlignment: Alignment = Alignment.Center,
     content: @Composable BoxScope.() -> Unit
@@ -55,7 +55,7 @@ fun GlassSurface(
 fun GlassIconContainer(
     modifier: Modifier = Modifier,
     size: Dp = 48.dp,
-    isDark: Boolean = isSystemInDarkTheme(),
+    isDark: Boolean = true,
     iconTint: Color = PrimaryLight,
     icon: @Composable () -> Unit
 ) {

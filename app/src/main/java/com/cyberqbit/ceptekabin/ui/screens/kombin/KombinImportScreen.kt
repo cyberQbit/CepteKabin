@@ -41,7 +41,7 @@ fun KombinImportScreen(
     viewModel: KombinImportViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val isDark = isSystemInDarkTheme()
+    val isDark = true
 
     LaunchedEffect(uri) { viewModel.parseUri(uri) }
 
@@ -91,7 +91,7 @@ fun KombinImportScreen(
     }
 }
 
-// ── Loading ────────────────────────────────────────────────────────────────────
+// â”€â”€ Loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @Composable
 private fun LoadingState(isDark: Boolean) {
@@ -108,10 +108,10 @@ private fun LoadingState(isDark: Boolean) {
                 RepeatMode.Reverse
             ), label = "scale"
         )
-        Text("🎁", fontSize = 64.sp, modifier = Modifier.scale(scale))
+        Text("ğŸ", fontSize = 64.sp, modifier = Modifier.scale(scale))
         Spacer(Modifier.height(24.dp))
         Text(
-            "Kombin açılıyor...",
+            "Kombin aÃ§Ä±lÄ±yor...",
             style = MaterialTheme.typography.bodyLarge,
             color = if (isDark) Grey300 else Grey700
         )
@@ -123,7 +123,7 @@ private fun LoadingState(isDark: Boolean) {
     }
 }
 
-// ── Error ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @Composable
 private fun ErrorState(message: String, onBack: () -> Unit, isDark: Boolean) {
@@ -138,7 +138,7 @@ private fun ErrorState(message: String, onBack: () -> Unit, isDark: Boolean) {
         )
         Spacer(Modifier.height(24.dp))
         Text(
-            "Kombinyi Açamadık 😕",
+            "Kombinyi AÃ§amadÄ±k ğŸ˜•",
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = if (isDark) Grey100 else Grey900,
@@ -155,12 +155,12 @@ private fun ErrorState(message: String, onBack: () -> Unit, isDark: Boolean) {
         GlassButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
             Icon(Icons.Default.ArrowBack, null)
             Spacer(Modifier.width(8.dp))
-            Text("Geri Dön")
+            Text("Geri DÃ¶n")
         }
     }
 }
 
-// ── Main content ──────────────────────────────────────────────────────────────
+// â”€â”€ Main content â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @Composable
 private fun ContentState(
@@ -196,7 +196,7 @@ private fun ContentState(
         ) {
             Spacer(Modifier.height(56.dp))
 
-            // ── Hediye ikonu ──────────────────────────────────────────────────
+            // â”€â”€ Hediye ikonu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Box(
                 modifier = Modifier
                     .size(100.dp)
@@ -210,7 +210,7 @@ private fun ContentState(
                         )
                     ),
                 contentAlignment = Alignment.Center
-            ) { Text("🎁", fontSize = 52.sp) }
+            ) { Text("ğŸ", fontSize = 52.sp) }
 
             Spacer(Modifier.height(20.dp))
 
@@ -223,7 +223,7 @@ private fun ContentState(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "Aşağıdaki kombini dolabına eklemek ister misin?",
+                "AÅŸaÄŸÄ±daki kombini dolabÄ±na eklemek ister misin?",
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (isDark) Grey400 else Grey600,
                 textAlign = TextAlign.Center
@@ -231,7 +231,7 @@ private fun ContentState(
 
             Spacer(Modifier.height(28.dp))
 
-            // ── Kombin kartı ──────────────────────────────────────────────────
+            // â”€â”€ Kombin kartÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -259,7 +259,7 @@ private fun ContentState(
                 Spacer(Modifier.height(14.dp))
 
                 Text(
-                    "${parcalar.size} Parça İçeriyor",
+                    "${parcalar.size} ParÃ§a Ä°Ã§eriyor",
                     style = MaterialTheme.typography.labelMedium,
                     color = if (isDark) Grey500 else Grey600
                 )
@@ -271,7 +271,7 @@ private fun ContentState(
                 }
             }
 
-            // Hata mesajı (kayıt hatası)
+            // Hata mesajÄ± (kayÄ±t hatasÄ±)
             if (saveError != null) {
                 Spacer(Modifier.height(16.dp))
                 Surface(
@@ -298,7 +298,7 @@ private fun ContentState(
 
             Spacer(Modifier.height(32.dp))
 
-            // ── Dolabıma Ekle butonu ──────────────────────────────────────────
+            // â”€â”€ DolabÄ±ma Ekle butonu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
             Button(
                 onClick = onConfirm,
                 enabled = !isSaving,
@@ -319,7 +319,7 @@ private fun ContentState(
                     Text("Ekleniyor...", fontWeight = FontWeight.SemiBold)
                 } else {
                     Text(
-                        "🎉  Dolabıma Ekle!",
+                        "ğŸ‰  DolabÄ±ma Ekle!",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.3.sp
@@ -334,7 +334,7 @@ private fun ContentState(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    "Teşekkürler, İstemiyorum",
+                    "TeÅŸekkÃ¼rler, Ä°stemiyorum",
                     style = MaterialTheme.typography.bodyMedium,
                     color = if (isDark) Grey500 else Grey500
                 )
@@ -345,7 +345,7 @@ private fun ContentState(
     }
 }
 
-// ── Kıyafet satırı ────────────────────────────────────────────────────────────
+// â”€â”€ KÄ±yafet satÄ±rÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @Composable
 private fun KiyaketImportRow(kiyaket: Kiyaket, isDark: Boolean) {
@@ -385,8 +385,8 @@ private fun KiyaketImportRow(kiyaket: Kiyaket, isDark: Boolean) {
             )
             val detail = buildString {
                 append(kiyaket.tur.displayName)
-                append(" · ${kiyaket.beden}")
-                if (!kiyaket.renk.isNullOrBlank()) append(" · ${kiyaket.renk}")
+                append(" Â· ${kiyaket.beden}")
+                if (!kiyaket.renk.isNullOrBlank()) append(" Â· ${kiyaket.renk}")
             }
             Text(
                 detail,

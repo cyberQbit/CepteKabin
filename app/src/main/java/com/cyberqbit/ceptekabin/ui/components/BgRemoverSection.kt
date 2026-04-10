@@ -23,12 +23,12 @@ import com.cyberqbit.ceptekabin.util.LocalImageStorageHelper
 import kotlinx.coroutines.launch
 
 /**
- * Fotoğraf seçildikten sonra KiyaketEkleScreen'de gösterilen
- * "Arka Planı Kaldır" aksiyon bölümü.
+ * FotoÃ„Å¸raf seÃƒÂ§ildikten sonra KiyaketEkleScreen'de gÃƒÂ¶sterilen
+ * "Arka PlanÃ„Â± KaldÃ„Â±r" aksiyon bÃƒÂ¶lÃƒÂ¼mÃƒÂ¼.
  *
- * [imageUri]       — seçili görsel URI
- * [bgRemover]      — inject edilmiş servis
- * [onResultUri]    — işlem sonucu yeni URI
+ * [imageUri]       Ã¢â‚¬â€ seÃƒÂ§ili gÃƒÂ¶rsel URI
+ * [bgRemover]      Ã¢â‚¬â€ inject edilmiÃ…Å¸ servis
+ * [onResultUri]    Ã¢â‚¬â€ iÃ…Å¸lem sonucu yeni URI
  */
 @Composable
 fun BgRemoverSection(
@@ -38,7 +38,7 @@ fun BgRemoverSection(
 ) {
     val context  = LocalContext.current
     val scope    = rememberCoroutineScope()
-    val isDark   = androidx.compose.foundation.isSystemInDarkTheme()
+    val isDark   = true
 
     var isProcessing  by remember { mutableStateOf(false) }
     var showApiDialog by remember { mutableStateOf(false) }
@@ -54,7 +54,7 @@ fun BgRemoverSection(
                 apiKey = key
                 prefs.edit().putString("removebg_api_key", key).apply()
                 showApiDialog = false
-                // Anahtar alındıktan hemen sonra işlemi başlat
+                // Anahtar alÃ„Â±ndÃ„Â±ktan hemen sonra iÃ…Å¸lemi baÃ…Å¸lat
                 scope.launch {
                     runRemoval(context, imageUri, key, bgRemover, onResultUri,
                         onStart    = { isProcessing = true; errorMsg = null },
@@ -74,7 +74,7 @@ fun BgRemoverSection(
                     style      = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color      = if (isDark) Grey100 else Grey900)
-                Text("remove.bg ücretsiz tier (50/ay)",
+                Text("remove.bg ÃƒÂ¼cretsiz tier (50/ay)",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isDark) Grey400 else Grey600)
             }
@@ -83,13 +83,13 @@ fun BgRemoverSection(
                 CircularProgressIndicator(Modifier.size(24.dp), PrimaryLight, strokeWidth = 2.dp)
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    // API anahtarı ayarla
+                    // API anahtarÃ„Â± ayarla
                     IconButton(onClick = { showApiDialog = true }) {
-                        Icon(Icons.Default.Key, "API Anahtarı",
+                        Icon(Icons.Default.Key, "API AnahtarÃ„Â±",
                             tint = if (isDark) Grey400 else Grey600,
                             modifier = Modifier.size(20.dp))
                     }
-                    // Arka planı kaldır
+                    // Arka planÃ„Â± kaldÃ„Â±r
                     GlassButton(
                         onClick = {
                             if (apiKey.isBlank()) {
@@ -135,15 +135,15 @@ private suspend fun runRemoval(
     try {
         val inputStream = context.contentResolver.openInputStream(sourceUri)
         val sourceBitmap = BitmapFactory.decodeStream(inputStream)
-        if (sourceBitmap == null) { onError("Görsel okunamadı."); return }
+        if (sourceBitmap == null) { onError("GÃƒÂ¶rsel okunamadÃ„Â±."); return }
 
         val result = bgRemover.removeBackground(sourceBitmap, apiKey)
-        if (result == null) { onError("API yanıt vermedi. Anahtarınızı kontrol edin."); return }
+        if (result == null) { onError("API yanÃ„Â±t vermedi. AnahtarÃ„Â±nÃ„Â±zÃ„Â± kontrol edin."); return }
 
         val savedUriStr = LocalImageStorageHelper.saveBitmapToGallery(
             context, result, "bgremoved_${System.currentTimeMillis()}"
         )
-        if (savedUriStr == null) { onError("Sonuç kaydedilemedi."); return }
+        if (savedUriStr == null) { onError("SonuÃƒÂ§ kaydedilemedi."); return }
 
         onResultUri(android.net.Uri.parse(savedUriStr))
     } catch (e: Exception) {
@@ -158,10 +158,10 @@ private fun ApiKeyDialog(current: String, onConfirm: (String) -> Unit, onDismiss
     var value by remember { mutableStateOf(current) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("remove.bg API Anahtarı") },
+        title = { Text("remove.bg API AnahtarÃ„Â±") },
         text  = {
             Column {
-                Text("remove.bg sitesinden ücretsiz anahtar alabilirsiniz (50 işlem/ay).",
+                Text("remove.bg sitesinden ÃƒÂ¼cretsiz anahtar alabilirsiniz (50 iÃ…Å¸lem/ay).",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(Modifier.height(8.dp))
@@ -177,6 +177,6 @@ private fun ApiKeyDialog(current: String, onConfirm: (String) -> Unit, onDismiss
             TextButton(onClick = { if (value.isNotBlank()) onConfirm(value.trim()) },
                 enabled = value.isNotBlank()) { Text("Kaydet") }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("İptal") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Ã„Â°ptal") } }
     )
 }
