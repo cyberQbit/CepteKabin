@@ -2,7 +2,7 @@
 
   <img src="app/src/main/res/drawable-nodpi/app_logo.webp" alt="CepteKabin Logo" width="185"/>
 
-  # 📱 CepteKabin v2.1
+  # 📱 CepteKabin v2.2
 
   **Yapay Zeka Destekli Moda Asistanı, Dijital Gardırop ve Kişisel Kombin Planlayıcı**
 
@@ -16,7 +16,7 @@
   <br>
 
   <a href="https://play.google.com/store/apps/details?id=com.cyberqbit.ceptekabin">
-    <img src="https://img.shields.io/badge/Google_Play'den_İndir-000000?style=for-the-badge&logo=google-play&logoColor=white" height="80" alt="Google Play'den İndir! (Şimdilik Sadece Kapalı Test - Alpha Kullanıcıları İçindir!)"/>
+    <img src="https://img.shields.io/badge/Google_Play'den_İndir-000000?style=for-the-badge&logo=google-play&logoColor=white" height="80" alt="Google Play'den İndir!"/>
   </a>
   <br><br>
   <a href="https://github.com/cyberQbit/CepteKabin/releases/latest">
@@ -30,7 +30,7 @@
 ---
 
 ## 📋 İçindekiler
-- [🎉 v2.1 Yenilikler](#-v21-yenilikler)
+- [🎉 v2.2 Yenilikler](#-v22-yenilikler)
 - [✨ Temel Özellikler](#-temel-özellikler)
 - [🧠 Yapay Zeka Motorları](#-yapay-zeka-motorları)
 - [🛠️ Teknoloji Yığını](#️-teknoloji-yığını)
@@ -42,39 +42,49 @@
 
 ---
 
-## 🎉 v2.1 Yenilikler
+## 🎉 v2.2 Yenilikler
 
-### 🌟 iOS Tarzı UI Polish
-
-> _"Android'de iOS hissi"_
-
-| Özellik | Önce | Sonra |
-|---------|------|-------|
-| Navigation Bar | Label'lı, düz ikonlar | Sadece ikon, filled/outlined değişimi |
-| Seçili İndikatör | Varsayılan M3 indicator | 52dp yuvarlak background |
-| Kart Press | Ripple efekti | iOS tarzı spring scale (0.97-0.98f) |
-| Loading | Circular progress | Shimmer skeleton animasyonu |
-| Geçişler | Hızlı fade | SlideUpFadeIn (fade + slide) |
-| Status/Nav Bar | Sistem varsayılanı | Edge-to-edge şeffaf |
-
-### 🆕 Yeni Özellikler (v2.1)
+### 🛡️ Güvenlik ve İzin Yönetimi
 
 | Özellik | Açıklama |
 |---------|----------|
-| **Onboarding Screen** | 3 sayfalık uygulama tanıtımı |
-| **Shimmer Loading** | Veri yüklenirken premium shimmer animasyonu |
-| **Press Effect** | Kartlara basıldığında spring scale animasyonu |
-| **Modern Hotbar** | iOS tarzı filled/outlined ikon değişimi |
-| **PhotoValidationUtil** | ML Kit ile fotoğraf doğrulama |
-| **Kombin Takvimi** | 30 gün görünüm, günde 3 kombin, snapshot |
+| **Kamera İzin Kontrolü** | Çalışma zamanında `CAMERA` izni isteniyor, izin verilmeden kamera açılmıyor |
+| **Güvenli Kamera Akışı** | İzin reddedilirse uygulama çökmez, kullanıcıya bilgi verilir |
 
-### 🐛 Hata Düzeltmeleri (v2.1)
+### 🌡️ Hava Durumu Optimizasyonu
 
-- Hotbar'da aynı sekmeye tıklama çalışmıyordu → Düzeltildi
-- Hava durumu yenileme butonu çalışmıyordu → Düzeltildi
-- Alt içerik kesiliyordu → Bottom padding artırıldı (96dp)
-- Dolap boş durumu düzgün hizalanmıyordu → Düzeltildi
-- FAB navigation bar ile çakışıyordu → Margin ayarlandı (80dp)
+| Özellik | Önce | Sonra |
+|---------|------|-------|
+| **API Tasarrufu** | Her ekran geçişinde API çağrısı | 15 dakika bayatlık kontrolü |
+| **Manuel Yenileme** | Spam yapılabiliyordu | 60 saniye cooldown |
+| **Cache Senkronizasyonu** | Her ekran bağımsız yüklüyordu | Room Flow ile reaktif paylaşım |
+| **HomeScreen Davranışı** | Her dönüşte yeniden yüklüyordu | Cache'den anlık gösterim |
+
+### 🎨 UI/UX İyileştirmeleri
+
+| Özellik | Açıklama |
+|---------|----------|
+| **Sabit Koyu Tema** | Sistem temasından bağımsız, tek renk paleti |
+| **Safe Area Düzeltmeleri** | Onboarding ve Auth ekranlarında navigation bar çakışması giderildi |
+| **Navigation Bar Padding** | 3-tuşlu ve gesture navigasyon için optimize edildi |
+
+### 🔐 Kimlik Doğrulama
+
+| Özellik | Açıklama |
+|---------|----------|
+| **Zorunlu Hesap Seçici** | Google Sign-In'de önceki oturum otomatik kullanılmıyor |
+| **Onboarding Zorunluluğu** | "Atla" butonu kaldırıldı, giriş yapmadan uygulamaya giriş yok |
+
+### 🐛 v2.2 Hata Düzeltmeleri
+
+| # | Sorun | Çözüm |
+|---|-------|-------|
+| 1 | Türkçe karakterler bozuk görünüyordu | 18 dosyada encoding düzeltildi |
+| 2 | Kamera butonuna basınca uygulama çöküyordu | Çalışma zamanı izin kontrolü eklendi |
+| 3 | HomeScreen'de sürekli shimmer loading | Cache-first stratejisi uygulandı |
+| 4 | Hava durumu manuel yenileme spam | 60 saniye cooldown eklendi |
+| 5 | Google girişinde hesap seçici gösterilmiyordu | Önceki oturum temizleniyor |
+| 6 | Aydınlık tema cihazlarda görünüyordu | Sabit koyu tema uygulandı |
 
 ---
 
@@ -82,13 +92,14 @@
 
 | Özellik | Açıklama |
 |---------|----------|
-| **☁️ Akıllı Hava Durumu** | 5 günlük hava tahmini + dinamik arka planlar |
-| **🧠 AI Kombin Önerileri** | Hava durumuna ve renk uyumuna göre otomatik kombin önerileri |
+| **☁️ Akıllı Hava Durumu** | 5 günlük hava tahmini + 15dk cache optimizasyonu |
+| **🧠 AI Kombin Önerileri** | Hava durumuna ve renk uyumuna göre otomatik öneriler |
 | **📦 Gizlilik Odaklı Depolama** | Görseller `.nomedia` klasörlerinde şifrelenir |
 | **🛒 Barkod ile Hızlı Ekleme** | ML Kit OCR ile barkod okutma |
 | **📅 Kombin Takvimi** | 30 güne kombin planla, günde 3 kombin |
 | **🎨 Renk Uyumu Analizi** | 12 renk grubu üzerinden kombinasyon puanlaması |
 | **👤 Sanal Prova** | Fotoğraf doğrulama ile yüz tespiti |
+| **🔄 Cihazlar Arası Senkronizasyon** | Google hesabı ile tüm veriler senkronize |
 
 ---
 
@@ -135,12 +146,12 @@ Uyum Puanı (100 üzerinden):
 | **Dil & UI** | Kotlin, Jetpack Compose, Material Design 3 |
 | **Mimari** | Clean Architecture, MVVM, Compose Navigation |
 | **Asenkron** | Coroutines, StateFlow, SharedFlow |
-| **Veritabanı** | Room Database (v6) |
+| **Veritabanı** | Room Database (v6) + Flow reaktif sorgular |
 | **Ağ** | Retrofit2, OkHttp3, Gson |
 | **AI & Görüntü** | Google ML Kit (Face, OCR), CameraX |
 | **Görsel** | Coil (AsyncImage) |
 | **DI** | Dagger-Hilt |
-| **Cloud** | Firebase Auth, Cloud Firestore (opsiyonel) |
+| **Cloud** | Firebase Auth, Cloud Firestore |
 
 ---
 
@@ -156,14 +167,14 @@ app/src/main/java/com/cyberqbit/ceptekabin/
 ├── data/
 │   ├── local/
 │   │   ├── database/   # Room entities, DAOs, Database (v6)
-│   │   └── dao/        # TakvimGirisiDao, WeatherCacheDao
+│   │   └── dao/        # TakvimGirisiDao, WeatherCacheDao (Flow)
 │   ├── repository/     # Repository implementations
-│   └── service/        # LocationService
+│   └── service/        # LocationService, GoogleAuthService
 ├── ui/
-│   ├── screens/        # Home, Dolap, Kombin, HavaDurumu, Takvim, Onboarding
-│   ├── components/     # GlassCard, GlassSurface, ShimmerLoading, RenkDairesi
+│   ├── screens/        # Home, Dolap, Kombin, HavaDurumu, Takvim, Onboarding, Auth
+│   ├── components/     # GlassCard, GlassSurface, ShimmerLoading, TutorialOverlay
 │   ├── navigation/     # NavGraph, Screen routes
-│   └── theme/          # Color, Type, Theme, Animations
+│   └── theme/          # Color, Type, Theme (sabit koyu tema)
 └── util/              # Constants
 ```
 
@@ -192,7 +203,7 @@ app/src/main/java/com/cyberqbit/ceptekabin/
 
 ### GlassCard / GlassSurface
 - 16dp corner radius
-- Light: 0.85f opacity, Dark: 0.7f opacity
+- Dark: 0.7f opacity
 - 1dp subtle border
 - Soft shadow
 
@@ -202,6 +213,11 @@ app/src/main/java/com/cyberqbit/ceptekabin/
 - Pasif: çerçeveli (outlined) ikon
 - 28dp ikon boyutu
 - iOS tarzı spring press effect
+
+### Safe Area Desteği
+- `statusBarsPadding()` + `navigationBarsPadding()`
+- 3-tuşlu ve gesture navigasyon desteği
+- Edge-to-edge immersive experience
 
 ### Tasarım Sistemi
 
@@ -236,14 +252,16 @@ cd CepteKabin
 4. Derleyin:
 ```bash
 ./gradlew clean
-./gradlew assembleRelease
+./gradlew bundleRelease
 ```
 
 ### Önemli Notlar
 
-> ⚠️ **Veritabanı v6:** İlk açılışta eski veriler silinecek. `fallbackToDestructiveMigration()` aktif.
+> ⚠️ **Veritabanı v6:** İlk açılışta eski veriler silinebilir. `fallbackToDestructiveMigration()` aktif.
 
 > 💡 **Konum İzni:** Hava durumu için `ACCESS_FINE_LOCATION` gereklidir.
+
+> 📷 **Kamera İzni:** Android 6.0+ için çalışma zamanında `CAMERA` izni istenir.
 
 ---
 

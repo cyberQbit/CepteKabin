@@ -32,7 +32,11 @@ class GoogleAuthService @Inject constructor(
     val currentUser = firebaseAuth.currentUser
 
     val signInIntent: Intent
-        get() = googleSignInClient.signInIntent
+        get() {
+            // Önceki oturumu temizle ki hesap seçici her zaman gösterilsin
+            googleSignInClient.signOut().addOnCompleteListener { }
+            return googleSignInClient.signInIntent
+        }
 
     suspend fun signInWithGoogle(intent: Intent): SignInResult {
         return try {
