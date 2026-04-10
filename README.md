@@ -16,7 +16,7 @@
   <br>
 
   <a href="https://play.google.com/store/apps/details?id=com.cyberqbit.ceptekabin">
-    <img src="https://img.shields.io/badge/Google_Play'den_İndir_(⚠️_In_Closed_Test_Process)-000000?style=for-the-badge&logo=google-play&logoColor=white" height="80" alt="Google Play'den İndir!"/>
+    <img src="https://img.shields.io/badge/Google_Play'den_İndir_(⚠️_Kapalı_Test_Sürecinde*¹)-000000?style=for-the-badge&logo=google-play&logoColor=white" height="80" alt="Google Play'den İndir!"/>
   </a>
   <br><br>
   <a href="https://github.com/cyberQbit/CepteKabin/releases/latest">
@@ -272,6 +272,8 @@ cd CepteKabin
 3. Commit'leyin
 4. Push'layın ve Pull Request açın
 
+---
+#### <b>*</b> <sup>1</sup> (Not: Uygulamanın Google Play Store sürümü "Kapalı Test - Alpha" sürecinde olup, bu sürece dahil olmak için geliştirici ile Google Hesabınıza ait e-posta hesabınızı paylaşmanız gerekmektedir!)
 ---
 
 <div align="center">
