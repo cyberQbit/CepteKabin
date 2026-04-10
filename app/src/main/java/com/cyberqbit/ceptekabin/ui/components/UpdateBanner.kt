@@ -19,6 +19,7 @@ import com.cyberqbit.ceptekabin.BuildConfig
 import com.cyberqbit.ceptekabin.data.worker.UpdateCheckWorker
 import com.cyberqbit.ceptekabin.ui.theme.PrimaryLight
 import com.cyberqbit.ceptekabin.util.Constants
+import com.cyberqbit.ceptekabin.util.KombinShareHelper
 
 /**
  * BuildConfig.VERSION_NAME ile GitHub'daki son release tag'ini karşılaştırır.
@@ -44,7 +45,6 @@ fun UpdateBanner() {
     }
 
     val latestVersion = prefs.getString(UpdateCheckWorker.PREF_LATEST_VERSION_NAME, null) ?: ""
-    val downloadUrl   = prefs.getString(UpdateCheckWorker.PREF_LATEST_VERSION_URL, null) ?: ""
 
     AnimatedVisibility(
         visible = showBanner,
@@ -82,9 +82,10 @@ fun UpdateBanner() {
                     )
                 }
                 TextButton(onClick = {
-                    if (downloadUrl.isNotBlank()) {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl)))
-                    }
+                    // Play Store'a yönlendir (GitHub release URL yerine)
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(KombinShareHelper.PLAY_STORE_LINK))
+                    )
                 }) {
                     Text("Güncelle", color = PrimaryLight, fontWeight = FontWeight.Bold)
                 }

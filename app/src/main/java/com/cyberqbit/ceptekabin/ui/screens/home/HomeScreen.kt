@@ -34,6 +34,7 @@ import com.cyberqbit.ceptekabin.domain.model.Kiyaket
 import com.cyberqbit.ceptekabin.ui.components.GlassCard
 import com.cyberqbit.ceptekabin.ui.components.GlassSurface
 import com.cyberqbit.ceptekabin.ui.components.ShimmerCard
+import com.cyberqbit.ceptekabin.ui.components.TutorialOverlay
 import com.cyberqbit.ceptekabin.ui.theme.*
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -148,6 +149,9 @@ fun HomeScreen(
         }
         Spacer(Modifier.height(24.dp))
     }
+
+    // İlk açılışta uygulamayı tanıtan tutorial (sadece bir kez gösterilir)
+    TutorialOverlay(isDark = isDark)
 }
 
 data class DolapIstatistikleri(

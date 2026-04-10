@@ -17,6 +17,8 @@ object Constants {
     const val PREF_DARK_MODE = "dark_mode"
     const val PREF_DISMISSED_UPDATE_VERSION = "dismissed_update_version"
     const val PREF_MANUAL_CITY = "manual_city"
+    const val PREF_ONBOARDING_COMPLETED = "onboarding_completed"
+    const val PREF_TUTORIAL_SHOWN = "tutorial_shown"
 
     const val EXTRA_BARKOD = "extra_barkod"
     const val EXTRA_KIYAKET_ID = "extra_kiyaket_id"

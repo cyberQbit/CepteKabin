@@ -53,9 +53,15 @@ fun HavaDurumuScreen(
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var secilenForecast by remember { mutableStateOf<ForecastItem?>(null) }
 
-    LaunchedEffect(locationPermission.status.isGranted) {
+    LaunchedEffect(Unit) {
+        // Ekrana her gelindiğinde fresh veri çek (izin durumuna göre)
         if (locationPermission.status.isGranted) viewModel.loadHavaDurumuWithLocation()
         else viewModel.loadHavaDurumuByCity("Ankara")
+    }
+
+    // İzin yeni verildiğinde konuma göre güncelle
+    LaunchedEffect(locationPermission.status.isGranted) {
+        if (locationPermission.status.isGranted) viewModel.loadHavaDurumuWithLocation()
     }
 
     val bgColors = havaDurumu?.let { getDynamicBackground(it.durum, isDark) }

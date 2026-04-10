@@ -1,5 +1,6 @@
 package com.cyberqbit.ceptekabin.ui.navigation
 
+import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -17,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -37,6 +39,7 @@ import com.cyberqbit.ceptekabin.ui.screens.onboarding.OnboardingScreen
 import com.cyberqbit.ceptekabin.ui.screens.tarama.KiyaketEkleScreen
 import com.cyberqbit.ceptekabin.ui.screens.tarama.TaramaScreen
 import com.cyberqbit.ceptekabin.ui.theme.*
+import com.cyberqbit.ceptekabin.util.Constants
 
 data class BottomNavItem(
     val route: String,
@@ -67,6 +70,7 @@ fun NavGraph(
     val showBottomBar = currentRoute in mainScreenRoutes
 
     val isDark = isSystemInDarkTheme()
+    val context = LocalContext.current
 
     LaunchedEffect(pendingImportUri, currentRoute) {
         val uri = pendingImportUri ?: return@LaunchedEffect
@@ -93,7 +97,13 @@ fun NavGraph(
             composable(Screen.Splash.route) {
                 com.cyberqbit.ceptekabin.ui.screens.splash.SplashScreen(
                     onNavigateToHome = {
-                        val dest = if (isLoggedIn) Screen.Home.route else Screen.Auth.route
+                        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+                        val onboardingDone = prefs.getBoolean(Constants.PREF_ONBOARDING_COMPLETED, false)
+                        val dest = when {
+                            !onboardingDone -> Screen.Onboarding.route
+                            isLoggedIn -> Screen.Home.route
+                            else -> Screen.Auth.route
+                        }
                         navController.navigate(dest) { popUpTo(Screen.Splash.route) { inclusive = true } }
                     }
                 )
@@ -198,7 +208,11 @@ fun NavGraph(
             composable(Screen.Onboarding.route) {
                 OnboardingScreen(
                     onComplete = {
-                        navController.navigate(Screen.Home.route) {
+                        // Onboarding tamamlandı olarak işaretle
+                        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+                        prefs.edit().putBoolean(Constants.PREF_ONBOARDING_COMPLETED, true).apply()
+                        // Google giriş ekranına yönlendir
+                        navController.navigate(Screen.Auth.route) {
                             popUpTo(Screen.Onboarding.route) { inclusive = true }
                         }
                     }
@@ -211,7 +225,8 @@ fun NavGraph(
             NavigationBar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+                    .navigationBarsPadding()            // sistem nav bar'ının yukarısına it
+                    .padding(start = 20.dp, end = 20.dp, bottom = 12.dp)
                     .height(68.dp)
                     .clip(RoundedCornerShape(28.dp))
                     .shadow(elevation = 12.dp, shape = RoundedCornerShape(28.dp)),
