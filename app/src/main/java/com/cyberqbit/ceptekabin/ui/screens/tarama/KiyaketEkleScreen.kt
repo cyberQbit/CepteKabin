@@ -1,11 +1,11 @@
 ﻿package com.cyberqbit.ceptekabin.ui.screens.tarama
 
+import android.Manifest
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -33,9 +33,12 @@ import com.cyberqbit.ceptekabin.domain.model.Kiyaket
 import com.cyberqbit.ceptekabin.domain.model.KiyaketTur
 import com.cyberqbit.ceptekabin.domain.model.Mevsim
 import com.cyberqbit.ceptekabin.ui.theme.*
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import java.io.File
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun KiyaketEkleScreen(
     barkod: String,
@@ -79,6 +82,10 @@ fun KiyaketEkleScreen(
     val context = LocalContext.current
     var validationError by remember { mutableStateOf<String?>(null) }
 
+    // Kamera izni — çalışma zamanında isteme zorunluluğu
+    val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
+    var pendingCameraLaunch by remember { mutableStateOf(false) }
+
     val markaList = com.cyberqbit.ceptekabin.util.Constants.MARKALAR
     val renkList = com.cyberqbit.ceptekabin.util.Constants.RENKLER
     val dinamikBedenListesi = com.cyberqbit.ceptekabin.util.Constants.getBedenListesi(model) ?: emptyList()
@@ -98,6 +105,16 @@ fun KiyaketEkleScreen(
 
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) tempCameraUri?.let { selectedImageUri = it }
+    }
+
+    // İzin yeni verildiğinde bekleyen kamera açma isteğini yerine getir
+    LaunchedEffect(cameraPermission.status.isGranted) {
+        if (cameraPermission.status.isGranted && pendingCameraLaunch) {
+            pendingCameraLaunch = false
+            val uri = createSafeImageUri()
+            tempCameraUri = uri
+            cameraLauncher.launch(uri)
+        }
     }
 
     LaunchedEffect(kiyaketId) {
@@ -232,11 +249,18 @@ fun KiyaketEkleScreen(
                     Spacer(Modifier.height(16.dp))
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Button(
-                            onClick = { 
-                                val uri = createSafeImageUri()
-                                tempCameraUri = uri
-                                cameraLauncher.launch(uri) 
-                            }, 
+                            onClick = {
+                                if (cameraPermission.status.isGranted) {
+                                    // İzin zaten var — kamerayı direkt aç
+                                    val uri = createSafeImageUri()
+                                    tempCameraUri = uri
+                                    cameraLauncher.launch(uri)
+                                } else {
+                                    // İzin yok — önce iste, verilince LaunchedEffect tetikler
+                                    pendingCameraLaunch = true
+                                    cameraPermission.launchPermissionRequest()
+                                }
+                            },
                             modifier = Modifier.weight(1f).height(48.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = PrimaryDark)
                         ) { Text("Kamera") }
