@@ -16,7 +16,7 @@
   <br>
 
   <a href="https://play.google.com/store/apps/details?id=com.cyberqbit.ceptekabin">
-    <img src="https://img.shields.io/badge/Google_Play'den_İndir-000000?style=for-the-badge&logo=google-play&logoColor=white" height="80" alt="Google Play'den İndir! (Şimdilik Sadece Kapalı Beta Kullanıcıları İçindir!)"/>
+    <img src="https://img.shields.io/badge/Google_Play'den_İndir-000000?style=for-the-badge&logo=google-play&logoColor=white" height="80" alt="Google Play'den İndir! (Şimdilik Sadece Kapalı Test - Alpha Kullanıcıları İçindir!)"/>
   </a>
   <br><br>
   <a href="https://github.com/cyberQbit/CepteKabin/releases/latest">
