@@ -22,7 +22,7 @@
   <a href="https://github.com/cyberQbit/CepteKabin/releases/latest">
     <img src="https://img.shields.io/badge/%F0%9F%93%81_CEPTEKAB%C4%B0N'%C4%B0_HEMEN_%C4%B0ND%C4%B0R_(APK)-2EA043?style=for-the-badge&logo=android&logoColor=white" height="65" alt="CepteKabin İndir"/>
   </a>
-
+  <br><br>
   <p><b>✨ Kendi gardırobunu cebinde taşı, yapay zeka ile tarzını baştan yarat! ✨</b></p>
 
 </div>
