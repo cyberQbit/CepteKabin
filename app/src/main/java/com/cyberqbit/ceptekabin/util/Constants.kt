@@ -19,6 +19,11 @@ object Constants {
     const val PREF_MANUAL_CITY = "manual_city"
     const val PREF_ONBOARDING_COMPLETED = "onboarding_completed"
     const val PREF_TUTORIAL_SHOWN = "tutorial_shown"
+    const val PREF_WEATHER_LAST_FETCH_TIME = "weather_last_fetch_time"
+    const val PREF_WEATHER_MANUAL_COOLDOWN_UNTIL = "weather_manual_cooldown_until"
+
+    const val WEATHER_STALE_MS    = 15 * 60 * 1000L  // 15 dakika
+    const val WEATHER_COOLDOWN_MS = 60 * 1000L        // 60 saniye (manuel yenileme cooldown)
 
     const val EXTRA_BARKOD = "extra_barkod"
     const val EXTRA_KIYAKET_ID = "extra_kiyaket_id"

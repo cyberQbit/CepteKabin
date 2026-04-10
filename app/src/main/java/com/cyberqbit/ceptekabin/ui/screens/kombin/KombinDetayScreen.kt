@@ -1,4 +1,4 @@
-package com.cyberqbit.ceptekabin.ui.screens.kombin
+﻿package com.cyberqbit.ceptekabin.ui.screens.kombin
 
 import android.content.Intent
 import androidx.compose.foundation.clickable
@@ -47,24 +47,24 @@ fun KombinDetayScreen(
         yukleniyor = false
     }
 
-    // Silme diyaloÄŸu
+    // Silme diyaloğu
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
             title = { Text("Kombini Sil") },
-            text  = { Text("Bu kombini silmek istediÄŸinden emin misin?") },
+            text  = { Text("Bu kombini silmek istediğinden emin misin?") },
             confirmButton = {
                 TextButton(onClick = {
                     kombin?.let { viewModel.deleteKombin(it); onNavigateBack() }
                 }) { Text("Sil", color = Error) }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) { Text("Ä°ptal") }
+                TextButton(onClick = { showDeleteDialog = false }) { Text("İptal") }
             }
         )
     }
 
-    // PaylaÅŸÄ±m alt sayfasÄ±
+    // Paylaşım alt sayfası
     if (showShareSheet && kombin != null) {
         KombinShareBottomSheet(
             kombin    = kombin!!,
@@ -84,7 +84,7 @@ fun KombinDetayScreen(
                 actions = {
                     kombin?.let { k ->
                         IconButton(onClick = { onNavigateToEdit(k.id) }) {
-                            Icon(Icons.Default.Edit, "DÃ¼zenle")
+                            Icon(Icons.Default.Edit, "Düzenle")
                         }
                         IconButton(onClick = {
                             kombin = k.copy(favori = !k.favori)
@@ -115,7 +115,7 @@ fun KombinDetayScreen(
                 Box(
                     Modifier.fillMaxSize().padding(padding),
                     contentAlignment = Alignment.Center
-                ) { Text("Kombin bulunamadÄ±.") }
+                ) { Text("Kombin bulunamadı.") }
             }
             else -> {
                 val k = kombin!!
@@ -125,7 +125,7 @@ fun KombinDetayScreen(
                         .padding(padding)
                         .padding(16.dp)
                 ) {
-                    // â”€â”€ Kombin detay kartÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                    // ── Kombin detay kartı ────────────────────────────────────
                     GlassCard(modifier = Modifier.fillMaxWidth()) {
                         Column {
                             Text(
@@ -140,7 +140,7 @@ fun KombinDetayScreen(
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 KombinSlotCard(
-                                    "Ãœst", k.ustGiyim, Modifier.weight(1f)
+                                    "Üst", k.ustGiyim, Modifier.weight(1f)
                                 ) { k.ustGiyim?.let { onNavigateToKiyaket(it.id) } }
                                 KombinSlotCard(
                                     "Alt", k.altGiyim, Modifier.weight(1f)
@@ -152,10 +152,10 @@ fun KombinDetayScreen(
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 KombinSlotCard(
-                                    "DÄ±ÅŸ", k.disGiyim, Modifier.weight(1f)
+                                    "Dış", k.disGiyim, Modifier.weight(1f)
                                 ) { k.disGiyim?.let { onNavigateToKiyaket(it.id) } }
                                 KombinSlotCard(
-                                    "AyakkabÄ±", k.ayakkabi, Modifier.weight(1f)
+                                    "Ayakkabı", k.ayakkabi, Modifier.weight(1f)
                                 ) { k.ayakkabi?.let { onNavigateToKiyaket(it.id) } }
                             }
                             k.aksesuar?.let { aks ->
@@ -185,7 +185,7 @@ fun KombinDetayScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    // â”€â”€ Giydim butonu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                    // ── Giydim butonu ─────────────────────────────────────────
                     Button(
                         onClick = {
                             viewModel.incrementPuan(k.id)
@@ -201,14 +201,14 @@ fun KombinDetayScreen(
 
                     Spacer(Modifier.height(12.dp))
 
-                    // â”€â”€ PaylaÅŸ butonu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                    // ── Paylaş butonu ─────────────────────────────────────────
                     GlassButton(
                         onClick  = { showShareSheet = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Icon(Icons.Default.Share, contentDescription = "PaylaÅŸ")
+                        Icon(Icons.Default.Share, contentDescription = "Paylaş")
                         Spacer(Modifier.width(8.dp))
-                        Text("Kombini GÃ¶nder")
+                        Text("Kombini Gönder")
                     }
                 }
             }
@@ -216,7 +216,7 @@ fun KombinDetayScreen(
     }
 }
 
-// â”€â”€ PaylaÅŸÄ±m Alt SayfasÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Paylaşım Alt Sayfası ──────────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -240,25 +240,25 @@ private fun KombinShareBottomSheet(
         Column(modifier = Modifier.padding(horizontal = 24.dp)) {
 
             Text(
-                "Kombini PaylaÅŸ",
+                "Kombini Paylaş",
                 style      = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(6.dp))
             Text(
-                "\"${kombin.ad}\" kombinini nasÄ±l gÃ¶ndermek istersin?",
+                "\"${kombin.ad}\" kombinini nasıl göndermek istersin?",
                 style = MaterialTheme.typography.bodyMedium,
                 color = if (isDark) Grey400 else Grey600
             )
 
             Spacer(Modifier.height(24.dp))
 
-            // â”€â”€ SeÃ§enek 1: .kmb dosyasÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── Seçenek 1: .kmb dosyası ───────────────────────────────────────
             ShareOptionCard(
-                emoji       = if (isBuilding) null else "ğŸ“¦",
+                emoji       = if (isBuilding) null else "g���",
                 isLoading   = isBuilding,
-                title       = "Kombin DosyasÄ± GÃ¶nder",
-                description = "ArkadaÅŸÄ±n CepteKabin kuruluysa bunu seÃ§",
+                title       = "Kombin Dosyası Gönder",
+                description = "Arkadaşın CepteKabin kuruluysa bunu seç",
                 tint        = PrimaryLight,
                 isDark      = isDark,
                 onClick     = {
@@ -272,7 +272,7 @@ private fun KombinShareBottomSheet(
                             onDismiss()
                             if (intent != null) {
                                 context.startActivity(
-                                    Intent.createChooser(intent, "${kombin.ad} PaylaÅŸ")
+                                    Intent.createChooser(intent, "${kombin.ad} Paylaş")
                                 )
                             }
                         }
@@ -282,18 +282,18 @@ private fun KombinShareBottomSheet(
 
             Spacer(Modifier.height(12.dp))
 
-            // â”€â”€ SeÃ§enek 2: Davet linki â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            // ── Seçenek 2: Davet linki ────────────────────────────────────────
             ShareOptionCard(
-                emoji       = "ğŸ”—",
+                emoji       = "g���",
                 isLoading   = false,
-                title       = "Davet Linki GÃ¶nder",
-                description = "ArkadaÅŸÄ±n henÃ¼z uygulamayÄ± yoksa bunu seÃ§",
+                title       = "Davet Linki Gönder",
+                description = "Arkadaşın henüz uygulamayı yoksa bunu seç",
                 tint        = AccentGold,
                 isDark      = isDark,
                 onClick     = {
                     val intent = KombinShareHelper.createInviteIntent(kombin)
                     onDismiss()
-                    context.startActivity(Intent.createChooser(intent, "Davet Linki PaylaÅŸ"))
+                    context.startActivity(Intent.createChooser(intent, "Davet Linki Paylaş"))
                 }
             )
 
@@ -322,7 +322,7 @@ private fun ShareOptionCard(
             modifier           = Modifier.padding(16.dp),
             verticalAlignment  = Alignment.CenterVertically
         ) {
-            // Ä°kon kutusu
+            // İkon kutusu
             Surface(
                 shape = RoundedCornerShape(12.dp),
                 color = tint.copy(alpha = 0.15f),
@@ -336,7 +336,7 @@ private fun ShareOptionCard(
                             color       = tint
                         )
                     } else {
-                        Text(emoji ?: "ğŸ“¦", fontSize = 26.sp)
+                        Text(emoji ?: "g���", fontSize = 26.sp)
                     }
                 }
             }
@@ -365,7 +365,7 @@ private fun ShareOptionCard(
     }
 }
 
-// â”€â”€ Slot kartÄ± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Slot kartı ────────────────────────────────────────────────────────────────
 
 @Composable
 private fun KombinSlotCard(
@@ -408,7 +408,7 @@ private fun KombinSlotCard(
                     color = Grey500
                 )
             } else {
-                Text("â€”", style = MaterialTheme.typography.bodySmall, color = Grey400)
+                Text("—", style = MaterialTheme.typography.bodySmall, color = Grey400)
             }
         }
     }

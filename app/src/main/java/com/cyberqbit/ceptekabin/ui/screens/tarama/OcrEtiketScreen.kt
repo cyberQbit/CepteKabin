@@ -1,4 +1,4 @@
-package com.cyberqbit.ceptekabin.ui.screens.tarama
+﻿package com.cyberqbit.ceptekabin.ui.screens.tarama
 
 import android.Manifest
 import android.graphics.Bitmap
@@ -86,7 +86,7 @@ fun OcrCameraView(
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (!showResult) {
-            // Kamera gÃƒÂ¶rÃƒÂ¼nÃƒÂ¼mÃƒÂ¼
+            // Kamera gÃ¶rÃ¼nÃ¼mÃ¼
             AndroidView(
                 factory = { ctx ->
                     val previewView = PreviewView(ctx)
@@ -154,7 +154,7 @@ fun OcrCameraView(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Etiket FotoÃ„Å¸rafÃ„Â± Ãƒâ€¡ekin",
+                            text = "Etiket FotoÄŸrafÄ± Ã‡ekin",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             textAlign = TextAlign.Center,
@@ -162,7 +162,7 @@ fun OcrCameraView(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "KÃ„Â±yafet etiketindeki marka, boyut ve materyal bilgilerini otomatik olarak tanÃ„Â±yacaÃ„Å¸Ã„Â±z",
+                            text = "KÄ±yafet etiketindeki marka, boyut ve materyal bilgilerini otomatik olarak tanÄ±yacaÄŸÄ±z",
                             style = MaterialTheme.typography.bodySmall,
                             color = if (isDark) Grey400 else Grey600,
                             textAlign = TextAlign.Center
@@ -187,27 +187,27 @@ fun OcrCameraView(
                 )
             }
 
-            // Ãƒâ€¡ekim butonu
+            // Ã‡ekim butonu
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 48.dp)
             ) {
                 FloatingActionButton(
-                    onClick = { /* FotoÃ„Å¸raf ÃƒÂ§ek */ },
+                    onClick = { /* FotoÄŸraf Ã§ek */ },
                     containerColor = PrimaryLight,
                     contentColor = White,
                     modifier = Modifier.size(72.dp)
                 ) {
                     Icon(
                         Icons.Default.CameraAlt,
-                        contentDescription = "FotoÃ„Å¸raf ÃƒÂ§ek",
+                        contentDescription = "FotoÄŸraf Ã§ek",
                         modifier = Modifier.size(32.dp)
                     )
                 }
             }
         } else {
-            // SonuÃƒÂ§ gÃƒÂ¶rÃƒÂ¼nÃƒÂ¼mÃƒÂ¼
+            // SonuÃ§ gÃ¶rÃ¼nÃ¼mÃ¼
             OcrResultView(
                 recognizedText = recognizedText,
                 isProcessing = isProcessing,
@@ -257,7 +257,7 @@ fun OcrResultView(
                 )
             }
             Text(
-                text = "TanÃ„Â±ma Sonucu",
+                text = "TanÄ±ma Sonucu",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = if (isDark) Grey100 else Grey900
@@ -275,17 +275,17 @@ fun OcrResultView(
                 CircularProgressIndicator(color = PrimaryLight)
             }
         } else {
-            // TanÃ„Â±nan metin
+            // TanÄ±nan metin
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "TanÃ„Â±nan Metin",
+                    text = "TanÄ±nan Metin",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = if (isDark) Grey100 else Grey900
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = recognizedText ?: "Metin tanÃ„Â±namadÃ„Â±",
+                    text = recognizedText ?: "Metin tanÄ±namadÄ±",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isDark) Grey400 else Grey600
                 )
@@ -293,10 +293,10 @@ fun OcrResultView(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Ãƒâ€¡Ã„Â±karÃ„Â±lan bilgiler
+            // Ã‡Ä±karÄ±lan bilgiler
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Ãƒâ€¡Ã„Â±karÃ„Â±lan Bilgiler",
+                    text = "Ã‡Ä±karÄ±lan Bilgiler",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = if (isDark) Grey100 else Grey900
@@ -328,7 +328,7 @@ fun OcrResultView(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Onay butonlarÃ„Â±
+            // Onay butonlarÄ±
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -339,7 +339,7 @@ fun OcrResultView(
                 ) {
                     Icon(Icons.Default.Refresh, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Yeniden Ãƒâ€¡ek")
+                    Text("Yeniden Ã‡ek")
                 }
 
                 GlassButton(
@@ -360,7 +360,7 @@ private fun parseEtiketText(text: String): Map<String, String> {
     val result = mutableMapOf<String, String>()
 
     // Marka tespiti
-    val markaList = listOf("koton", "lcw", "mavi", "defacto", "benetton", "puma", "adidas", "nike", "zara", "h&m", "mango", "bershka", "stradivarius", "pull&bear", "corsÃ¥Â°ÂÃ©Â»â€˜Ã§â€œÂ¶", "deichmann", "nine west")
+    val markaList = listOf("koton", "lcw", "mavi", "defacto", "benetton", "puma", "adidas", "nike", "zara", "h&m", "mango", "bershka", "stradivarius", "pull&bear", "corså°é»‘ç“¶", "deichmann", "nine west")
     markaList.forEach { marka ->
         if (lowerText.contains(marka)) {
             result["Marka"] = marka.replaceFirstChar { it.uppercase() }
@@ -382,7 +382,7 @@ private fun parseEtiketText(text: String): Map<String, String> {
     }
 
     // Materyal tespiti
-    val materyalList = listOf("%100 cotton", "%100 pamuk", "polyester", "viscose", "linen", "keten", "wool", "yÃƒÂ¼n", "cashmere", "kaÃ…Å¸mere", "modal", "akrilik")
+    val materyalList = listOf("%100 cotton", "%100 pamuk", "polyester", "viscose", "linen", "keten", "wool", "yÃ¼n", "cashmere", "kaÅŸmere", "modal", "akrilik")
     materyalList.forEach { materyal ->
         if (lowerText.contains(materyal)) {
             result["Materyal"] = materyal.replaceFirstChar { it.uppercase() }
@@ -391,7 +391,7 @@ private fun parseEtiketText(text: String): Map<String, String> {
     }
 
     // Renk tespiti
-    val renkList = listOf("siyah", "beyaz", "gri", "kÃ„Â±rmÃ„Â±zÃ„Â±", "mavi", "yeÃ…Å¸il", "sarÃ„Â±", "turuncu", "mor", "pembe", "bordo", "bej", "kahverengi", "lacivert")
+    val renkList = listOf("siyah", "beyaz", "gri", "kÄ±rmÄ±zÄ±", "mavi", "yeÅŸil", "sarÄ±", "turuncu", "mor", "pembe", "bordo", "bej", "kahverengi", "lacivert")
     renkList.forEach { renk ->
         if (lowerText.contains(renk)) {
             result["Renk"] = renk.replaceFirstChar { it.uppercase() }
@@ -399,9 +399,9 @@ private fun parseEtiketText(text: String): Map<String, String> {
         }
     }
 
-    // ÃƒÅ“retim yeri tespiti
-    if (lowerText.contains("tÃƒÂ¼rkiye") || lowerText.contains("made in turkey")) {
-        result["ÃƒÅ“retim"] = "TÃƒÂ¼rkiye"
+    // Ãœretim yeri tespiti
+    if (lowerText.contains("tÃ¼rkiye") || lowerText.contains("made in turkey")) {
+        result["Ãœretim"] = "TÃ¼rkiye"
     }
 
     return result

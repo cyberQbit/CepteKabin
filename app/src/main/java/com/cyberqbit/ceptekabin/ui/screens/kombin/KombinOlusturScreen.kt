@@ -1,4 +1,4 @@
-package com.cyberqbit.ceptekabin.ui.screens.kombin
+﻿package com.cyberqbit.ceptekabin.ui.screens.kombin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,7 +43,7 @@ fun KombinOlusturScreen(
     var kombinAdi by remember { mutableStateOf("") }
     var existingKombin by remember { mutableStateOf<Kombin?>(null) }
 
-    // DÃ¼zenleme modunu baÅŸlat
+    // Düzenleme modunu başlat
     LaunchedEffect(kombinId) {
         if (kombinId != 0L) {
             viewModel.loadKombinForEdit(kombinId)
@@ -83,7 +83,7 @@ fun KombinOlusturScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Kombin OluÅŸtur") },
+                title = { Text("Kombin Oluştur") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
@@ -107,10 +107,10 @@ fun KombinOlusturScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Kombin adÄ±
+            // Kombin adı
             GlassCard(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    "Kombin AdÄ±",
+                    "Kombin Adı",
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = if (isDark) Grey100 else Grey900
@@ -120,7 +120,7 @@ fun KombinOlusturScreen(
                     value = kombinAdi,
                     onValueChange = { kombinAdi = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Ã¶rn: GÃ¼nlÃ¼k Casual") },
+                    label = { Text("örn: Günlük Casual") },
                     leadingIcon = { Icon(Icons.Default.Style, contentDescription = null) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -133,17 +133,17 @@ fun KombinOlusturScreen(
             Spacer(Modifier.height(16.dp))
 
             Text(
-                "KÄ±yafet SeÃ§imi",
+                "Kıyafet Seçimi",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = if (isDark) Grey100 else Grey900
             )
             Spacer(Modifier.height(12.dp))
 
-            // Slot kartlarÄ±
+            // Slot kartları
             SlotCard(
                 slot = KiyaketSlot.UST,
-                label = "Ãœst Giyim",
+                label = "Üst Giyim",
                 icon = Icons.Default.Checkroom,
                 kiyaket = uiState.seciliUst,
                 onClick = { showKiyaketSecim = KiyaketSlot.UST },
@@ -161,7 +161,7 @@ fun KombinOlusturScreen(
             Spacer(Modifier.height(10.dp))
             SlotCard(
                 slot = KiyaketSlot.DIS,
-                label = "DÄ±ÅŸ Giyim (Opsiyonel)",
+                label = "Dış Giyim (Opsiyonel)",
                 icon = Icons.Default.Layers,
                 kiyaket = uiState.seciliDis,
                 onClick = { showKiyaketSecim = KiyaketSlot.DIS },
@@ -170,7 +170,7 @@ fun KombinOlusturScreen(
             Spacer(Modifier.height(10.dp))
             SlotCard(
                 slot = KiyaketSlot.AYAK,
-                label = "AyakkabÄ±",
+                label = "Ayakkabı",
                 icon = Icons.Default.DirectionsWalk,
                 kiyaket = uiState.seciliAyak,
                 onClick = { showKiyaketSecim = KiyaketSlot.AYAK },
@@ -221,7 +221,7 @@ fun KombinOlusturScreen(
 
             Spacer(Modifier.height(12.dp))
             TextButton(onClick = onNavigateBack, modifier = Modifier.fillMaxWidth()) {
-                Text("Ä°ptal", color = if (isDark) Grey400 else Grey600)
+                Text("İptal", color = if (isDark) Grey400 else Grey600)
             }
         }
     }
@@ -261,19 +261,19 @@ private fun SlotCard(
                 )
                 if (kiyaket != null) {
                     Text(
-                        "${kiyaket.marka} â€” ${kiyaket.tur.displayName}",
+                        "${kiyaket.marka} — ${kiyaket.tur.displayName}",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = if (isDark) Grey100 else Grey900
                     )
                     Text(
-                        "${kiyaket.beden}${if (!kiyaket.renk.isNullOrBlank()) " Â· ${kiyaket.renk}" else ""}",
+                        "${kiyaket.beden}${if (!kiyaket.renk.isNullOrBlank()) " · ${kiyaket.renk}" else ""}",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isDark) Grey400 else Grey600
                     )
                 } else {
                     Text(
-                        "SeÃ§mek iÃ§in dokun",
+                        "Seçmek için dokun",
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (isDark) Grey600 else Grey400
                     )
@@ -318,7 +318,7 @@ private fun KiyaketSecimBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "KÄ±yafet SeÃ§",
+                    "Kıyafet Seç",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -336,7 +336,7 @@ private fun KiyaketSecimBottomSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        "Bu kategoride kÄ±yafet bulunamadÄ±.\nÃ–nce dolabÄ±na kÄ±yafet ekle.",
+                        "Bu kategoride kıyafet bulunamadı.\nÖnce dolabına kıyafet ekle.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = if (isDark) Grey500 else Grey600
                     )
@@ -385,8 +385,8 @@ private fun KiyaketSecimBottomSheet(
                                         fontWeight = FontWeight.SemiBold
                                     )
                                     Text(
-                                        "${kiyaket.tur.displayName} Â· ${kiyaket.beden}" +
-                                                if (!kiyaket.renk.isNullOrBlank()) " Â· ${kiyaket.renk}" else "",
+                                        "${kiyaket.tur.displayName} · ${kiyaket.beden}" +
+                                                if (!kiyaket.renk.isNullOrBlank()) " · ${kiyaket.renk}" else "",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = if (isDark) Grey400 else Grey600
                                     )

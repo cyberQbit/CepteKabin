@@ -1,4 +1,4 @@
-package com.cyberqbit.ceptekabin.ui.screens.home
+﻿package com.cyberqbit.ceptekabin.ui.screens.home
 
 import android.Manifest
 import androidx.compose.animation.*
@@ -64,20 +64,14 @@ fun HomeScreen(
     val isDark = true
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
-    var permissionRequested by remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         viewModel.checkAndShowSharePrompt()
-        if (!permissionRequested) {
-            permissionRequested = true
-            if (!locationPermission.status.isGranted) locationPermission.launchPermissionRequest()
-        }
+        // Konum izni iste (ilk açılışta)
+        if (!locationPermission.status.isGranted) locationPermission.launchPermissionRequest()
     }
 
-    LaunchedEffect(locationPermission.status.isGranted) {
-        if (locationPermission.status.isGranted) viewModel.loadHavaDurumuWithLocation()
-        else viewModel.loadHavaDurumuByCity("Ankara")
-    }
+    // İzin yeni verildiğinde: HavaDurumuScreen zaten staleness kontrolü yapacak
+    // HomeScreen'den API çağrısı yapılmaz — cache reaktif flow'dan otomatik güncellenir
 
     Column(
         modifier = Modifier
@@ -102,13 +96,13 @@ fun HomeScreen(
         }
         Spacer(Modifier.height(20.dp))
 
-        Text("HÄ±zlÄ± Ä°ÅŸlemler", style = MaterialTheme.typography.titleMedium,
+        Text("Hızlı İşlemler", style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
         Spacer(Modifier.height(10.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            QuickActionCard(Icons.Default.QrCodeScanner, "Barkod Tara", "ÃœrÃ¼n ekle",
+            QuickActionCard(Icons.Default.QrCodeScanner, "Barkod Tara", "Ürün ekle",
                 onNavigateToTarama, Modifier.weight(1f), isDark)
-            QuickActionCard(Icons.Default.Style, "Kombin Yap", "KÄ±yafet kombinle",
+            QuickActionCard(Icons.Default.Style, "Kombin Yap", "Kıyafet kombinle",
                 onNavigateToKombin, Modifier.weight(1f), isDark)
             QuickActionCard(Icons.Default.CalendarMonth, "Takvim", "Kombin planla",
                 onNavigateToKombinTakvim, Modifier.weight(1f), isDark)
@@ -136,7 +130,7 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically) {
                 Text("Son Eklenenler", style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
-                TextButton(onClick = onNavigateToDolap) { Text("TÃ¼mÃ¼nÃ¼ GÃ¶r") }
+                TextButton(onClick = onNavigateToDolap) { Text("Tümünü Gör") }
             }
             Spacer(Modifier.height(10.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -150,7 +144,7 @@ fun HomeScreen(
         Spacer(Modifier.height(24.dp))
     }
 
-    // Ä°lk aÃ§Ä±lÄ±ÅŸta uygulamayÄ± tanÄ±tan tutorial (sadece bir kez gÃ¶sterilir)
+    // İlk açılışta uygulamayı tanıtan tutorial (sadece bir kez gösterilir)
     TutorialOverlay(isDark = isDark)
 }
 
@@ -170,7 +164,7 @@ private fun WelcomeHeader(userName: String?, isDark: Boolean) {
                 text = if (!userName.isNullOrBlank()) "Merhaba, $userName" else "Merhaba",
                 style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold,
                 color = if (isDark) Grey100 else Grey900)
-            Text("BugÃ¼n ne giyeceksin?", style = MaterialTheme.typography.bodyMedium,
+            Text("Bugün ne giyeceksin?", style = MaterialTheme.typography.bodyMedium,
                 color = if (isDark) Grey400 else Grey600)
         }
     }
@@ -182,7 +176,7 @@ private fun TodayWeatherBar(havaDurumu: HavaDurumu?, isLoading: Boolean, isDark:
         Row(Modifier.fillMaxSize().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
             if (isLoading) {
-                Text("Hava durumu gÃ¼ncelleniyor...", style = MaterialTheme.typography.bodyMedium,
+                Text("Hava durumu güncelleniyor...", style = MaterialTheme.typography.bodyMedium,
                     color = if (isDark) Grey400 else Grey600)
                 CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = PrimaryLight)
             } else if (havaDurumu != null) {
@@ -191,7 +185,7 @@ private fun TodayWeatherBar(havaDurumu: HavaDurumu?, isLoading: Boolean, isDark:
                     Spacer(Modifier.width(10.dp))
                     Column {
                         Row(verticalAlignment = Alignment.Bottom) {
-                            Text("${havaDurumu.sicaklik.toInt()}Â°C", style = MaterialTheme.typography.titleMedium,
+                            Text("${havaDurumu.sicaklik.toInt()}°C", style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
                             Spacer(Modifier.width(8.dp))
                             Text(havaDurumu.durum.displayName, style = MaterialTheme.typography.bodyMedium,
@@ -205,7 +199,7 @@ private fun TodayWeatherBar(havaDurumu: HavaDurumu?, isLoading: Boolean, isDark:
                 Icon(Icons.Default.ChevronRight, null, Modifier.size(18.dp),
                     tint = if (isDark) Grey500 else Grey400)
             } else {
-                Text("Hava durumu alÄ±namadÄ±.", style = MaterialTheme.typography.bodyMedium,
+                Text("Hava durumu alınamadı.", style = MaterialTheme.typography.bodyMedium,
                     color = if (isDark) Grey400 else Grey600)
                 Icon(Icons.Default.Refresh, null, tint = PrimaryLight)
             }
@@ -233,7 +227,7 @@ private fun DailyOutfitSection(oneriler: List<SmartKombinSuggester.KombinOnerisi
     havaDurumu: HavaDurumu?, isDark: Boolean, dolapBos: Boolean,
     onNavigateToDolap: () -> Unit, onNavigateToKombinOlustur: () -> Unit,
     isLoading: Boolean = false) {
-    Text("BugÃ¼nkÃ¼ Ã–nerin", style = MaterialTheme.typography.titleMedium,
+    Text("Bugünkü Önerin", style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900)
     Spacer(Modifier.height(10.dp))
 
@@ -242,14 +236,14 @@ private fun DailyOutfitSection(oneriler: List<SmartKombinSuggester.KombinOnerisi
             Column(Modifier.fillMaxWidth().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(Icons.Default.AutoAwesome, null, Modifier.size(36.dp), tint = AccentGold)
                 Spacer(Modifier.height(10.dp))
-                Text("DolabÄ±na kÄ±yafet ekleyerek\nkiÅŸisel Ã¶neriler almaya baÅŸla!",
+                Text("Dolabına kıyafet ekleyerek\nkişisel öneriler almaya başla!",
                     style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium,
                     color = if (isDark) Grey200 else Grey800, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(12.dp))
                 Button(onClick = onNavigateToDolap, colors = ButtonDefaults.buttonColors(containerColor = PrimaryLight),
                     shape = RoundedCornerShape(12.dp)) {
                     Icon(Icons.Default.Add, null, Modifier.size(18.dp)); Spacer(Modifier.width(6.dp))
-                    Text("Ä°lk KÄ±yafetini Ekle")
+                    Text("İlk Kıyafetini Ekle")
                 }
             }
         }
@@ -258,7 +252,7 @@ private fun DailyOutfitSection(oneriler: List<SmartKombinSuggester.KombinOnerisi
             Row(Modifier.fillMaxWidth().padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.WbCloudy, null, Modifier.size(28.dp), tint = if (isDark) Grey500 else Grey400)
                 Spacer(Modifier.width(12.dp))
-                Text("Hava durumu yÃ¼klenince kombinler Ã¶nerilecek",
+                Text("Hava durumu yüklenince kombinler önerilecek",
                     style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey300 else Grey700)
             }
         }
@@ -299,9 +293,9 @@ private fun SuggestionCard(oneri: SmartKombinSuggester.KombinOnerisi, isDark: Bo
                 Text("uyum", style = MaterialTheme.typography.labelSmall, color = if (isDark) Grey500 else Grey600)
             }
             Spacer(Modifier.height(12.dp))
-            oneri.ustGiyim?.let { KiyafetSatir("Ãœst", "${it.marka} ${it.tur.displayName}", isDark) }
+            oneri.ustGiyim?.let { KiyafetSatir("Üst", "${it.marka} ${it.tur.displayName}", isDark) }
             oneri.altGiyim?.let { KiyafetSatir("Alt", "${it.marka} ${it.tur.displayName}", isDark) }
-            oneri.disGiyim?.let { KiyafetSatir("DÄ±ÅŸ", "${it.marka} ${it.tur.displayName}", isDark) }
+            oneri.disGiyim?.let { KiyafetSatir("Dış", "${it.marka} ${it.tur.displayName}", isDark) }
             oneri.ayakkabi?.let { KiyafetSatir("Ayak", "${it.marka} ${it.tur.displayName}", isDark) }
             Spacer(Modifier.height(10.dp))
             Text(oneri.aciklama, style = MaterialTheme.typography.labelSmall,
@@ -325,9 +319,9 @@ private fun KiyafetSatir(label: String, text: String, isDark: Boolean) {
 private fun DolapStatsCard(stats: DolapIstatistikleri, isDark: Boolean, onNavigateToDolap: () -> Unit) {
     GlassCard(modifier = Modifier.fillMaxWidth().clickable(onClick = onNavigateToDolap)) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            StatItem(stats.toplamKiyafet.toString(), "KÄ±yafet", Icons.Default.Checkroom, isDark)
+            StatItem(stats.toplamKiyafet.toString(), "Kıyafet", Icons.Default.Checkroom, isDark)
             StatItem(stats.toplamKombin.toString(), "Kombin", Icons.Default.Style, isDark)
-            stats.enCokGiyilen?.let { StatItem(it, "En Ã§ok giyilen", Icons.Default.Favorite, isDark, true) }
+            stats.enCokGiyilen?.let { StatItem(it, "En çok giyilen", Icons.Default.Favorite, isDark, true) }
         }
     }
 }
@@ -383,11 +377,11 @@ fun RenkDairesi(renk: String, size: Int = 12) {
 
 private fun renkToColor(renk: String): Color = when (renk) {
     "Siyah" -> Color(0xFF1A1A1A); "Beyaz" -> Color(0xFFF5F5F5); "Gri" -> Color(0xFF9E9E9E)
-    "Lacivert" -> Color(0xFF1A237E); "Mavi" -> Color(0xFF2196F3); "KÄ±rmÄ±zÄ±" -> Color(0xFFE53935)
+    "Lacivert" -> Color(0xFF1A237E); "Mavi" -> Color(0xFF2196F3); "Kırmızı" -> Color(0xFFE53935)
     "Bordo" -> Color(0xFF880E4F); "Pembe" -> Color(0xFFE91E63); "Mor" -> Color(0xFF9C27B0)
-    "YeÅŸil" -> Color(0xFF4CAF50); "Haki" -> Color(0xFF827717); "SarÄ±" -> Color(0xFFFDD835)
+    "Yeşil" -> Color(0xFF4CAF50); "Haki" -> Color(0xFF827717); "Sarı" -> Color(0xFFFDD835)
     "Turuncu" -> Color(0xFFFF9800); "Kahverengi" -> Color(0xFF795548); "Bej" -> Color(0xFFD7CCC8)
     "Krem" -> Color(0xFFFFF8E1); "Ekru" -> Color(0xFFF5F0E1); "Hardal" -> Color(0xFFF9A825)
-    "Petrol" -> Color(0xFF006064); "Ã‡oklu / Desenli" -> Color(0xFFFF6F00)
+    "Petrol" -> Color(0xFF006064); "Çoklu / Desenli" -> Color(0xFFFF6F00)
     else -> Color(0xFFBDBDBD)
 }

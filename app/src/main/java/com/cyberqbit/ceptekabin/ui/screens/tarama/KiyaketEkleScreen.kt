@@ -1,4 +1,4 @@
-package com.cyberqbit.ceptekabin.ui.screens.tarama
+﻿package com.cyberqbit.ceptekabin.ui.screens.tarama
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -150,7 +150,7 @@ fun KiyaketEkleScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (kiyaketId > 0L) "KÄ±yafeti DÃ¼zenle" else "KÄ±yafet Ekle", fontWeight = FontWeight.Bold) },
+                title = { Text(if (kiyaketId > 0L) "Kıyafeti Düzenle" else "Kıyafet Ekle", fontWeight = FontWeight.Bold) },
                 navigationIcon = { IconButton(onClick = onNavigateBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri") } },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = containerColor)
             )
@@ -164,16 +164,16 @@ fun KiyaketEkleScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            // SÄ°LÄ°NEN BARKOD VE ÃœRÃœN KODU KISMI GERÄ° GELDÄ°
+            // SİLİNEN BARKOD VE ÜRÜN KODU KISMI GERİ GELDİ
             if (kiyaketId == 0L) {
                 Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = cardColor), elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)) {
                     Column(Modifier.padding(16.dp)) {
-                        Text("ÃœrÃ¼n Kodu ile Ara", fontWeight = FontWeight.SemiBold, color = textColor)
+                        Text("Ürün Kodu ile Ara", fontWeight = FontWeight.SemiBold, color = textColor)
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             OutlinedTextField(
                                 value = urunKoduInput, onValueChange = { urunKoduInput = it }, modifier = Modifier.weight(1f),
-                                label = { Text("ÃœrÃ¼n Kodu") }, placeholder = { Text("Ã–rn: W2GL42Z8-CVL") }, singleLine = true,
+                                label = { Text("Ürün Kodu") }, placeholder = { Text("Örn: W2GL42Z8-CVL") }, singleLine = true,
                                 colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -194,33 +194,33 @@ fun KiyaketEkleScreen(
                         Spacer(modifier = Modifier.width(16.dp))
                         Column {
                             Text("Okutulan Barkod", style = MaterialTheme.typography.labelMedium, color = Grey500)
-                            Text(barkod.takeIf { it.isNotBlank() } ?: "Barkod OkutulmadÄ±", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = textColor)
+                            Text(barkod.takeIf { it.isNotBlank() } ?: "Barkod Okutulmadı", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = textColor)
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Resim SeÃ§ici
+            // Resim Seçici
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = cardColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("KÄ±yafet GÃ¶rseli", fontWeight = FontWeight.SemiBold, color = textColor)
+                    Text("Kıyafet Görseli", fontWeight = FontWeight.SemiBold, color = textColor)
                     Spacer(Modifier.height(12.dp))
                     
                     if (selectedImageUri != null) {
                         Box(modifier = Modifier.fillMaxWidth().height(220.dp).clip(RoundedCornerShape(12.dp)), contentAlignment = Alignment.TopEnd) {
                             AsyncImage(
                                 model = ImageRequest.Builder(context).data(selectedImageUri).setParameter("time", System.currentTimeMillis(), memoryCacheKey = null).build(),
-                                contentDescription = "SeÃ§ilen Resim",
+                                contentDescription = "Seçilen Resim",
                                 modifier = Modifier.fillMaxSize(),
                                 contentScale = ContentScale.Crop
                             )
                             IconButton(onClick = { selectedImageUri = null }, modifier = Modifier.padding(8.dp).background(Color.Black.copy(alpha = 0.6f), CircleShape)) {
-                                Icon(Icons.Default.Close, "KaldÄ±r", tint = Color.White)
+                                Icon(Icons.Default.Close, "Kaldır", tint = Color.White)
                             }
                         }
                     } else {
@@ -251,14 +251,14 @@ fun KiyaketEkleScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // ÃœrÃ¼n Detay Formu
+            // Ürün Detay Formu
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = cardColor),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
             ) {
                 Column(Modifier.padding(16.dp)) {
-                    Text("ÃœrÃ¼n DetaylarÄ±", fontWeight = FontWeight.SemiBold, color = textColor)
+                    Text("Ürün Detayları", fontWeight = FontWeight.SemiBold, color = textColor)
                     Spacer(Modifier.height(16.dp))
 
                     ExposedDropdownMenuBox(expanded = markaExpanded, onExpandedChange = { markaExpanded = it }) {
@@ -272,8 +272,8 @@ fun KiyaketEkleScreen(
                             markaList.forEach { m -> DropdownMenuItem(text = { Text(m) }, onClick = { marka = m; customMarkaField = ""; markaExpanded = false }) }
                         }
                     }
-                    if (marka == "DiÄŸer") {
-                        OutlinedTextField(value = customMarkaField, onValueChange = { customMarkaField = it }, label = { Text("Marka AdÄ±") }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor))
+                    if (marka == "Diğer") {
+                        OutlinedTextField(value = customMarkaField, onValueChange = { customMarkaField = it }, label = { Text("Marka Adı") }, modifier = Modifier.fillMaxWidth().padding(top = 8.dp), colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor))
                     }
 
                     Spacer(Modifier.height(16.dp))
@@ -295,7 +295,7 @@ fun KiyaketEkleScreen(
                     ExposedDropdownMenuBox(expanded = turExpanded, onExpandedChange = { turExpanded = it }) {
                         OutlinedTextField(
                             value = tur?.displayName ?: "", onValueChange = { }, readOnly = true,
-                            label = { Text("TÃ¼r *") }, modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                            label = { Text("Tür *") }, modifier = Modifier.fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = turExpanded) },
                             colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor)
                         )
@@ -337,7 +337,7 @@ fun KiyaketEkleScreen(
 
                     OutlinedTextField(
                         value = not, onValueChange = { not = it },
-                        label = { Text("Not (Ä°steÄŸe BaÄŸlÄ±)") }, modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Not (İsteğe Bağlı)") }, modifier = Modifier.fillMaxWidth(),
                         maxLines = 3,
                         colors = OutlinedTextFieldDefaults.colors(focusedTextColor = textColor, unfocusedTextColor = textColor)
                     )
@@ -348,8 +348,8 @@ fun KiyaketEkleScreen(
 
             Button(
                 onClick = {
-                    val finalMarka = if (marka == "DiÄŸer") customMarkaField else marka
-                    val finalRenk = if (renk == "DiÄŸer") customRenkField else renk
+                    val finalMarka = if (marka == "Diğer") customMarkaField else marka
+                    val finalRenk = if (renk == "Diğer") customRenkField else renk
                     
                     if (finalMarka.isNotBlank() && tur != null && model.isNotBlank()) {
                         viewModel.saveKiyaket(
@@ -362,7 +362,7 @@ fun KiyaketEkleScreen(
                             onError = { validationError = it }
                         )
                     } else {
-                        validationError = "LÃ¼tfen yÄ±ldÄ±zlÄ± (*) alanlarÄ± eksiksiz doldurun."
+                        validationError = "Lütfen yıldızlı (*) alanları eksiksiz doldurun."
                     }
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -370,9 +370,9 @@ fun KiyaketEkleScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = PrimaryCyan)
             ) {
-                Text(if (kiyaketId > 0L) "GÃ¼ncelle" else "Kaydet", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                Text(if (kiyaketId > 0L) "Güncelle" else "Kaydet", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.Black)
             }
-            Spacer(Modifier.height(80.dp)) // Alt bar iÃ§in kaydÄ±rma payÄ±
+            Spacer(Modifier.height(80.dp)) // Alt bar için kaydırma payı
         }
     }
 }

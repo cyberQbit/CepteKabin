@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -87,6 +89,10 @@ class HomeViewModel @Inject constructor(
     private val _showShareDialog = MutableStateFlow(false)
     val showShareDialog: StateFlow<Boolean> = _showShareDialog.asStateFlow()
 
+    /** Manuel yenileme cooldown'ında mı? UI'da buton geri bildirimi için */
+    private val _isManualRefreshOnCooldown = MutableStateFlow(false)
+    val isManualRefreshOnCooldown: StateFlow<Boolean> = _isManualRefreshOnCooldown.asStateFlow()
+
     private val gson = Gson()
     private var weatherJob: Job? = null
 
@@ -94,7 +100,19 @@ class HomeViewModel @Inject constructor(
         loadUserName()
         loadManuelSehir()
         loadDolapVerileri()
-        loadCachedWeather()
+        // Reaktif cache: DB değiştiğinde (HavaDurumuScreen fetch edince dahil) otomatik güncellenir
+        weatherCacheDao.getCacheFlow()
+            .onEach { entity ->
+                entity?.let {
+                    if (_havaDurumu.value == null) {           // sadece henüz verisi yoksa başlangıç yüklemesi
+                        _havaDurumu.value = it.toHavaDurumu()
+                        _showingCachedWeather.value = true
+                        val sdf = SimpleDateFormat("HH:mm - dd/MM/yyyy", Locale("tr", "TR"))
+                        _sonGuncelleme.value = "Son güncelleme: ${sdf.format(Date(it.kayitTarihi))}"
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun loadUserName() {
@@ -168,19 +186,40 @@ class HomeViewModel @Inject constructor(
 
     fun setKonumIzniDurumu(verildi: Boolean) { _konumIzniVerildi.value = verildi }
 
-    private fun loadManuelSehir() {
+    /**
+     * 15 dakikadan eski ise API'den taze veri çek, değilse cache yeterli.
+     * HavaDurumuScreen'e girildiğinde çağrılır — her seferinde API israf etmez.
+     */
+    fun loadHavaDurumuIfStale() {
         val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
-        _manuelSehir.value = prefs.getString(Constants.PREF_MANUAL_CITY, null)
+        val lastFetch = prefs.getLong(Constants.PREF_WEATHER_LAST_FETCH_TIME, 0L)
+        val isStale = System.currentTimeMillis() - lastFetch > Constants.WEATHER_STALE_MS
+        if (!isStale && _havaDurumu.value != null) return  // cache taze, atla
+        loadHavaDurumuWithLocationInternal()
     }
 
-    fun setManuelSehir(sehir: String) {
-        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putString(Constants.PREF_MANUAL_CITY, sehir).apply()
-        _manuelSehir.value = sehir
-        loadHavaDurumuByCity(sehir)
-    }
-
+    /**
+     * Manuel yenileme (konum butonu). 60 saniye cooldown uygular.
+     */
     fun loadHavaDurumuWithLocation() {
+        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        val cooldownUntil = prefs.getLong(Constants.PREF_WEATHER_MANUAL_COOLDOWN_UNTIL, 0L)
+        val now = System.currentTimeMillis()
+        if (now < cooldownUntil) {
+            _isManualRefreshOnCooldown.value = true
+            viewModelScope.launch {
+                kotlinx.coroutines.delay(2000)
+                _isManualRefreshOnCooldown.value = false
+            }
+            return
+        }
+        prefs.edit()
+            .putLong(Constants.PREF_WEATHER_MANUAL_COOLDOWN_UNTIL, now + Constants.WEATHER_COOLDOWN_MS)
+            .apply()
+        loadHavaDurumuWithLocationInternal()
+    }
+
+    private fun loadHavaDurumuWithLocationInternal() {
         weatherJob?.cancel()
         weatherJob = viewModelScope.launch {
             _isLoading.value = true
@@ -197,6 +236,18 @@ class HomeViewModel @Inject constructor(
             } catch (_: Exception) { fetchWeather(getDefaultCity()) }
             _isLoading.value = false
         }
+    }
+
+    private fun loadManuelSehir() {
+        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        _manuelSehir.value = prefs.getString(Constants.PREF_MANUAL_CITY, null)
+    }
+
+    fun setManuelSehir(sehir: String) {
+        val prefs = context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(Constants.PREF_MANUAL_CITY, sehir).apply()
+        _manuelSehir.value = sehir
+        loadHavaDurumuByCity(sehir)
     }
 
     fun loadHavaDurumuByCity(sehir: String) {
@@ -226,6 +277,11 @@ class HomeViewModel @Inject constructor(
                 val sdf = SimpleDateFormat("HH.mm - dd/MM/yyyy", Locale("tr", "TR"))
                 _sonGuncelleme.value = "Son güncelleme: ${sdf.format(Date())}"
                 saveWeatherToCache(hava)
+                // Başarılı fetch → timestamp kaydet (15dk stale kontrolü için)
+                context.getSharedPreferences(Constants.PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .putLong(Constants.PREF_WEATHER_LAST_FETCH_TIME, System.currentTimeMillis())
+                    .apply()
                 val kiyafetler = _sonEklenenler.value
                 if (kiyafetler.isNotEmpty()) guncelleOneriler(kiyafetler, hava)
             }

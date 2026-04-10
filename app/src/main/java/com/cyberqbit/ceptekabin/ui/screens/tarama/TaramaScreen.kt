@@ -1,4 +1,4 @@
-package com.cyberqbit.ceptekabin.ui.screens.tarama
+﻿package com.cyberqbit.ceptekabin.ui.screens.tarama
 
 import android.Manifest
 import android.util.Size
@@ -35,10 +35,10 @@ import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 
 /**
- * Taranan deÄŸer:
- *  - Normal barkod/QR  â†’ onBarkodFound(value)
- *  - DPP URL           â†’ onDppUrlFound(url) ile KiyaketEkleScreen'e yÃ¶nlendirilir,
- *                        orada DppUrlService Ã§aÄŸrÄ±larak form otomatik doldurulur.
+ * Taranan değer:
+ *  - Normal barkod/QR  → onBarkodFound(value)
+ *  - DPP URL           → onDppUrlFound(url) ile KiyaketEkleScreen'e yönlendirilir,
+ *                        orada DppUrlService çağrılarak form otomatik doldurulur.
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -153,14 +153,14 @@ fun CameraPreviewWithBarcode(
                     Icon(Icons.Default.QrCodeScanner, null,
                         Modifier.size(48.dp), tint = PrimaryLight)
                     Spacer(Modifier.height(16.dp))
-                    Text("Barkod veya QR kod tarayÄ±n",
+                    Text("Barkod veya QR kod tarayın",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center,
                         color = if (isDark) Grey100 else Grey900)
                     Spacer(Modifier.height(8.dp))
                     Text(
-                        "KÄ±yafet etiketi barkodunu veya Ã¼rÃ¼n QR kodunu\nkameraya tutun â€” bilgiler otomatik doldurulur",
+                        "Kıyafet etiketi barkodunu veya ürün QR kodunu\nkameraya tutun — bilgiler otomatik doldurulur",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isDark) Grey400 else Grey600,
                         textAlign = TextAlign.Center
@@ -195,15 +195,15 @@ fun PermissionDenied(onNavigateBack: () -> Unit) {
     ) {
         Icon(Icons.Default.CameraAlt, null, Modifier.size(64.dp), tint = Error)
         Spacer(Modifier.height(24.dp))
-        Text("Kamera Ä°zni Reddedildi",
+        Text("Kamera İzni Reddedildi",
             style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold,
             color = if (isDark) Grey100 else Grey900)
         Spacer(Modifier.height(12.dp))
-        Text("Ayarlardan kamera iznini etkinleÅŸtirebilirsiniz.",
+        Text("Ayarlardan kamera iznini etkinleştirebilirsiniz.",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = if (isDark) Grey400 else Grey600)
         Spacer(Modifier.height(32.dp))
-        TextButton(onClick = onNavigateBack) { Text("Geri DÃ¶n", color = PrimaryLight) }
+        TextButton(onClick = onNavigateBack) { Text("Geri Dön", color = PrimaryLight) }
     }
 }

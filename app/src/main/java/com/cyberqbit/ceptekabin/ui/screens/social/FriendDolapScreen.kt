@@ -1,4 +1,4 @@
-package com.cyberqbit.ceptekabin.ui.screens.social
+﻿package com.cyberqbit.ceptekabin.ui.screens.social
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,9 +43,9 @@ fun FriendDolapScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text(uiState.friendName.ifBlank { "ArkadaÅŸÄ±n DolabÄ±" },
+                        Text(uiState.friendName.ifBlank { "Arkadaşın Dolabı" },
                             style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Text("Salt okunur gÃ¶rÃ¼nÃ¼m",
+                        Text("Salt okunur görünüm",
                             style = MaterialTheme.typography.labelSmall,
                             color = if (isDark) Grey500 else Grey600)
                     }
@@ -88,7 +88,7 @@ fun FriendDolapScreen(
                     contentPadding = PaddingValues(vertical = 12.dp)
                 ) {
                     item {
-                        // ArkadaÅŸ profil Ã¶zeti
+                        // Arkadaş profil özeti
                         FriendProfileBanner(
                             name         = uiState.friendName,
                             kiyafetSayisi = uiState.kiyaketler.size,
@@ -104,7 +104,7 @@ fun FriendDolapScreen(
                                         Modifier.size(48.dp),
                                         tint = if (isDark) Grey600 else Grey400)
                                     Spacer(Modifier.height(8.dp))
-                                    Text("ArkadaÅŸÄ±n dolabÄ± boÅŸ.",
+                                    Text("Arkadaşın dolabı boş.",
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = if (isDark) Grey500 else Grey600)
                                 }
@@ -145,7 +145,7 @@ private fun FriendProfileBanner(name: String, kiyafetSayisi: Int, isDark: Boolea
                     Icon(Icons.Default.Checkroom, null, Modifier.size(13.dp),
                         tint = if (isDark) Grey500 else Grey600)
                     Spacer(Modifier.width(4.dp))
-                    Text("$kiyafetSayisi kÄ±yafet",
+                    Text("$kiyafetSayisi kıyafet",
                         style = MaterialTheme.typography.bodySmall,
                         color = if (isDark) Grey500 else Grey600)
                 }

@@ -1,4 +1,4 @@
-package com.cyberqbit.ceptekabin.ui.screens.auth
+﻿package com.cyberqbit.ceptekabin.ui.screens.auth
 
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -92,7 +92,7 @@ fun GoogleSignInScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Senin DolabÄ±n, Senin Kombinin!",
+                text = "Senin Dolabın, Senin Kombinin!",
                 style = MaterialTheme.typography.titleMedium,
                 color = PrimaryLight,
                 fontWeight = FontWeight.SemiBold
@@ -101,7 +101,7 @@ fun GoogleSignInScreen(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = "TÃ¼m cihazlardan gardÄ±robuna eriÅŸmek iÃ§in Google hesabÄ±nla giriÅŸ yap.",
+                text = "Tüm cihazlardan gardırobuna erişmek için Google hesabınla giriş yap.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = subTextColor,
@@ -113,7 +113,7 @@ fun GoogleSignInScreen(
             if (isLoading) {
                 CircularProgressIndicator(color = PrimaryCyan)
             } else {
-                // YÃ¼ksek KontrastlÄ± Standart Buton (Okunabilirlik Garantili)
+                // Yüksek Kontrastlı Standart Buton (Okunabilirlik Garantili)
                 Button(
                     onClick = {
                         val signInIntent = viewModel.getGoogleSignInIntent()
@@ -129,7 +129,7 @@ fun GoogleSignInScreen(
                         .height(56.dp)
                 ) {
                     Text(
-                        text = "Google ile GiriÅŸ Yap",
+                        text = "Google ile Giriş Yap",
                         fontSize = 17.sp,
                         fontWeight = FontWeight.Bold
                     )

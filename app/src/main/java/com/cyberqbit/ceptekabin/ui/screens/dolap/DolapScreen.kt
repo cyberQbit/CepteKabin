@@ -1,4 +1,4 @@
-package com.cyberqbit.ceptekabin.ui.screens.dolap
+﻿package com.cyberqbit.ceptekabin.ui.screens.dolap
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
@@ -50,11 +50,11 @@ fun DolapScreen(
     val isMultiSelectMode by viewModel.isMultiSelectMode.collectAsState()
 
     val isDark = true
-    val categories = listOf("TÃ¼mÃ¼", "Ãœst Giyim", "Alt Giyim", "DÄ±ÅŸ Giyim", "AyakkabÄ±", "Aksesuar")
+    val categories = listOf("Tümü", "Üst Giyim", "Alt Giyim", "Dış Giyim", "Ayakkabı", "Aksesuar")
     val selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0)
 
     val filteredList = kiyafetler.filter { kiyaket ->
-        val categoryMatch = selectedCategory == "TÃ¼mÃ¼" || kiyaket.kategori == selectedCategory
+        val categoryMatch = selectedCategory == "Tümü" || kiyaket.kategori == selectedCategory
         val searchMatch = searchQuery.isBlank() ||
             kiyaket.marka.contains(searchQuery, ignoreCase = true) ||
             kiyaket.tur.displayName.contains(searchQuery, ignoreCase = true) ||
@@ -65,10 +65,10 @@ fun DolapScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isMultiSelectMode) "${selectedIds.size} seÃ§ili" else "DolabÄ±m") },
+                title = { Text(if (isMultiSelectMode) "${selectedIds.size} seçili" else "Dolabım") },
                 navigationIcon = {
                     if (isMultiSelectMode) {
-                        IconButton(onClick = { viewModel.exitMultiSelect() }) { Icon(Icons.Default.Close, "Ä°ptal") }
+                        IconButton(onClick = { viewModel.exitMultiSelect() }) { Icon(Icons.Default.Close, "İptal") }
                     }
                 },
                 actions = {
@@ -92,7 +92,7 @@ fun DolapScreen(
                     containerColor = PrimaryLight,
                     modifier = Modifier.padding(bottom = 80.dp)
                 ) {
-                    Icon(Icons.Default.Add, "KÄ±yafet Ekle", tint = White)
+                    Icon(Icons.Default.Add, "Kıyafet Ekle", tint = White)
                 }
             }
         }
@@ -104,7 +104,7 @@ fun DolapScreen(
             OutlinedTextField(
                 value = searchQuery, onValueChange = { viewModel.setSearchQuery(it) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
-                placeholder = { Text("Marka, tÃ¼r veya renk ara...") },
+                placeholder = { Text("Marka, tür veya renk ara...") },
                 leadingIcon = { Icon(Icons.Default.Search, null) },
                 trailingIcon = {
                     if (searchQuery.isNotBlank()) {
@@ -126,7 +126,7 @@ fun DolapScreen(
                     Tab(selected = selectedTabIndex == index,
                         onClick = { viewModel.setCategory(category) },
                         text = {
-                            val count = if (category == "TÃ¼mÃ¼") kiyafetler.size
+                            val count = if (category == "Tümü") kiyafetler.size
                             else kiyafetler.count { it.kategori == category }
                             Text("$category ($count)",
                                 fontWeight = if (selectedTabIndex == index) FontWeight.SemiBold else FontWeight.Normal)
@@ -143,7 +143,7 @@ fun DolapScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.SearchOff, null, Modifier.size(48.dp), tint = if (isDark) Grey500 else Grey400)
                         Spacer(Modifier.height(12.dp))
-                        Text("Bu filtreyle kÄ±yafet bulunamadÄ±", color = if (isDark) Grey400 else Grey600)
+                        Text("Bu filtreyle kıyafet bulunamadı", color = if (isDark) Grey400 else Grey600)
                     }
                 }
             } else {
@@ -210,7 +210,7 @@ private fun KiyafetCard(kiyaket: Kiyaket, isDark: Boolean, isSelected: Boolean,
                 }
             }
             Spacer(Modifier.height(8.dp))
-            Text(kiyaket.marka.ifBlank { "Marka belirtilmemiÅŸ" }, style = MaterialTheme.typography.labelMedium,
+            Text(kiyaket.marka.ifBlank { "Marka belirtilmemiş" }, style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold, color = if (isDark) Grey100 else Grey900, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(2.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -220,7 +220,7 @@ private fun KiyafetCard(kiyaket: Kiyaket, isDark: Boolean, isSelected: Boolean,
                 Text(kiyaket.tur.displayName, style = MaterialTheme.typography.bodySmall,
                     color = if (isDark) Grey400 else Grey600, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (kiyaket.beden.isNotBlank()) {
-                    Text(" â€¢ ${kiyaket.beden}", style = MaterialTheme.typography.bodySmall, color = Grey500)
+                    Text(" • ${kiyaket.beden}", style = MaterialTheme.typography.bodySmall, color = Grey500)
                 }
             }
         }
@@ -240,10 +240,10 @@ private fun EmptyDolapState(onBarkodTara: () -> Unit, onManuelEkle: () -> Unit, 
             }
         }
         Spacer(Modifier.height(24.dp))
-        Text("Ä°lk kÄ±yafetini ekle!", style = MaterialTheme.typography.headlineSmall,
+        Text("İlk kıyafetini ekle!", style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold, color = if (isDark) Grey100 else Grey900)
         Spacer(Modifier.height(8.dp))
-        Text("Barkod okutarak veya manuel olarak\ndolabÄ±nÄ± oluÅŸturmaya baÅŸla",
+        Text("Barkod okutarak veya manuel olarak\ndolabını oluşturmaya başla",
             style = MaterialTheme.typography.bodyMedium, color = if (isDark) Grey400 else Grey600, textAlign = TextAlign.Center)
         Spacer(Modifier.height(28.dp))
         Button(onClick = onBarkodTara, modifier = Modifier.fillMaxWidth(),
