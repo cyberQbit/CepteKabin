@@ -8,6 +8,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cyberqbit.ceptekabin.data.local.database.dao.WeatherCacheDao
 import com.cyberqbit.ceptekabin.data.local.database.entity.WeatherCacheEntity
+import com.cyberqbit.ceptekabin.data.remote.config.DynamicContent
+import com.cyberqbit.ceptekabin.data.remote.config.FeatureFlags
+import com.cyberqbit.ceptekabin.data.remote.config.RemoteConfigManager
 import com.cyberqbit.ceptekabin.data.service.LocationService
 import com.cyberqbit.ceptekabin.domain.engine.SmartKombinSuggester
 import com.cyberqbit.ceptekabin.domain.engine.WeatherOutfitEngine
@@ -43,6 +46,7 @@ class HomeViewModel @Inject constructor(
     private val kombinRepository: KombinRepository,
     private val locationService: LocationService,
     private val weatherCacheDao: WeatherCacheDao,
+    private val remoteConfigManager: RemoteConfigManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -93,6 +97,11 @@ class HomeViewModel @Inject constructor(
     private val _isManualRefreshOnCooldown = MutableStateFlow(false)
     val isManualRefreshOnCooldown: StateFlow<Boolean> = _isManualRefreshOnCooldown.asStateFlow()
 
+    /** Remote Config — Feature Flags */
+    val featureFlags: StateFlow<FeatureFlags> = remoteConfigManager.featureFlags
+    /** Remote Config — Dinamik İçerik (banner, duyuru vb.) */
+    val dynamicContent: StateFlow<DynamicContent> = remoteConfigManager.dynamicContent
+
     private val gson = Gson()
     private var weatherJob: Job? = null
 
@@ -100,6 +109,8 @@ class HomeViewModel @Inject constructor(
         loadUserName()
         loadManuelSehir()
         loadDolapVerileri()
+        // Remote Config: Firebase'den en son değerleri çek
+        viewModelScope.launch { remoteConfigManager.fetchAndActivate() }
         // Reaktif cache: DB değiştiğinde (HavaDurumuScreen fetch edince dahil) otomatik güncellenir
         weatherCacheDao.getCacheFlow()
             .onEach { entity ->

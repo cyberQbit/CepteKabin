@@ -60,6 +60,8 @@ fun HomeScreen(
     val userName by viewModel.userName.collectAsState()
     val havaDurumuYukleniyor by viewModel.havaDurumuYukleniyor.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val dynamicContent by viewModel.dynamicContent.collectAsState()
+    val featureFlags by viewModel.featureFlags.collectAsState()
 
     val isDark = true
     val locationPermission = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -88,6 +90,67 @@ fun HomeScreen(
 
         WelcomeHeader(userName = userName, isDark = isDark)
         Spacer(Modifier.height(16.dp))
+
+        // Dinamik Banner (Firebase Remote Config)
+        if (dynamicContent.homeBannerVisible && dynamicContent.homeBannerText.isNotBlank()) {
+            val bannerColor = try {
+                Color(android.graphics.Color.parseColor(dynamicContent.homeBannerColor))
+            } catch (_: Exception) { PrimaryLight }
+
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = bannerColor.copy(alpha = 0.15f)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Campaign,
+                        contentDescription = null,
+                        tint = bannerColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = dynamicContent.homeBannerText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (isDark) Grey100 else Grey900,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
+
+        // Duyuru (Firebase Remote Config)
+        if (dynamicContent.announcementVisible && dynamicContent.announcementText.isNotBlank()) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFFFF9800).copy(alpha = 0.12f)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        tint = Color(0xFFFF9800),
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = dynamicContent.announcementText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = if (isDark) Grey100 else Grey900
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+        }
 
         if (isLoading) {
             ShimmerCard(modifier = Modifier.fillMaxWidth().height(64.dp), isDark = isDark) {}
