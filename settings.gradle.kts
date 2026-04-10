@@ -18,4 +18,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "CepteKabin"
-include(":app")
+include(":app") 
